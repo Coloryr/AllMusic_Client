@@ -1,11 +1,11 @@
 /*
  * 11/19/04  1.0 moved to LGPL.
- * 
- * 12/12/99	 0.0.7 Renamed class, additional constructor arguments 
+ *
+ * 12/12/99	 0.0.7 Renamed class, additional constructor arguments
  *			 and larger write buffers. mdm@techie.com.
  *
  * 15/02/99  Java Conversion by E.B ,javalayer@javazoom.net
- *  
+ *
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -29,68 +29,61 @@ import javazoom.jl.decoder.Obuffer;
 
 /**
  * Implements an Obuffer by writing the data to
- * a file in RIFF WAVE format. 
- *  
+ * a file in RIFF WAVE format.
+ *
  * @since 0.0
  */
 
 
-public class WaveFileObuffer extends Obuffer
-{
-  private short[] 		buffer;
-  private short[] 		bufferp;
-  private int 			channels;
-  private WaveFile      outWave;
+public class WaveFileObuffer extends Obuffer {
+    /**
+     * Write the samples to the file (Random Acces).
+     */
+    short[] myBuffer = new short[2];
+    private short[] buffer;
+    private short[] bufferp;
+    private int channels;
+    private WaveFile outWave;
 
-  /**
-   * Creates a new WareFileObuffer instance. 
-   * 
-   * @param number_of_channels	
-   *				The number of channels of audio data
-   *				this buffer will receive. 
-   * 
-   * @param freq	The sample frequency of the samples in the buffer.
-   * 
-   * @param fileName	The filename to write the data to.
-   */
-  public WaveFileObuffer(int number_of_channels, int freq, String FileName)
-  {
-  	if (FileName==null)
-		throw new NullPointerException("FileName");
-	
-	buffer = new short[OBUFFERSIZE];
-	bufferp = new short[MAXCHANNELS];
-	channels = number_of_channels;
-	
-	for (int i = 0; i < number_of_channels; ++i) 
-		bufferp[i] = (short)i;
-	
-	outWave = new WaveFile();
-	
-    int rc = outWave.OpenForWrite (FileName,freq,(short)16,(short)channels);
-  }
+    /**
+     * Creates a new WareFileObuffer instance.
+     *
+     * @param number_of_channels The number of channels of audio data
+     *                           this buffer will receive.
+     * @param freq               The sample frequency of the samples in the buffer.
+     * @param fileName           The filename to write the data to.
+     */
+    public WaveFileObuffer(int number_of_channels, int freq, String FileName) {
+        if (FileName == null)
+            throw new NullPointerException("FileName");
 
-  /**
-   * Takes a 16 Bit PCM sample.
-   */
-  public void append(int channel, short value)
-  {
-    buffer[bufferp[channel]] = value;
-    bufferp[channel] += channels;
-  }
+        buffer = new short[OBUFFERSIZE];
+        bufferp = new short[MAXCHANNELS];
+        channels = number_of_channels;
 
-  /**
-   * Write the samples to the file (Random Acces).
-   */
-  short[] myBuffer = new short[2];
-  public void write_buffer(int val)
-  {
-	  
-    int k = 0;
-    int rc = 0;
-    
-	rc = outWave.WriteData(buffer, bufferp[0]);
-	// REVIEW: handle RiffFile errors. 
+        for (int i = 0; i < number_of_channels; ++i)
+            bufferp[i] = (short) i;
+
+        outWave = new WaveFile();
+
+        int rc = outWave.OpenForWrite(FileName, freq, (short) 16, (short) channels);
+    }
+
+    /**
+     * Takes a 16 Bit PCM sample.
+     */
+    public void append(int channel, short value) {
+        buffer[bufferp[channel]] = value;
+        bufferp[channel] += channels;
+    }
+
+    public void write_buffer(int val) {
+
+        int k = 0;
+        int rc = 0;
+
+        rc = outWave.WriteData(buffer, bufferp[0]);
+        // REVIEW: handle RiffFile errors.
 	/*
     for (int j=0;j<bufferp[0];j=j+2)
     {
@@ -102,25 +95,24 @@ public class WaveFileObuffer extends Obuffer
         rc = outWave.WriteData (myBuffer,2);
     }
 	*/
-    for (int i = 0; i < channels; ++i) bufferp[i] = (short)i;
-  }
+        for (int i = 0; i < channels; ++i) bufferp[i] = (short) i;
+    }
 
-  public void close()
-  {
-    outWave.Close(); 
-  }
-  
-  /**
-   *
-   */
-  public void clear_buffer()
-  {}
+    public void close() {
+        outWave.Close();
+    }
 
-  /**
-   *
-   */
-  public void set_stop_flag()
-  {}
+    /**
+     *
+     */
+    public void clear_buffer() {
+    }
+
+    /**
+     *
+     */
+    public void set_stop_flag() {
+    }
 
   /*
    * Create STDOUT buffer
