@@ -476,7 +476,6 @@ final class LayerIIIDecoder implements FrameDecoder {
 
     /************************************************************/
     /*                            L3TABLE                       */
-
     public void decodeFrame() {
         decode();
     }
@@ -2342,6 +2341,7 @@ final class LayerIIIDecoder implements FrameDecoder {
             gr[1] = new gr_info_s();
         }
     }
+
     /***************************************************************/
     /*                         END OF INV_MDCT                     */
 

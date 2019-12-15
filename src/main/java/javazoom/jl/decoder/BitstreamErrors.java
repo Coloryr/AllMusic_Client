@@ -26,8 +26,8 @@ package javazoom.jl.decoder;
  * in <code>BistreamException</code>s.
  *
  * @author MDM        12/12/99
- * @since 0.0.6
  * @see BitstreamException
+ * @since 0.0.6
  */
 
 public interface BitstreamErrors extends JavaLayerErrors {

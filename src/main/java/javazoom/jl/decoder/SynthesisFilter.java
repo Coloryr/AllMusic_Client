@@ -63,28 +63,28 @@ final class SynthesisFilter {
 	*/
     private static final float cos15_64 = (float) (1.0 / (2.0 * Math.cos(MY_PI * 15.0 / 64.0)));
     private static final float cos17_64 = (float) (1.0 / (2.0 * Math.cos(MY_PI * 17.0 / 64.0)));
-  
-	/*
-	private void setQuality(int quality0)
-	{
-	  	switch (quality0)
-	  	{		
-		case HIGH_QUALITY:
-		case MEDIUM_QUALITY:
-		case LOW_QUALITY:						  
-			v_inc = 16 * quality0;			
-			quality = quality0;
-			break;	
-		default :
-			throw new IllegalArgumentException("Unknown quality value");
-	  	}				
-	}
-	
-	public int getQuality()
-	{
-		return quality;	
-	}
-	*/
+
+    /*
+    private void setQuality(int quality0)
+    {
+          switch (quality0)
+          {
+        case HIGH_QUALITY:
+        case MEDIUM_QUALITY:
+        case LOW_QUALITY:
+            v_inc = 16 * quality0;
+            quality = quality0;
+            break;
+        default :
+            throw new IllegalArgumentException("Unknown quality value");
+          }
+    }
+
+    public int getQuality()
+    {
+        return quality;
+    }
+    */
     private static final float cos19_64 = (float) (1.0 / (2.0 * Math.cos(MY_PI * 19.0 / 64.0)));
     private static final float cos21_64 = (float) (1.0 / (2.0 * Math.cos(MY_PI * 21.0 / 64.0)));
     private static final float cos23_64 = (float) (1.0 / (2.0 * Math.cos(MY_PI * 23.0 / 64.0)));
@@ -127,6 +127,7 @@ final class SynthesisFilter {
      */
 
     private float[] _tmpOut = new float[32];
+
     /**
      * Contructor.
      * The scalefactor scales the calculated float pcm samples to short values

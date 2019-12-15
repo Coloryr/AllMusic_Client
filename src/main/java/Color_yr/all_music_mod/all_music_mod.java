@@ -1,24 +1,16 @@
 package Color_yr.all_music_mod;
 
-import io.netty.buffer.ByteBuf;
 import javazoom.jl.player.Player;
-import net.minecraft.network.NetworkSystem;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.FMLMCRegisterPacketHandler;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.event.EventNetworkChannel;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +27,8 @@ import java.util.function.Supplier;
 public class all_music_mod {
     private static final Logger LOGGER = LogManager.getLogger();
     private static Player nowPlaying;
-    private SimpleChannel channel;
     private static URL nowURL;
+    private SimpleChannel channel;
 
     public all_music_mod() {
         // Register the setup method for modloading
@@ -63,6 +55,7 @@ public class all_music_mod {
         channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
         set(100);
     }
+
     private void enc(String str, PacketBuffer buffer) {
         buffer.writeBytes(str.getBytes(StandardCharsets.UTF_8));
     }
@@ -70,6 +63,7 @@ public class all_music_mod {
     private String dec(PacketBuffer buffer) {
         return buffer.toString(StandardCharsets.UTF_8);
     }
+
     private void proc(String str, Supplier<NetworkEvent.Context> supplier) {
         onClicentPacket(str);
         NetworkEvent.Context context = supplier.get();

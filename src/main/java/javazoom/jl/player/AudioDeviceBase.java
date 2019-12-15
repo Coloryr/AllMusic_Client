@@ -30,8 +30,8 @@ import javazoom.jl.decoder.JavaLayerException;
  * in doing so provide the implementation for the main operations
  * of the <code>AudioDevice</code> interface.
  *
- * @since 0.0.8
  * @author Mat McGowan
+ * @since 0.0.8
  */
 /*
  * REVIEW:  It is desirable to be able to use the decoder whe

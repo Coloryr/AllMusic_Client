@@ -230,6 +230,8 @@ public class Converter {
          * Called when an exception is thrown during while converting
          * a frame.
          *
+         * @param t The <code>Throwable</code> instance that
+         *          was thrown.
          * @return <code>true</code> to continue processing, or false
          * to abort conversion.
          * <p>
@@ -237,8 +239,6 @@ public class Converter {
          * is propagated to the caller of the convert() method. If
          * <code>true</code> is returned, the exception is silently
          * ignored and the converter moves onto the next frame.
-         * @param    t    The <code>Throwable</code> instance that
-         * was thrown.
          */
         boolean converterException(Throwable t);
 

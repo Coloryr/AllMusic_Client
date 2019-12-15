@@ -38,9 +38,9 @@ import javazoom.jl.decoder.JavaLayerException;
  * required. (See the JavaSound deivce and factory for an example
  * of this.)
  *
- * @since 0.0.8
  * @author Mat McGowan
  * @see FactoryRegistry
+ * @since 0.0.8
  */
 public abstract class AudioDeviceFactory {
     /**
@@ -48,7 +48,7 @@ public abstract class AudioDeviceFactory {
      *
      * @return a new instance of a specific class of <code>AudioDevice</code>.
      * @throws JavaLayerException if an instance of AudioDevice could not
-     * be created.
+     *                            be created.
      */
     public abstract AudioDevice createAudioDevice() throws JavaLayerException;
 
