@@ -1,4 +1,4 @@
-package Color_yr.all_music_mod;
+package Color_yr.allmusic_mod;
 
 import javazoom.jl.player.Player;
 import net.minecraft.network.PacketBuffer;
@@ -23,14 +23,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-@Mod("all_music_mod")
-public class all_music_mod {
+@Mod("allmusic_mod")
+public class allmusic_mod {
     private static final Logger LOGGER = LogManager.getLogger();
     private static Player nowPlaying;
     private static URL nowURL;
     private SimpleChannel channel;
 
-    public all_music_mod() {
+    public allmusic_mod() {
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -72,21 +72,21 @@ public class all_music_mod {
 
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
-        if (all_music_mod.nowPlaying != null && !all_music_mod.nowPlaying.isComplete()) {
-            all_music_mod.nowPlaying.close();
+        if (allmusic_mod.nowPlaying != null && !allmusic_mod.nowPlaying.isComplete()) {
+            allmusic_mod.nowPlaying.close();
         }
     }
 
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
             if (message.equals("[Stop]")) {
-                all_music_mod.this.stopPlaying();
+                allmusic_mod.this.stopPlaying();
             } else if (message.startsWith("[Play]")) {
                 try {
                     if (nowPlaying != null && !nowPlaying.isComplete()) {
                         nowPlaying.close();
                     }
-                    all_music_mod.nowURL = new URL(message.replace("[Play]", ""));
+                    allmusic_mod.nowURL = new URL(message.replace("[Play]", ""));
                     nowPlaying = new Player(nowURL.openStream());
                     nowPlaying.play();
                 } catch (Exception e) {
