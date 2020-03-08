@@ -48,7 +48,6 @@ public class RiffFile {
     protected int fmode;            // current file I/O mode
     protected RandomAccessFile file;             // I/O stream to use
     private RiffChunkHeader riff_header;      // header for whole file
-
     /**
      * Dummy Constructor
      */

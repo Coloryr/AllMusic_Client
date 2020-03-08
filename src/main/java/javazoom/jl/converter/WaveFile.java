@@ -34,7 +34,6 @@ public class WaveFile extends RiffFile {
     private RiffChunkHeader pcm_data;
     private long pcm_data_offset = 0;  // offset of 'pcm_data' in output file
     private int num_samples = 0;
-
     /**
      * Constructs a new WaveFile instance.
      */
@@ -132,46 +131,47 @@ public class WaveFile extends RiffFile {
     }
 
     /**
-     * public int OpenForRead (String Filename)
-     * {
-     * // Verify filename parameter as best we can...
-     * if (Filename == null)
-     * {
-     * return DDC_INVALID_CALL;
-     * }
-     * int retcode = Open ( Filename, RFM_READ );
-     * <p>
-     * if ( retcode == DDC_SUCCESS )
-     * {
-     * retcode = Expect ( "WAVE", 4 );
-     * <p>
-     * if ( retcode == DDC_SUCCESS )
-     * {
-     * retcode = Read(wave_format,24);
-     * <p>
-     * if ( retcode == DDC_SUCCESS && !wave_format.VerifyValidity() )
-     * {
-     * // This isn't standard PCM, so we don't know what it is!
-     * retcode = DDC_FILE_ERROR;
-     * }
-     * <p>
-     * if ( retcode == DDC_SUCCESS )
-     * {
-     * pcm_data_offset = CurrentFilePosition();
-     * <p>
-     * // Figure out number of samples from
-     * // file size, current file position, and
-     * // WAVE header.
-     * retcode = Read (pcm_data, 8 );
-     * num_samples = filelength(fileno(file)) - CurrentFilePosition();
-     * num_samples /= NumChannels();
-     * num_samples /= (BitsPerSample() / 8);
-     * }
-     * }
-     * }
-     * return retcode;
-     * }
-     */
+     *
+     *
+     public int OpenForRead (String Filename)
+     {
+     // Verify filename parameter as best we can...
+     if (Filename == null)
+     {
+     return DDC_INVALID_CALL;
+     }
+     int retcode = Open ( Filename, RFM_READ );
+
+     if ( retcode == DDC_SUCCESS )
+     {
+     retcode = Expect ( "WAVE", 4 );
+
+     if ( retcode == DDC_SUCCESS )
+     {
+     retcode = Read(wave_format,24);
+
+     if ( retcode == DDC_SUCCESS && !wave_format.VerifyValidity() )
+     {
+     // This isn't standard PCM, so we don't know what it is!
+     retcode = DDC_FILE_ERROR;
+     }
+
+     if ( retcode == DDC_SUCCESS )
+     {
+     pcm_data_offset = CurrentFilePosition();
+
+     // Figure out number of samples from
+     // file size, current file position, and
+     // WAVE header.
+     retcode = Read (pcm_data, 8 );
+     num_samples = filelength(fileno(file)) - CurrentFilePosition();
+     num_samples /= NumChannels();
+     num_samples /= (BitsPerSample() / 8);
+     }
+     }
+     }
+     return retcode;
+     }*/
 
     // [Hz]
     public int SamplingRate() {
@@ -254,18 +254,19 @@ public class WaveFile extends RiffFile {
      }*/
 
     /**
-     * public int SeekToSample ( long SampleIndex )
-     * {
-     * if ( SampleIndex >= NumSamples() )
-     * {
-     * return DDC_INVALID_CALL;
-     * }
-     * int SampleSize = (BitsPerSample() + 7) / 8;
-     * int rc = Seek ( pcm_data_offset + 8 +
-     * SampleSize * NumChannels() * SampleIndex );
-     * return rc;
-     * }
-     */
+     *
+     *
+     public int SeekToSample ( long SampleIndex )
+     {
+     if ( SampleIndex >= NumSamples() )
+     {
+     return DDC_INVALID_CALL;
+     }
+     int SampleSize = (BitsPerSample() + 7) / 8;
+     int rc = Seek ( pcm_data_offset + 8 +
+     SampleSize * NumChannels() * SampleIndex );
+     return rc;
+     }*/
 
     public short BitsPerSample() {
         return wave_format.data.nBitsPerSample;
@@ -382,31 +383,32 @@ public class WaveFile extends RiffFile {
      }*/
 
     /**
-     * public int ReadStereoSample ( short[] LeftSampleData, short[] RightSampleData )
-     * {
-     * int retcode = DDC_SUCCESS;
-     * byte[] x = new byte[2];
-     * short[] y = new short[2];
-     * switch ( wave_format.data.nBitsPerSample )
-     * {
-     * case 8:
-     * retcode = Read ( x, 2 );
-     * L[0] = (short) ( x[0] );
-     * R[0] = (short) ( x[1] );
-     * break;
-     * <p>
-     * case 16:
-     * retcode = Read ( y, 4 );
-     * L[0] = (short) ( y[0] );
-     * R[0] = (short) ( y[1] );
-     * break;
-     * <p>
-     * default:
-     * retcode = DDC_INVALID_CALL;
-     * }
-     * return retcode;
-     * }
-     */
+     *
+     *
+     public int ReadStereoSample ( short[] LeftSampleData, short[] RightSampleData )
+     {
+     int retcode = DDC_SUCCESS;
+     byte[] x = new byte[2];
+     short[] y = new short[2];
+     switch ( wave_format.data.nBitsPerSample )
+     {
+     case 8:
+     retcode = Read ( x, 2 );
+     L[0] = (short) ( x[0] );
+     R[0] = (short) ( x[1] );
+     break;
+
+     case 16:
+     retcode = Read ( y, 4 );
+     L[0] = (short) ( y[0] );
+     R[0] = (short) ( y[1] );
+     break;
+
+     default:
+     retcode = DDC_INVALID_CALL;
+     }
+     return retcode;
+     }*/
 
     public short NumChannels() {
         return wave_format.data.nChannels;

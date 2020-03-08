@@ -23,6 +23,8 @@ package javazoom.jl.player;
 import javazoom.jl.decoder.Decoder;
 import javazoom.jl.decoder.JavaLayerException;
 
+import javax.sound.sampled.FloatControl;
+
 /**
  * The <code>AudioDevice</code> interface provides an abstraction for
  * a device capable of sounding audio samples. Samples are written to
@@ -41,8 +43,8 @@ import javazoom.jl.decoder.JavaLayerException;
  *  r<i>x</i> indicates the <i>x</i>th sample on channel 1
  * </code></pre>
  *
- * @author Mat McGowan
  * @since 0.0.8
+ * @author Mat McGowan
  */
 public interface AudioDevice {
     /**
@@ -53,7 +55,7 @@ public interface AudioDevice {
      *                <p>
      *                If the audio device is already open, this method returns silently.
      */
-    void open(Decoder decoder) throws JavaLayerException;
+    public void open(Decoder decoder) throws JavaLayerException;
 
     /**
      * Retrieves the open state of this audio device.
@@ -61,7 +63,7 @@ public interface AudioDevice {
      * @return <code>true</code> if this audio device is open and playing
      * audio samples, or <code>false</code> otherwise.
      */
-    boolean isOpen();
+    public boolean isOpen();
 
     /**
      * Writes a number of samples to this <code>AudioDevice</code>.
@@ -74,7 +76,7 @@ public interface AudioDevice {
      *                This method may return prior to the samples actually being played
      *                by the audio device.
      */
-    void write(short[] samples, int offs, int len) throws JavaLayerException;
+    public void write(short[] samples, int offs, int len) throws JavaLayerException;
 
 
     /**
@@ -86,17 +88,19 @@ public interface AudioDevice {
      * on the device (e.g. during a <code>write</code> or <code>flush</code>
      * operation should be unblocked by this method.
      */
-    void close();
+    public void close();
 
 
     /**
      * Blocks until all audio samples previously written to this audio device have
      * been heard.
      */
-    void flush();
+    public void flush();
 
     /**
      * Retrieves the current playback position in milliseconds.
      */
-    int getPosition();
+    public int getPosition();
+
+    FloatControl getVolctrl();
 }

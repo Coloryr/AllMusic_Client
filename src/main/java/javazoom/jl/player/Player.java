@@ -22,6 +22,7 @@ package javazoom.jl.player;
 
 import javazoom.jl.decoder.*;
 
+import javax.sound.sampled.FloatControl;
 import java.io.InputStream;
 
 /**
@@ -35,186 +36,84 @@ import java.io.InputStream;
 // REVIEW: the audio device should not be opened until the
 // first MPEG audio frame has been decoded. 
 public class Player {
-    /**
-     * The current frame number.
-     */
-    private int frame = 0;
 
-    /**
-     * The MPEG audio bitstream.
-     */
-    // javac blank final bug.
-    /*final*/ private Bitstream bitstream;
-
-    /**
-     * The MPEG audio decoder.
-     */
-    /*final*/ private Decoder decoder;
-
-    /**
-     * The AudioDevice the audio samples are written to.
-     */
+    private Bitstream bitstream;
+    private Decoder decoder;
     private AudioDevice audio;
+    private boolean isClose;
 
-    /**
-     * Has the player been closed?
-     */
-    private boolean closed = false;
-
-    /**
-     * Has the player played back all frames from the stream?
-     */
-    private boolean complete = false;
-
-    private int lastPosition = 0;
-
-    /**
-     * Creates a new <code>Player</code> instance.
-     */
-    public Player(InputStream stream) throws JavaLayerException {
-        this(stream, null);
-    }
-
-    public Player(InputStream stream, AudioDevice device) throws JavaLayerException {
-        bitstream = new Bitstream(stream);
-        decoder = new Decoder();
-
-        if (device != null) {
-            audio = device;
-        } else {
+    public Player() {
+        try {
             FactoryRegistry r = FactoryRegistry.systemRegistry();
             audio = r.createAudioDevice();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    public synchronized void SetMusic(InputStream stream) throws JavaLayerException {
+        bitstream = new Bitstream(stream);
+        decoder = new Decoder();
         audio.open(decoder);
+        isClose = false;
     }
 
-    public void play() throws JavaLayerException {
-        play(Integer.MAX_VALUE);
+    public synchronized void Set(float a) {
+        if (audio == null)
+            return;
+        FloatControl temp = audio.getVolctrl();
+        if (temp != null) {
+            temp.setValue(a);
+        }
     }
 
-    /**
-     * Plays a number of MPEG audio frames.
-     *
-     * @param frames The number of frames to play.
-     * @return true if the last frame was played, or false if there are
-     * more frames.
-     */
-    public boolean play(int frames) throws JavaLayerException {
+    public void play() {
         boolean ret = true;
 
-        while (frames-- > 0 && ret) {
+        while (ret) {
             ret = decodeFrame();
         }
 
-        if (!ret) {
-            // last frame, ensure all data flushed to the audio device.
-            AudioDevice out = audio;
-            if (out != null) {
-                out.flush();
-                synchronized (this) {
-                    complete = (!closed);
-                    close();
-                }
+        if (audio != null) {
+            audio.flush();
+            synchronized (this) {
+                close();
             }
         }
-        return ret;
     }
 
-    /**
-     * Cloases this player. Any audio currently playing is stopped
-     * immediately.
-     */
     public synchronized void close() {
-        AudioDevice out = audio;
-        if (out != null) {
-            closed = true;
-            audio = null;
-            // this may fail, so ensure object state is set up before
-            // calling this method.
-            out.close();
-            lastPosition = out.getPosition();
-            try {
-                bitstream.close();
-            } catch (BitstreamException ex) {
-            }
-        }
-    }
-
-    /**
-     * Returns the completed status of this player.
-     *
-     * @return true if all available MPEG audio frames have been
-     * decoded, or false otherwise.
-     */
-    public synchronized boolean isComplete() {
-        return complete;
-    }
-
-    /**
-     * Retrieves the position in milliseconds of the current audio
-     * sample being played. This method delegates to the <code>
-     * AudioDevice</code> that is used by this player to sound
-     * the decoded audio samples.
-     */
-    public int getPosition() {
-        int position = lastPosition;
-
-        AudioDevice out = audio;
-        if (out != null) {
-            position = out.getPosition();
-        }
-        return position;
-    }
-
-    /**
-     * Decodes a single frame.
-     *
-     * @return true if there are no more frames to decode, false otherwise.
-     */
-    protected boolean decodeFrame() throws JavaLayerException {
         try {
-            AudioDevice out = audio;
-            if (out == null)
-                return false;
+            isClose = true;
+            if (bitstream != null)
+                bitstream.close();
+        } catch (BitstreamException ex) {
+        }
+    }
 
+    protected boolean decodeFrame() {
+        try {
+            if (audio == null)
+                return false;
+            if (isClose)
+                return false;
             Header h = bitstream.readFrame();
 
             if (h == null)
                 return false;
 
-            // sample buffer set when decoder constructed
             SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
 
             synchronized (this) {
-                out = audio;
-                if (out != null) {
-                    out.write(output.getBuffer(), 0, output.getBufferLength());
+                if (audio != null && !isClose) {
+                    audio.write(output.getBuffer(), 0, output.getBufferLength());
                 }
+                bitstream.closeFrame();
             }
 
-            bitstream.closeFrame();
-        } catch (RuntimeException ex) {
-            throw new JavaLayerException("Exception decoding audio frame", ex);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-/*
-		catch (IOException ex)
-		{
-			System.out.println("exception decoding audio frame: "+ex);
-			return false;	
-		}
-		catch (BitstreamException bitex)
-		{
-			System.out.println("exception decoding audio frame: "+bitex);
-			return false;	
-		}
-		catch (DecoderException decex)
-		{
-			System.out.println("exception decoding audio frame: "+decex);
-			return false;				
-		}
-*/
         return true;
     }
-
-
 }

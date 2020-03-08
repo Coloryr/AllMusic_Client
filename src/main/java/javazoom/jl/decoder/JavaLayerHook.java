@@ -31,5 +31,5 @@ public interface JavaLayerHook {
      * Retrieves the named resource. This allows resources to be
      * obtained without specifying how they are retrieved.
      */
-    InputStream getResourceAsStream(String name);
+    public InputStream getResourceAsStream(String name);
 }

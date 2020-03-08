@@ -28,20 +28,20 @@ import java.io.IOException;
  */
 public interface Source {
 
-    long LENGTH_UNKNOWN = -1;
+    public static final long LENGTH_UNKNOWN = -1;
 
-    int read(byte[] b, int offs, int len)
+    public int read(byte[] b, int offs, int len)
             throws IOException;
 
 
-    boolean willReadBlock();
+    public boolean willReadBlock();
 
-    boolean isSeekable();
+    public boolean isSeekable();
 
-    long length();
+    public long length();
 
-    long tell();
+    public long tell();
 
-    long seek(long pos);
+    public long seek(long pos);
 
 }

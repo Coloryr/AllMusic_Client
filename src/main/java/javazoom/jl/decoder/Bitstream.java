@@ -67,7 +67,7 @@ public final class Bitstream implements BitstreamErrors {
      * The frame buffer that holds the data for the current frame.
      */
     private final int[] framebuffer = new int[BUFFER_INT_SIZE];
-    private final int[] bitmask = {0,    // dummy
+    private final int bitmask[] = {0,    // dummy
             0x00000001, 0x00000003, 0x00000007, 0x0000000F,
             0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF,
             0x000001FF, 0x000003FF, 0x000007FF, 0x00000FFF,
@@ -75,7 +75,7 @@ public final class Bitstream implements BitstreamErrors {
             0x0001FFFF};
     private final PushbackInputStream source;
     private final Header header = new Header();
-    private final byte[] syncbuf = new byte[4];
+    private final byte syncbuf[] = new byte[4];
     /**
      * Number of valid bytes in the frame buffer.
      */
@@ -191,7 +191,7 @@ public final class Bitstream implements BitstreamErrors {
             int majorVersion = id3header[0];
             int revision = id3header[1];
             in.read(id3header, 0, 4);
-            size = (id3header[0] << 21) + (id3header[1] << 14) + (id3header[2] << 7) + (id3header[3]);
+            size = (int) (id3header[0] << 21) + (id3header[1] << 14) + (id3header[2] << 7) + (id3header[3]);
         }
         return (size + 10);
     }

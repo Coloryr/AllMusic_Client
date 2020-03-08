@@ -59,7 +59,7 @@ public final class Header {
     public static final int FOURTYEIGHT = 1;
     public static final int THIRTYTWO = 2;
     // E.B -> private to public
-    public static final int[][][] bitrates = {
+    public static final int bitrates[][][] = {
             {{0 /*free format*/, 32000, 48000, 56000, 64000, 80000, 96000,
                     112000, 128000, 144000, 160000, 176000, 192000, 224000, 256000, 0},
                     {0 /*free format*/, 8000, 16000, 24000, 32000, 40000, 48000,
@@ -83,7 +83,7 @@ public final class Header {
 
     };
     // E.B -> private to public
-    public static final String[][][] bitrate_str = {
+    public static final String bitrate_str[][][] = {
             {{"free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s",
                     "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s",
                     "160 kbit/s", "176 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s",
@@ -290,7 +290,7 @@ public final class Header {
     void parseVBR(byte[] firstframe) throws BitstreamException {
         // Trying Xing header.
         String xing = "Xing";
-        byte[] tmp = new byte[4];
+        byte tmp[] = new byte[4];
         int offset = 0;
         // Compute "Xing" offset depending on MPEG version and channels.
         if (h_version == MPEG1) {
@@ -313,7 +313,7 @@ public final class Header {
 
                 int length = 4;
                 // Read flags.
-                byte[] flags = new byte[4];
+                byte flags[] = new byte[4];
                 System.arraycopy(firstframe, offset + length, flags, 0, flags.length);
                 length += flags.length;
                 // Read number of frames (if available).
@@ -422,7 +422,8 @@ public final class Header {
      * Returns Protection bit.
      */
     public boolean checksums() {
-        return h_protection_bit == 0;
+        if (h_protection_bit == 0) return true;
+        else return false;
     }
 
     /**
@@ -480,7 +481,8 @@ public final class Header {
      * Returns Layer III Padding bit.
      */
     public boolean padding() {
-        return h_padding_bit != 0;
+        if (h_padding_bit == 0) return false;
+        else return true;
     }
 
     /**
@@ -577,7 +579,7 @@ public final class Header {
             if ((h_version == MPEG2_LSF) || (h_version == MPEG25_LSF)) tpf /= 2;
             return ((float) (tpf * 1000));
         } else {
-            float[][] ms_per_frame_array = {{8.707483f, 8.0f, 12.0f},
+            float ms_per_frame_array[][] = {{8.707483f, 8.0f, 12.0f},
                     {26.12245f, 24.0f, 36.0f},
                     {26.12245f, 24.0f, 36.0f}};
             return (ms_per_frame_array[h_layer - 1][h_sample_frequency]);
@@ -627,7 +629,7 @@ public final class Header {
      */
     public String bitrate_string() {
         if (h_vbr == true) {
-            return bitrate() / 1000 + " kb/s";
+            return Integer.toString(bitrate() / 1000) + " kb/s";
         } else return bitrate_str[h_version][h_layer - 1][h_bitrate_index];
     }
 

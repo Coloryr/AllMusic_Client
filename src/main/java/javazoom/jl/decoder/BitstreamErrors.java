@@ -26,8 +26,8 @@ package javazoom.jl.decoder;
  * in <code>BistreamException</code>s.
  *
  * @author MDM        12/12/99
- * @see BitstreamException
  * @since 0.0.6
+ * @see BitstreamException
  */
 
 public interface BitstreamErrors extends JavaLayerErrors {
@@ -35,36 +35,36 @@ public interface BitstreamErrors extends JavaLayerErrors {
     /**
      * An undeterminable error occurred.
      */
-    int UNKNOWN_ERROR = BITSTREAM_ERROR + 0;
+    static public final int UNKNOWN_ERROR = BITSTREAM_ERROR + 0;
 
     /**
      * The header describes an unknown sample rate.
      */
-    int UNKNOWN_SAMPLE_RATE = BITSTREAM_ERROR + 1;
+    static public final int UNKNOWN_SAMPLE_RATE = BITSTREAM_ERROR + 1;
 
     /**
      * A problem occurred reading from the stream.
      */
-    int STREAM_ERROR = BITSTREAM_ERROR + 2;
+    static public final int STREAM_ERROR = BITSTREAM_ERROR + 2;
 
     /**
      * The end of the stream was reached prematurely.
      */
-    int UNEXPECTED_EOF = BITSTREAM_ERROR + 3;
+    static public final int UNEXPECTED_EOF = BITSTREAM_ERROR + 3;
 
     /**
      * The end of the stream was reached.
      */
-    int STREAM_EOF = BITSTREAM_ERROR + 4;
+    static public final int STREAM_EOF = BITSTREAM_ERROR + 4;
 
     /**
      * Frame data are missing.
      */
-    int INVALIDFRAME = BITSTREAM_ERROR + 5;
+    static public final int INVALIDFRAME = BITSTREAM_ERROR + 5;
 
     /**
      *
      */
-    int BITSTREAM_LAST = 0x1ff;
+    static public final int BITSTREAM_LAST = 0x1ff;
 
 }

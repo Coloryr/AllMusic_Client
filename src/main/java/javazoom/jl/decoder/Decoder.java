@@ -24,8 +24,8 @@ package javazoom.jl.decoder;
  * The <code>Decoder</code> class encapsulates the details of
  * decoding an MPEG audio frame.
  *
- * @author MDM
  * @version 0.0.7 12/12/99
+ * @author MDM
  * @since 0.0.5
  */
 public class Decoder implements DecoderErrors {
@@ -322,5 +322,6 @@ public class Decoder implements DecoderErrors {
 
     }
 
+    ;
 }
 

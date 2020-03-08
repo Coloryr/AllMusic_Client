@@ -43,6 +43,12 @@ public class JavaSoundAudioDevice extends AudioDeviceBase {
 
     private byte[] byteBuf = new byte[4096];
 
+    private FloatControl volctrl;
+
+    public FloatControl getVolctrl() {
+        return volctrl;
+    }
+
     protected AudioFormat getAudioFormat() {
         if (fmt == null) {
             Decoder decoder = getDecoder();
@@ -62,8 +68,7 @@ public class JavaSoundAudioDevice extends AudioDeviceBase {
     protected DataLine.Info getSourceLineInfo() {
         AudioFormat fmt = getAudioFormat();
         //DataLine.Info info = new DataLine.Info(SourceDataLine.class, fmt, 4000);
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, fmt);
-        return info;
+        return new DataLine.Info(SourceDataLine.class, fmt);
     }
 
     public void open(AudioFormat fmt) throws JavaLayerException {
@@ -86,22 +91,11 @@ public class JavaSoundAudioDevice extends AudioDeviceBase {
             Line line = AudioSystem.getLine(getSourceLineInfo());
             if (line instanceof SourceDataLine) {
                 source = (SourceDataLine) line;
-                //source.open(fmt, millisecondsToBytes(fmt, 2000));
                 source.open(fmt);
-                /*
-                if (source.isControlSupported(FloatControl.Type.MASTER_GAIN))
-                {
-					FloatControl c = (FloatControl)source.getControl(FloatControl.Type.MASTER_GAIN);
-                    c.setValue(c.getMaximum());
-                }*/
                 source.start();
-
+                volctrl = (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
             }
-        } catch (RuntimeException ex) {
-            t = ex;
-        } catch (LinkageError ex) {
-            t = ex;
-        } catch (LineUnavailableException ex) {
+        } catch (RuntimeException | LinkageError | LineUnavailableException ex) {
             t = ex;
         }
         if (source == null) throw new JavaLayerException("cannot obtain source audio line", t);

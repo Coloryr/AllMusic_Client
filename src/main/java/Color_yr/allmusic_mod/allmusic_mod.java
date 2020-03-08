@@ -26,21 +26,12 @@ import java.util.function.Supplier;
 @Mod("allmusic_mod")
 public class allmusic_mod {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static Player nowPlaying;
+    private static final Player nowPlaying = new Player();
     private static URL nowURL;
     private SimpleChannel channel;
 
     public allmusic_mod() {
-        // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        // Register the enqueueIMC method for modloading
-        //FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-        // Register the processIMC method for modloading
-        //FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
-        // Register the doClientStuff method for modloading
-        //FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-
-        // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -72,9 +63,7 @@ public class allmusic_mod {
 
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
-        if (allmusic_mod.nowPlaying != null && !allmusic_mod.nowPlaying.isComplete()) {
-            allmusic_mod.nowPlaying.close();
-        }
+        stopPlaying();
     }
 
     private void onClicentPacket(final String message) {
@@ -83,11 +72,9 @@ public class allmusic_mod {
                 allmusic_mod.this.stopPlaying();
             } else if (message.startsWith("[Play]")) {
                 try {
-                    if (nowPlaying != null && !nowPlaying.isComplete()) {
-                        nowPlaying.close();
-                    }
+                    stopPlaying();
                     allmusic_mod.nowURL = new URL(message.replace("[Play]", ""));
-                    nowPlaying = new Player(nowURL.openStream());
+                    nowPlaying.SetMusic(nowURL.openStream());
                     nowPlaying.play();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -105,27 +92,13 @@ public class allmusic_mod {
     }
 
     private void stopPlaying() {
-        if (nowPlaying != null) {
-            nowPlaying.close();
-            nowPlaying = null;
-        }
+        nowPlaying.close();
     }
 
     private void set(int a) {
         try {
-            final Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
-            for (final Mixer.Info info : mixerInfo) {
-                final Mixer mixer = AudioSystem.getMixer(info);
-                if (mixer.isLineSupported(Port.Info.SPEAKER)) {
-                    final Port port = (Port) mixer.getLine(Port.Info.SPEAKER);
-                    port.open();
-                    if (port.isControlSupported(FloatControl.Type.VOLUME)) {
-                        final FloatControl volume = (FloatControl) port.getControl(FloatControl.Type.VOLUME);
-                        volume.setValue((float) a / 1000);
-                    }
-                    port.close();
-                }
-            }
+            final float temp = (a == 0) ? -80.0f : ((float) (a * 0.2 - 20.0));
+            nowPlaying.Set(temp);
         } catch (Exception e) {
             e.printStackTrace();
         }
