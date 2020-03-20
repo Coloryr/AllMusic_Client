@@ -1,8 +1,11 @@
 package Color_yr.allmusic_mod;
 
+import io.netty.buffer.Unpooled;
 import javazoom.jl.player.Player;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -25,10 +28,22 @@ import java.util.function.Supplier;
 
 @Mod("allmusic_mod")
 public class allmusic_mod {
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final Player nowPlaying = new Player();
     private static URL nowURL;
     private SimpleChannel channel;
+
+    public final Thread thread = new Thread(() -> {
+        while (true) {
+            try {
+                int nowV = (int) (Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.RECORDS) *
+                        Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.MASTER) * 100);
+                nowPlaying.Set(nowV);
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    });
 
     public allmusic_mod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -36,7 +51,6 @@ public class allmusic_mod {
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        MinecraftForge.EVENT_BUS.register(this);
         channel = NetworkRegistry.ChannelBuilder
                 .named(new ResourceLocation("allmusic", "channel"))
                 .networkProtocolVersion(() -> "zzzz")
@@ -44,7 +58,7 @@ public class allmusic_mod {
                 .clientAcceptedVersions(NetworkRegistry.ACCEPTVANILLA::equals)
                 .simpleChannel();
         channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
-        set(100);
+        thread.start();
     }
 
     private void enc(String str, PacketBuffer buffer) {
@@ -68,7 +82,9 @@ public class allmusic_mod {
 
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
-            if (message.equals("[Stop]")) {
+            if (message.equalsIgnoreCase("[Check]")) {
+                channel.sendToServer("666");
+            } else if (message.equals("[Stop]")) {
                 allmusic_mod.this.stopPlaying();
             } else if (message.startsWith("[Play]")) {
                 try {
@@ -79,13 +95,6 @@ public class allmusic_mod {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (message.startsWith("[V]")) {
-                try {
-                    String a = message.replace("[V]", "");
-                    set(Integer.parseInt(a));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         });
         asyncThread.start();
@@ -93,14 +102,5 @@ public class allmusic_mod {
 
     private void stopPlaying() {
         nowPlaying.close();
-    }
-
-    private void set(int a) {
-        try {
-            final float temp = (a == 0) ? -80.0f : ((float) (a * 0.2 - 20.0));
-            nowPlaying.Set(temp);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -58,12 +58,13 @@ public class Player {
         isClose = false;
     }
 
-    public synchronized void Set(float a) {
+    public synchronized void Set(int a) {
         if (audio == null)
             return;
         FloatControl temp = audio.getVolctrl();
         if (temp != null) {
-            temp.setValue(a);
+            final float temp1 = (a == 0) ? -80.0f : ((float) (a * 0.2 - 20.0));
+            temp.setValue(temp1);
         }
     }
 
