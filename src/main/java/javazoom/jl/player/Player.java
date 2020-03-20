@@ -63,7 +63,7 @@ public class Player {
             return;
         FloatControl temp = audio.getVolctrl();
         if (temp != null) {
-            final float temp1 = (a == 0) ? -80.0f : ((float) (a * 0.2 - 20.0));
+            final float temp1 = (a == 0) ? -80.0f : ((float) (a * 0.2 - 35.0));
             temp.setValue(temp1);
         }
     }
