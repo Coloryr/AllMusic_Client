@@ -82,8 +82,13 @@ public class allmusic_mod {
 
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
-            if (message.equalsIgnoreCase("[Check]")) {
-                channel.sendToServer("666");
+            if (message.contains("[Check]")) {
+                try {
+                    Thread.sleep(1000);
+                    channel.sendToServer("666");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             } else if (message.equals("[Stop]")) {
                 allmusic_mod.this.stopPlaying();
             } else if (message.startsWith("[Play]")) {
