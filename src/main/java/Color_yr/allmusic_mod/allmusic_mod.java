@@ -92,6 +92,8 @@ public class allmusic_mod {
                 stopPlaying();
             } else if (message.startsWith("[Play]")) {
                 try {
+                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
+                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
                     stopPlaying();
                     allmusic_mod.nowURL = new URL(message.replace("[Play]", ""));
                     nowPlaying.SetMusic(nowURL.openStream());
