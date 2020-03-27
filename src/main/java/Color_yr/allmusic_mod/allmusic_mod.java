@@ -7,6 +7,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.sound.PlaySoundSourceEvent;
+import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -33,8 +34,7 @@ public class allmusic_mod {
                 int nowV = (int) (Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.RECORDS) *
                         Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.MASTER) * 100);
                 if (v != nowV) {
-                    v = nowV;
-                    nowPlaying.Set(v);
+                    nowPlaying.Set(nowV);
                 }
                 Thread.sleep(500);
             } catch (Exception e) {
@@ -70,14 +70,14 @@ public class allmusic_mod {
     }
 
     @SubscribeEvent
-    public void onSound(final PlaySoundSourceEvent e) {
+    public void onSound(final SoundEvent.SoundSourceEvent e) {
         if(!isPlay)
             return;
         SoundCategory data = e.getSound().getCategory();
         switch (data) {
             case MUSIC:
             case RECORDS:
-                e.setCanceled(true);
+                e.getSource().func_216418_f();
         }
     }
 
@@ -89,7 +89,7 @@ public class allmusic_mod {
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
             if (message.equals("[Stop]")) {
-                allmusic_mod.this.stopPlaying();
+                stopPlaying();
             } else if (message.startsWith("[Play]")) {
                 try {
                     stopPlaying();

@@ -66,6 +66,7 @@ public class Player {
         if (temp != null) {
             final float temp1 = (a == 0) ? -80.0f : ((float) (a * 0.2 - 35.0));
             temp.setValue(temp1);
+            allmusic_mod.v = a;
         }
     }
 
