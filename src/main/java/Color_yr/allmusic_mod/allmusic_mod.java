@@ -1,12 +1,12 @@
 package Color_yr.allmusic_mod;
 
-import io.netty.buffer.Unpooled;
 import javazoom.jl.player.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.sound.PlaySoundSourceEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -15,13 +15,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.Port;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
@@ -30,15 +24,19 @@ import java.util.function.Supplier;
 public class allmusic_mod {
     private static final Player nowPlaying = new Player();
     private static URL nowURL;
-    private SimpleChannel channel;
+    public static boolean isPlay = false;
+    public static int v = 0;
 
     public final Thread thread = new Thread(() -> {
         while (true) {
             try {
                 int nowV = (int) (Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.RECORDS) *
                         Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.MASTER) * 100);
-                nowPlaying.Set(nowV);
-                Thread.sleep(1000);
+                if (v != nowV) {
+                    v = nowV;
+                    nowPlaying.Set(v);
+                }
+                Thread.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -51,12 +49,8 @@ public class allmusic_mod {
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        channel = NetworkRegistry.ChannelBuilder
-                .named(new ResourceLocation("allmusic", "channel"))
-                .networkProtocolVersion(() -> "zzzz")
-                .serverAcceptedVersions(NetworkRegistry.ACCEPTVANILLA::equals)
-                .clientAcceptedVersions(NetworkRegistry.ACCEPTVANILLA::equals)
-                .simpleChannel();
+        SimpleChannel channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("allmusic", "channel"),
+                () -> "1.0", s -> true, s -> true);
         channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
         thread.start();
     }
@@ -76,20 +70,25 @@ public class allmusic_mod {
     }
 
     @SubscribeEvent
+    public void onSound(final PlaySoundSourceEvent e) {
+        if(!isPlay)
+            return;
+        SoundCategory data = e.getSound().getCategory();
+        switch (data) {
+            case MUSIC:
+            case RECORDS:
+                e.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
         stopPlaying();
     }
 
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
-            if (message.contains("[Check]")) {
-                try {
-                    Thread.sleep(1000);
-                    channel.sendToServer("666");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else if (message.equals("[Stop]")) {
+            if (message.equals("[Stop]")) {
                 allmusic_mod.this.stopPlaying();
             } else if (message.startsWith("[Play]")) {
                 try {
