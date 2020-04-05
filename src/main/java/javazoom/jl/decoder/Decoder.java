@@ -24,8 +24,8 @@ package javazoom.jl.decoder;
  * The <code>Decoder</code> class encapsulates the details of
  * decoding an MPEG audio frame.
  *
- * @version 0.0.7 12/12/99
  * @author MDM
+ * @version 0.0.7 12/12/99
  * @since 0.0.5
  */
 public class Decoder implements DecoderErrors {
@@ -64,8 +64,6 @@ public class Decoder implements DecoderErrors {
 
     private Equalizer equalizer = new Equalizer();
 
-    private Params params;
-
     private boolean initialized;
 
 
@@ -82,14 +80,14 @@ public class Decoder implements DecoderErrors {
      * Creates a new <code>Decoder</code> instance with default
      * parameters.
      *
-     * @param params The <code>Params</code> instance that describes
-     *               the customizable aspects of the decoder.
+     * @param params0 The <code>Params</code> instance that describes
+     *                the customizable aspects of the decoder.
      */
     public Decoder(Params params0) {
         if (params0 == null)
             params0 = DEFAULT_PARAMS;
 
-        params = params0;
+        Params params = params0;
 
         Equalizer eq = params.getInitialEqualizerSettings();
         if (eq != null) {
@@ -119,8 +117,8 @@ public class Decoder implements DecoderErrors {
     /**
      * Decodes one frame from an MPEG audio bitstream.
      *
-     * @param header    The header describing the frame to decode.
-     * @param bitstream The bistream that provides the bits for te body of the frame.
+     * @param header The header describing the frame to decode.
+     * @param stream The bistream that provides the bits for te body of the frame.
      * @return A SampleBuffer containing the decoded samples.
      */
     public Obuffer decodeFrame(Header header, Bitstream stream)
@@ -154,9 +152,6 @@ public class Decoder implements DecoderErrors {
      * Retrieves the sample frequency of the PCM samples output
      * by this decoder. This typically corresponds to the sample
      * rate encoded in the MPEG audio stream.
-     *
-     * @param the sample rate (in Hz) of the samples written to the
-     *            output buffer when decoding.
      */
     public int getOutputFrequency() {
         return outputFrequency;
@@ -194,8 +189,8 @@ public class Decoder implements DecoderErrors {
         return new DecoderException(errorcode, null);
     }
 
-    protected DecoderException newDecoderException(int errorcode, Throwable throwable) {
-        return new DecoderException(errorcode, throwable);
+    protected DecoderException newDecoderException() {
+        return new DecoderException(DecoderErrors.UNSUPPORTED_LAYER, null);
     }
 
     protected FrameDecoder retrieveDecoder(Header header, Bitstream stream, int layer)
@@ -235,14 +230,13 @@ public class Decoder implements DecoderErrors {
         }
 
         if (decoder == null) {
-            throw newDecoderException(UNSUPPORTED_LAYER, null);
+            throw newDecoderException();
         }
 
         return decoder;
     }
 
-    private void initialize(Header header)
-            throws DecoderException {
+    private void initialize(Header header) {
 
         // REVIEW: allow customizable scale factor
         float scalefactor = 32700.0f;
@@ -257,11 +251,11 @@ public class Decoder implements DecoderErrors {
             output = new SampleBuffer(header.frequency(), channels);
 
         float[] factors = equalizer.getBandFactors();
-        filter1 = new SynthesisFilter(0, scalefactor, factors);
+        filter1 = new SynthesisFilter(0, scalefactor);
 
         // REVIEW: allow mono output for stereo
         if (channels == 2)
-            filter2 = new SynthesisFilter(1, scalefactor, factors);
+            filter2 = new SynthesisFilter(1, scalefactor);
 
         outputChannels = channels;
         outputFrequency = header.frequency();
@@ -321,7 +315,5 @@ public class Decoder implements DecoderErrors {
         }
 
     }
-
-    ;
 }
 

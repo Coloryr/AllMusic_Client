@@ -36,10 +36,6 @@ public class JavaLayerException extends Exception {
 
     private Throwable exception;
 
-
-    public JavaLayerException() {
-    }
-
     public JavaLayerException(String msg) {
         super(msg);
     }
@@ -48,11 +44,6 @@ public class JavaLayerException extends Exception {
         super(msg);
         exception = t;
     }
-
-    public Throwable getException() {
-        return exception;
-    }
-
 
     public void printStackTrace() {
         printStackTrace(System.err);

@@ -36,86 +36,73 @@ import javax.sound.sampled.*;
  * @author Mat McGowan
  * @since 0.0.8
  */
-public class JavaSoundAudioDevice extends AudioDeviceBase {
+public class JavaSoundAudioDevice {
+    public boolean startplay = false;
     private SourceDataLine source = null;
-
-    private AudioFormat fmt = null;
+    private boolean open = false;
+    private Decoder decoder = null;
+    private AudioFormatSelf fmt = null;
 
     private byte[] byteBuf = new byte[4096];
 
     private FloatControl volctrl;
 
+    public JavaSoundAudioDevice() {
+        try {
+            Throwable t = null;
+            try {
+                fmt = new AudioFormatSelf(48000,
+                        16,
+                        2,
+                        true,
+                        false);
+                source = (SourceDataLine) AudioSystem.getLine(new DataLine.Info(SourceDataLine.class, fmt));
+            } catch (RuntimeException | LinkageError | LineUnavailableException ex) {
+                t = ex;
+            }
+            if (source == null) throw new JavaLayerException("cannot obtain source audio line", t);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public FloatControl getVolctrl() {
         return volctrl;
     }
 
-    protected AudioFormat getAudioFormat() {
-        if (fmt == null) {
-            Decoder decoder = getDecoder();
-            fmt = new AudioFormat(decoder.getOutputFrequency(),
-                    16,
-                    decoder.getOutputChannels(),
-                    true,
-                    false);
-        }
-        return fmt;
+    public synchronized void open(Decoder decoder) {
+        this.decoder = decoder;
+        open = true;
     }
 
-    protected void setAudioFormat(AudioFormat fmt0) {
-        fmt = fmt0;
+    public synchronized void close() {
+        flush();
+        decoder = null;
+        open = false;
     }
 
-    protected DataLine.Info getSourceLineInfo() {
-        AudioFormat fmt = getAudioFormat();
-        //DataLine.Info info = new DataLine.Info(SourceDataLine.class, fmt, 4000);
-        return new DataLine.Info(SourceDataLine.class, fmt);
-    }
-
-    public void open(AudioFormat fmt) throws JavaLayerException {
-        if (!isOpen()) {
-            setAudioFormat(fmt);
-            openImpl();
-            setOpen(true);
+    public void write(short[] samples, int offs, int len) throws LineUnavailableException {
+        if (open) {
+            writeImpl(samples, offs, len);
         }
     }
 
-    protected void openImpl()
-            throws JavaLayerException {
-    }
-
-
-    // createSource fix.
-    protected void createSource() throws JavaLayerException {
-        Throwable t = null;
-        try {
-            Line line = AudioSystem.getLine(getSourceLineInfo());
-            if (line instanceof SourceDataLine) {
-                source = (SourceDataLine) line;
-                source.open(fmt);
-                source.start();
-                volctrl = (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
-            }
-        } catch (RuntimeException | LinkageError | LineUnavailableException ex) {
-            t = ex;
-        }
-        if (source == null) throw new JavaLayerException("cannot obtain source audio line", t);
-    }
-
-    public int millisecondsToBytes(AudioFormat fmt, int time) {
-        return (int) (time * (fmt.getSampleRate() * fmt.getChannels() * fmt.getSampleSizeInBits()) / 8000.0);
-    }
-
-    protected void closeImpl() {
+    public void flush() {
         if (source != null) {
             source.close();
+            startplay = false;
         }
     }
 
-    protected void writeImpl(short[] samples, int offs, int len)
-            throws JavaLayerException {
-        if (source == null)
-            createSource();
-
+    protected void writeImpl(short[] samples, int offs, int len) throws LineUnavailableException {
+        if (!startplay) {
+            fmt.setSampleRate(decoder.getOutputFrequency());
+            fmt.setChannels(decoder.getOutputChannels());
+            source.open(fmt);
+            source.start();
+            volctrl = (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
+            startplay = true;
+        }
         byte[] b = toByteArray(samples, offs, len);
         source.write(b, 0, len * 2);
     }
@@ -137,36 +124,5 @@ public class JavaSoundAudioDevice extends AudioDeviceBase {
             b[idx++] = (byte) (s >>> 8);
         }
         return b;
-    }
-
-    protected void flushImpl() {
-        if (source != null) {
-            source.drain();
-        }
-    }
-
-    public int getPosition() {
-        int pos = 0;
-        if (source != null) {
-            pos = (int) (source.getMicrosecondPosition() / 1000);
-        }
-        return pos;
-    }
-
-    /**
-     * Runs a short test by playing a short silent sound.
-     */
-    public void test()
-            throws JavaLayerException {
-        try {
-            open(new AudioFormat(22050, 16, 1, true, false));
-            short[] data = new short[22050 / 10];
-            write(data, 0, data.length);
-            flush();
-            close();
-        } catch (RuntimeException ex) {
-            throw new JavaLayerException("Device test failed: " + ex);
-        }
-
     }
 }

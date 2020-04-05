@@ -28,7 +28,6 @@ package javazoom.jl.decoder;
  */
 public class DecoderException extends JavaLayerException
         implements DecoderErrors {
-    private int errorcode = UNKNOWN_ERROR;
 
     public DecoderException(String msg, Throwable t) {
         super(msg, t);
@@ -36,7 +35,6 @@ public class DecoderException extends JavaLayerException
 
     public DecoderException(int errorcode, Throwable t) {
         this(getErrorString(errorcode), t);
-        this.errorcode = errorcode;
     }
 
     static public String getErrorString(int errorcode) {
@@ -44,10 +42,6 @@ public class DecoderException extends JavaLayerException
         // to locale-sensitive strings.
 
         return "Decoder errorcode " + Integer.toHexString(errorcode);
-    }
-
-    public int getErrorCode() {
-        return errorcode;
     }
 
 

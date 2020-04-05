@@ -36,7 +36,7 @@ public class allmusic_mod {
                 if (v != nowV) {
                     nowPlaying.Set(nowV);
                 }
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (Exception e) {
                 e.printStackTrace();
             }

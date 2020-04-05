@@ -67,7 +67,7 @@ public final class Bitstream implements BitstreamErrors {
      * The frame buffer that holds the data for the current frame.
      */
     private final int[] framebuffer = new int[BUFFER_INT_SIZE];
-    private final int bitmask[] = {0,    // dummy
+    private final int[] bitmask = {0,    // dummy
             0x00000001, 0x00000003, 0x00000007, 0x0000000F,
             0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF,
             0x000001FF, 0x000003FF, 0x000007FF, 0x00000FFF,
@@ -75,7 +75,7 @@ public final class Bitstream implements BitstreamErrors {
             0x0001FFFF};
     private final PushbackInputStream source;
     private final Header header = new Header();
-    private final byte syncbuf[] = new byte[4];
+    private final byte[] syncbuf = new byte[4];
     /**
      * Number of valid bytes in the frame buffer.
      */
@@ -191,7 +191,7 @@ public final class Bitstream implements BitstreamErrors {
             int majorVersion = id3header[0];
             int revision = id3header[1];
             in.read(id3header, 0, 4);
-            size = (int) (id3header[0] << 21) + (id3header[1] << 14) + (id3header[2] << 7) + (id3header[3]);
+            size = (id3header[0] << 21) + (id3header[1] << 14) + (id3header[2] << 7) + (id3header[3]);
         }
         return (size + 10);
     }
@@ -233,7 +233,7 @@ public final class Bitstream implements BitstreamErrors {
         try {
             result = readNextFrame();
             // E.B, Parse VBR (if any) first frame.
-            if (firstframe == true) {
+            if (firstframe) {
                 result.parseVBR(frame_bytes);
                 firstframe = false;
             }
@@ -333,19 +333,6 @@ public final class Bitstream implements BitstreamErrors {
         return sync;
     }
 
-
-    // REVIEW: this class should provide inner classes to
-    // parse the frame contents. Eventually, readBits will
-    // be removed.
-    public int readBits(int n) {
-        return get_bits(n);
-    }
-
-    public int readCheckedBits(int n) {
-        // REVIEW: implement CRC check.
-        return get_bits(n);
-    }
-
     protected BitstreamException newBitstreamException(int errorcode) {
         return new BitstreamException(errorcode, null);
     }
@@ -383,9 +370,6 @@ public final class Bitstream implements BitstreamErrors {
         }
         while (!sync);
 
-        //current_frame_number++;
-        //if (last_frame_number < current_frame_number) last_frame_number = current_frame_number;
-
         return headerstring;
     }
 
@@ -393,7 +377,6 @@ public final class Bitstream implements BitstreamErrors {
         boolean sync = false;
 
         if (syncmode == INITIAL_SYNC) {
-            //sync =  ((headerstring & 0xFFF00000) == 0xFFF00000);
             sync = ((headerstring & 0xFFE00000) == 0xFFE00000);    // SZD: MPEG 2.5
         } else {
             sync = ((headerstring & 0xFFF80C00) == word) &&
@@ -418,8 +401,7 @@ public final class Bitstream implements BitstreamErrors {
      * until parse frame is called.
      */
     int read_frame_data(int bytesize) throws BitstreamException {
-        int numread = 0;
-        numread = readFully(frame_bytes, 0, bytesize);
+        int numread = readFully(frame_bytes, 0, bytesize);
         framesize = bytesize;
         wordpointer = -1;
         bitindex = -1;
@@ -434,16 +416,6 @@ public final class Bitstream implements BitstreamErrors {
         int b = 0;
         byte[] byteread = frame_bytes;
         int bytesize = framesize;
-
-        // Check ID3v1 TAG (True only if last frame).
-        //for (int t=0;t<(byteread.length)-2;t++)
-        //{
-        //	if ((byteread[t]=='T') && (byteread[t+1]=='A') && (byteread[t+2]=='G'))
-        //	{
-        //		System.out.println("ID3v1 detected at offset "+t);
-        //		throw newBitstreamException(INVALIDFRAME, null);
-        //	}
-        //}
 
         for (int k = 0; k < bytesize; k = k + 4) {
             int convert = 0;
@@ -486,10 +458,6 @@ public final class Bitstream implements BitstreamErrors {
             return returnvalue;
         }
 
-        // E.B : Check that ?
-        //((short[])&returnvalue)[0] = ((short[])wordpointer + 1)[0];
-        //wordpointer++; // Added by me!
-        //((short[])&returnvalue + 1)[0] = ((short[])wordpointer)[0];
         int Right = (framebuffer[wordpointer] & 0x0000FFFF);
         wordpointer++;
         int Left = (framebuffer[wordpointer] & 0xFFFF0000);

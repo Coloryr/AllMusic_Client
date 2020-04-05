@@ -58,17 +58,9 @@ public final class Equalizer {
 //					 float b12, float b13, float b14, float b15, float b16,
 //					 float b17, float b18, float b19, float b20);
 
-    public Equalizer(float[] settings) {
-        setFrom(settings);
-    }
-
-    public Equalizer(EQFunction eq) {
-        setFrom(eq);
-    }
-
     public void setFrom(float[] eq) {
         reset();
-        int max = (eq.length > BANDS) ? BANDS : eq.length;
+        int max = Math.min(eq.length, BANDS);
 
         for (int i = 0; i < max; i++) {
             settings[i] = limit(eq[i]);
@@ -77,9 +69,8 @@ public final class Equalizer {
 
     public void setFrom(EQFunction eq) {
         reset();
-        int max = BANDS;
 
-        for (int i = 0; i < max; i++) {
+        for (int i = 0; i < BANDS; i++) {
             settings[i] = limit(eq.getBand(i));
         }
     }
@@ -105,47 +96,13 @@ public final class Equalizer {
     }
 
 
-    /**
-     * Retrieves the number of bands present in this equalizer.
-     */
-    public int getBandCount() {
-        return settings.length;
-    }
-
-    public float setBand(int band, float neweq) {
-        float eq = 0.0f;
-
-        if ((band >= 0) && (band < BANDS)) {
-            eq = settings[band];
-            settings[band] = limit(neweq);
-        }
-
-        return eq;
-    }
-
-
-    /**
-     * Retrieves the eq setting for a given band.
-     */
-    public float getBand(int band) {
-        float eq = 0.0f;
-
-        if ((band >= 0) && (band < BANDS)) {
-            eq = settings[band];
-        }
-
-        return eq;
-    }
-
     private float limit(float eq) {
         if (eq == BAND_NOT_PRESENT)
             return eq;
         if (eq > 1.0f)
             return 1.0f;
-        if (eq < -1.0f)
-            return -1.0f;
+        return Math.max(eq, -1.0f);
 
-        return eq;
     }
 
     /**
@@ -159,7 +116,7 @@ public final class Equalizer {
      */
     float[] getBandFactors() {
         float[] factors = new float[BANDS];
-        for (int i = 0, maxCount = BANDS; i < maxCount; i++) {
+        for (int i = 0; i < BANDS; i++) {
             factors[i] = getBandFactor(settings[i]);
         }
 
@@ -175,8 +132,7 @@ public final class Equalizer {
         if (eq == BAND_NOT_PRESENT)
             return 0.0f;
 
-        float f = (float) Math.pow(2.0, eq);
-        return f;
+        return (float) Math.pow(2.0, eq);
     }
 
 

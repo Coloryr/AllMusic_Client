@@ -33,25 +33,6 @@ public class JavaLayerUtils {
     static private JavaLayerHook hook = null;
 
     /**
-     * Deserializes the object contained in the given input stream.
-     *
-     * @param in  The input stream to deserialize an object from.
-     * @param cls The expected class of the deserialized object.
-     */
-    static public Object deserialize(InputStream in, Class cls)
-            throws IOException {
-        if (cls == null)
-            throw new NullPointerException("cls");
-
-        Object obj = deserialize(in, cls);
-        if (!cls.isInstance(obj)) {
-            throw new InvalidObjectException("type of deserialized instance not of required class.");
-        }
-
-        return obj;
-    }
-
-    /**
      * Deserializes an object from the given <code>InputStream</code>.
      * The deserialization is delegated to an <code>
      * ObjectInputStream</code> instance.
@@ -127,9 +108,7 @@ public class JavaLayerUtils {
         if (str == null)
             throw new IOException("unable to load resource '" + name + "'");
 
-        Object obj = deserializeArray(str, elemType, length);
-
-        return obj;
+        return deserializeArray(str, elemType, length);
     }
 
     static public void serialize(OutputStream out, Object obj)

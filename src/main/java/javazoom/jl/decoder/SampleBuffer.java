@@ -49,14 +49,6 @@ public class SampleBuffer extends Obuffer {
 
     }
 
-    public int getChannelCount() {
-        return this.channels;
-    }
-
-    public int getSampleFrequency() {
-        return this.frequency;
-    }
-
     public short[] getBuffer() {
         return this.buffer;
     }
@@ -81,7 +73,7 @@ public class SampleBuffer extends Obuffer {
         for (int i = 0; i < 32; ) {
             fs = f[i++];
             fs = (fs > 32767.0f ? 32767.0f
-                    : (fs < -32767.0f ? -32767.0f : fs));
+                    : (Math.max(fs, -32767.0f)));
 
             s = (short) fs;
             buffer[pos] = s;
@@ -96,9 +88,6 @@ public class SampleBuffer extends Obuffer {
      * Write the samples to the file (Random Acces).
      */
     public void write_buffer(int val) {
-
-        //for (int i = 0; i < channels; ++i)
-        //	bufferp[i] = (short)i;
 
     }
 
