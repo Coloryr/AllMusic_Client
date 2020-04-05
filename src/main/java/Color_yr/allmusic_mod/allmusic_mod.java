@@ -26,7 +26,7 @@ public class allmusic_mod {
     private static final Player nowPlaying = new Player();
     private static URL nowURL;
     public static boolean isPlay = false;
-    public static int v = 0;
+    public static int v = -1;
 
     public final Thread thread = new Thread(() -> {
         while (true) {
