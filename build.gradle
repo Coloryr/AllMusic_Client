@@ -13,9 +13,9 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.4.0'
-group = 'com.color_yr.allmusic_mod' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'allmusic_mod'
+version = '2.0.0'
+group = 'com.color_yr.AllMusic' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'AllMusic'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 

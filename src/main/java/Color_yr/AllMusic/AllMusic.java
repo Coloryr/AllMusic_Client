@@ -1,14 +1,15 @@
-package Color_yr.allmusic_mod;
+package Color_yr.AllMusic;
 
+import Color_yr.AllMusic.Hud.Hud;
 import javazoom.jl.player.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.sound.PlaySoundSourceEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -21,8 +22,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-@Mod("allmusic_mod")
-public class allmusic_mod {
+@Mod("allmusic")
+public class AllMusic {
     private static final Player nowPlaying = new Player();
     private static URL nowURL;
     public static boolean isPlay = false;
@@ -43,7 +44,7 @@ public class allmusic_mod {
         }
     });
 
-    public allmusic_mod() {
+    public AllMusic() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -84,26 +85,43 @@ public class allmusic_mod {
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
         stopPlaying();
+        Hud.Lyric = Hud.Info = Hud.List = "";
+        Hud.save = null;
     }
 
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
-            if (message.equals("[Stop]")) {
-                stopPlaying();
-            } else if (message.startsWith("[Play]")) {
-                try {
+            try {
+                if (message.equals("[Stop]")) {
+                    stopPlaying();
+                } else if (message.startsWith("[Play]")) {
                     Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
                     Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
                     stopPlaying();
-                    allmusic_mod.nowURL = new URL(message.replace("[Play]", ""));
+                    AllMusic.nowURL = new URL(message.replace("[Play]", ""));
                     nowPlaying.SetMusic(nowURL.openStream());
                     nowPlaying.play();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } else if (message.startsWith("[Lyric]")) {
+                    Hud.Lyric = message.substring(7);
+                } else if (message.startsWith("[Info]")) {
+                    Hud.Info = message.substring(6);
+                } else if (message.startsWith("[List]")) {
+                    Hud.List = message.substring(6);
+                } else if (message.equalsIgnoreCase("[clear]")) {
+                    Hud.Lyric = Hud.Info = Hud.List = "";
+                } else if (message.startsWith("{")) {
+                    Hud.Set(message);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
         asyncThread.start();
+    }
+
+    @SubscribeEvent
+    public void onRed(final TickEvent.RenderTickEvent e) {
+        Hud.update();
     }
 
     private void stopPlaying() {
