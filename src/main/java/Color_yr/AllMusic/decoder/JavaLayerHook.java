@@ -1,7 +1,5 @@
 /*
  * 11/19/04		1.0 moved to LGPL.
- * 11/17/04		INVALIDFRAME code added.	javalayer@javazoom.net
- * 12/12/99		Initial version.			mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -19,37 +17,19 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
+
+import java.io.InputStream;
 
 /**
- * This interface describes all error codes that can be thrown
- * in <code>BistreamException</code>s.
- *
- * @author MDM        12/12/99
- * @see BitstreamException
- * @since 0.0.6
+ * The <code>JavaLayerHooks</code> class allows developers to change
+ * the way the JavaLayer library uses Resources.
  */
 
-public interface BitstreamErrors extends JavaLayerErrors {
-
+public interface JavaLayerHook {
     /**
-     * An undeterminable error occurred.
+     * Retrieves the named resource. This allows resources to be
+     * obtained without specifying how they are retrieved.
      */
-    int UNKNOWN_ERROR = BITSTREAM_ERROR;
-
-    /**
-     * A problem occurred reading from the stream.
-     */
-    int STREAM_ERROR = BITSTREAM_ERROR + 2;
-
-    /**
-     * The end of the stream was reached.
-     */
-    int STREAM_EOF = BITSTREAM_ERROR + 4;
-
-    /**
-     * Frame data are missing.
-     */
-    int INVALIDFRAME = BITSTREAM_ERROR + 5;
-
+    InputStream getResourceAsStream(String name);
 }

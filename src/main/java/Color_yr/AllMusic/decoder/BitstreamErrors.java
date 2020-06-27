@@ -1,6 +1,7 @@
 /*
  * 11/19/04		1.0 moved to LGPL.
- * 12/12/99		Initial version.	mdm@techie.com
+ * 11/17/04		INVALIDFRAME code added.	javalayer@javazoom.net
+ * 12/12/99		Initial version.			mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -18,22 +19,37 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
- * Exception erorr codes for components of the JavaLayer API.
+ * This interface describes all error codes that can be thrown
+ * in <code>BistreamException</code>s.
+ *
+ * @author MDM        12/12/99
+ * @see BitstreamException
+ * @since 0.0.6
  */
-public interface JavaLayerErrors {
-    /**
-     * The first bitstream error code. See the {@link DecoderErrors DecoderErrors}
-     * interface for other bitstream error codes.
-     */
-    int BITSTREAM_ERROR = 0x100;
+
+public interface BitstreamErrors extends JavaLayerErrors {
 
     /**
-     * The first decoder error code. See the {@link DecoderErrors DecoderErrors}
-     * interface for other decoder error codes.
+     * An undeterminable error occurred.
      */
-    int DECODER_ERROR = 0x200;
+    int UNKNOWN_ERROR = BITSTREAM_ERROR;
+
+    /**
+     * A problem occurred reading from the stream.
+     */
+    int STREAM_ERROR = BITSTREAM_ERROR + 2;
+
+    /**
+     * The end of the stream was reached.
+     */
+    int STREAM_EOF = BITSTREAM_ERROR + 4;
+
+    /**
+     * Frame data are missing.
+     */
+    int INVALIDFRAME = BITSTREAM_ERROR + 5;
 
 }

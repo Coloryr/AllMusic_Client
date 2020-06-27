@@ -1,6 +1,7 @@
 package Color_yr.AllMusic.Hud;
 
 import com.google.gson.Gson;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 
@@ -10,6 +11,8 @@ public class Hud {
     public static String Lyric = "";
     public static SaveOBJ save;
     public static final Object lock = new Object();
+
+    private static MatrixStack stack = new MatrixStack();
 
     public static void Set(String data) {
         synchronized (lock) {
@@ -26,8 +29,8 @@ public class Hud {
                 int offset = 0;
                 String[] temp = Info.split("\n");
                 for (String item : temp) {
-                    hud.drawStringWithShadow(item, save.getInfo().getX(),
-                            save.getInfo().getY() + offset, 0xffffff);
+                    hud.func_238405_a_(stack, item, (float) save.getInfo().getX(),
+                            (float) save.getInfo().getY() + offset, 0xffffff);
                     offset += 10;
                 }
             }
@@ -35,8 +38,8 @@ public class Hud {
                 String[] temp = List.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    hud.drawStringWithShadow(item, save.getList().getX(),
-                            save.getList().getY() + offset, 0xffffff);
+                    hud.func_238405_a_(stack, item, (float) save.getList().getX(),
+                            (float) save.getList().getY() + offset, 0xffffff);
                     offset += 10;
                 }
             }
@@ -44,8 +47,8 @@ public class Hud {
                 String[] temp = Lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    hud.drawStringWithShadow(item, save.getLyric().getX(),
-                            save.getLyric().getY() + offset, 0xffffff);
+                    hud.func_238405_a_(stack, item, (float) save.getLyric().getX(),
+                            (float) save.getLyric().getY() + offset, 0xffffff);
                     offset += 10;
                 }
             }

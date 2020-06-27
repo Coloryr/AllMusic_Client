@@ -24,7 +24,7 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * Implements decoding of MPEG Audio Layer I frames.

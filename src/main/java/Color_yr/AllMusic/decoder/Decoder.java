@@ -18,7 +18,7 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * The <code>Decoder</code> class encapsulates the details of

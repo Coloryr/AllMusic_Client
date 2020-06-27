@@ -1,7 +1,7 @@
 package Color_yr.AllMusic;
 
 import Color_yr.AllMusic.Hud.Hud;
-import javazoom.jl.player.Player;
+import Color_yr.AllMusic.player.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
@@ -78,7 +78,7 @@ public class AllMusic {
         switch (data) {
             case MUSIC:
             case RECORDS:
-                e.getSource().func_216418_f();
+                e.getSource().stop();
         }
     }
 

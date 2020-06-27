@@ -18,10 +18,10 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.player;
+package Color_yr.AllMusic.player;
 
 import Color_yr.AllMusic.AllMusic;
-import javazoom.jl.decoder.*;
+import Color_yr.AllMusic.decoder.*;
 
 import javax.sound.sampled.FloatControl;
 import java.io.InputStream;

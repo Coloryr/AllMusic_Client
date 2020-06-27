@@ -23,7 +23,7 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * The <code>SampleBuffer</code> class implements an output buffer

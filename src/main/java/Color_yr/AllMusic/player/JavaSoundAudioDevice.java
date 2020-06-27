@@ -22,10 +22,10 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.player;
+package Color_yr.AllMusic.player;
 
-import javazoom.jl.decoder.Decoder;
-import javazoom.jl.decoder.JavaLayerException;
+import Color_yr.AllMusic.decoder.Decoder;
+import Color_yr.AllMusic.decoder.JavaLayerException;
 
 import javax.sound.sampled.*;
 

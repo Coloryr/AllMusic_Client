@@ -37,7 +37,7 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * Class to implements Huffman decoder.

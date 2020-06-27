@@ -32,7 +32,7 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * Class Implementing Layer 3 Decoder.

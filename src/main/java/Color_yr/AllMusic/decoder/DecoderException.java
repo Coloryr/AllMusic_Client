@@ -1,7 +1,6 @@
 /*
- * 09/26/08     throw exception on subbband alloc error: Christopher G. Jennings (cjennings@acm.org)
  * 11/19/04		1.0 moved to LGPL.
- * 12/12/99		Initial version.	mdm@techie.com
+ * 01/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -19,19 +18,32 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
- * Implementations of FrameDecoder are responsible for decoding
- * an MPEG audio frame.
+ * The <code>DecoderException</code> represents the class of
+ * errors that can occur when decoding MPEG audio.
+ *
+ * @author MDM
  */
-//REVIEW: the interface currently is too thin. There should be
-// methods to specify the output buffer, the synthesis filters and
-// possibly other objects used by the decoder. 
-public interface FrameDecoder {
-    /**
-     * Decodes one frame of MPEG audio.
-     */
-    void decodeFrame() throws DecoderException;
+public class DecoderException extends JavaLayerException
+        implements DecoderErrors {
+
+    public DecoderException(String msg, Throwable t) {
+        super(msg, t);
+    }
+
+    public DecoderException(int errorcode, Throwable t) {
+        this(getErrorString(errorcode), t);
+    }
+
+    static public String getErrorString(int errorcode) {
+        // REVIEW: use resource file to map error codes
+        // to locale-sensitive strings.
+
+        return "Decoder errorcode " + Integer.toHexString(errorcode);
+    }
+
 
 }
+

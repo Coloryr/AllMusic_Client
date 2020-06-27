@@ -1,4 +1,4 @@
-package javazoom.jl.player;
+package Color_yr.AllMusic.player;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

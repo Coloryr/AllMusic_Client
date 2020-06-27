@@ -1,5 +1,7 @@
 /*
+ * 09/26/08     throw exception on subbband alloc error: Christopher G. Jennings (cjennings@acm.org)
  * 11/19/04		1.0 moved to LGPL.
+ * 01/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -17,19 +19,26 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
-
-import java.io.InputStream;
+package Color_yr.AllMusic.decoder;
 
 /**
- * The <code>JavaLayerHooks</code> class allows developers to change
- * the way the JavaLayer library uses Resources.
+ * This interface provides constants describing the error
+ * codes used by the Decoder to indicate errors.
+ *
+ * @author MDM
  */
+public interface DecoderErrors extends JavaLayerErrors {
 
-public interface JavaLayerHook {
+    int UNKNOWN_ERROR = DECODER_ERROR;
+
     /**
-     * Retrieves the named resource. This allows resources to be
-     * obtained without specifying how they are retrieved.
+     * Layer not supported by the decoder.
      */
-    InputStream getResourceAsStream(String name);
+    int UNSUPPORTED_LAYER = DECODER_ERROR + 1;
+
+    /**
+     * Illegal allocation in subband layer. Indicates a corrupt stream.
+     */
+    int ILLEGAL_SUBBAND_ALLOCATION = DECODER_ERROR + 2;
+
 }

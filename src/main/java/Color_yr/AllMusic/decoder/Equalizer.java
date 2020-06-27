@@ -19,7 +19,7 @@
  */
 
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * The <code>Equalizer</code> class can be used to specify

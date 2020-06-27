@@ -18,44 +18,22 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
-
-import java.io.PrintStream;
-
+package Color_yr.AllMusic.decoder;
 
 /**
- * The JavaLayerException is the base class for all API-level
- * exceptions thrown by JavaLayer. To facilitate conversion and
- * common handling of exceptions from other domains, the class
- * can delegate some functionality to a contained Throwable instance.
- * <p>
- *
- * @author MDM
+ * Exception erorr codes for components of the JavaLayer API.
  */
-public class JavaLayerException extends Exception {
+public interface JavaLayerErrors {
+    /**
+     * The first bitstream error code. See the {@link DecoderErrors DecoderErrors}
+     * interface for other bitstream error codes.
+     */
+    int BITSTREAM_ERROR = 0x100;
 
-    private Throwable exception;
-
-    public JavaLayerException(String msg) {
-        super(msg);
-    }
-
-    public JavaLayerException(String msg, Throwable t) {
-        super(msg);
-        exception = t;
-    }
-
-    public void printStackTrace() {
-        printStackTrace(System.err);
-    }
-
-    public void printStackTrace(PrintStream ps) {
-        if (this.exception == null) {
-            super.printStackTrace(ps);
-        } else {
-            exception.printStackTrace();
-        }
-    }
-
+    /**
+     * The first decoder error code. See the {@link DecoderErrors DecoderErrors}
+     * interface for other decoder error codes.
+     */
+    int DECODER_ERROR = 0x200;
 
 }

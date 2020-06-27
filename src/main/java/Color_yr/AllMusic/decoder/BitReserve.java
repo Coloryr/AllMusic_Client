@@ -25,7 +25,7 @@
  *----------------------------------------------------------------------
  */
 
-package javazoom.jl.decoder;
+package Color_yr.AllMusic.decoder;
 
 /**
  * Implementation of Bit Reservoir for Layer III.
