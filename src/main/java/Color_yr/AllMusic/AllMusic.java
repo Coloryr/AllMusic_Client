@@ -18,6 +18,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
@@ -72,7 +73,7 @@ public class AllMusic {
 
     @SubscribeEvent
     public void onSound(final SoundEvent.SoundSourceEvent e) {
-        if(!isPlay)
+        if (!isPlay)
             return;
         SoundCategory data = e.getSound().getCategory();
         switch (data) {
@@ -89,6 +90,23 @@ public class AllMusic {
         Hud.save = null;
     }
 
+    public static URL Get(URL url) {
+        if (url.toString().contains("http://music.163.com/song/media/outer/url?id=")) {
+            try {
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(4 * 1000);
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 Chrome/42.0.2311.90 Safari/537.36");
+                connection.connect();
+                connection.getResponseCode();
+                return connection.getURL();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return url;
+    }
+
     private void onClicentPacket(final String message) {
         final Thread asyncThread = new Thread(() -> {
             try {
@@ -98,7 +116,10 @@ public class AllMusic {
                     Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
                     Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
                     stopPlaying();
-                    AllMusic.nowURL = new URL(message.replace("[Play]", ""));
+                    nowURL = new URL(message.replace("[Play]", ""));
+                    nowURL = Get(nowURL);
+                    if (nowURL == null)
+                        return;
                     nowPlaying.SetMusic(nowURL.openStream());
                     nowPlaying.play();
                 } else if (message.startsWith("[Lyric]")) {
