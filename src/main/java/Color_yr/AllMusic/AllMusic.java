@@ -91,14 +91,18 @@ public class AllMusic {
     }
 
     public static URL Get(URL url) {
-        if (url.toString().contains("http://music.163.com/song/media/outer/url?id=")) {
+        if (url.toString().contains("https://music.163.com/song/media/outer/url?id=")
+                || url.toString().contains("http://music.163.com/song/media/outer/url?id=")) {
             try {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(4 * 1000);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 Chrome/42.0.2311.90 Safari/537.36");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
+                connection.setRequestProperty("Host", "music.163.com");
                 connection.connect();
-                connection.getResponseCode();
+                if (connection.getResponseCode() == 302) {
+                    return new URL(connection.getHeaderField("Location"));
+                }
                 return connection.getURL();
             } catch (Exception e) {
                 e.printStackTrace();
