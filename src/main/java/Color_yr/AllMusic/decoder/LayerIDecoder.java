@@ -39,7 +39,7 @@ class LayerIDecoder implements FrameDecoder {
 
     protected int num_subbands;
     protected Subband[] subbands;
-    protected Crc16 crc = null;    // new Crc16[1] to enable CRC checking.
+    protected Crc16 crc;    // new Crc16[1] to enable CRC checking.
 
     public LayerIDecoder() {
         crc = new Crc16();

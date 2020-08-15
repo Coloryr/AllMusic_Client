@@ -52,10 +52,7 @@ public class OutputChannels {
     public static final int DOWNMIX_CHANNELS = 3;
 
 
-    public static final OutputChannels BOTH = new OutputChannels(BOTH_CHANNELS);
-
-
-    private int outputChannels;
+    private final int outputChannels;
 
     private OutputChannels(int channels) {
         outputChannels = channels;

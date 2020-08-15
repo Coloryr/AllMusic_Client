@@ -1,7 +1,7 @@
 package Color_yr.AllMusic;
 
 import Color_yr.AllMusic.Hud.Hud;
-import Color_yr.AllMusic.player.Player;
+import Color_yr.AllMusic.player.APlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 @Mod("allmusic")
 public class AllMusic {
-    private static final Player nowPlaying = new Player();
+    private static final APlayer nowPlaying = new APlayer();
     private static URL nowURL;
     public static boolean isPlay = false;
     public static int v = -1;
@@ -124,7 +124,7 @@ public class AllMusic {
                     nowURL = Get(nowURL);
                     if (nowURL == null)
                         return;
-                    nowPlaying.SetMusic(nowURL.openStream());
+                    nowPlaying.SetMusic(nowURL);
                     nowPlaying.play();
                 } else if (message.startsWith("[Lyric]")) {
                     Hud.Lyric = message.substring(7);
@@ -150,6 +150,10 @@ public class AllMusic {
     }
 
     private void stopPlaying() {
-        nowPlaying.close();
+        try {
+            nowPlaying.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

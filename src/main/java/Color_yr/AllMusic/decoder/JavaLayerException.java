@@ -34,11 +34,7 @@ import java.io.PrintStream;
  */
 public class JavaLayerException extends Exception {
 
-    private Throwable exception;
-
-    public JavaLayerException(String msg) {
-        super(msg);
-    }
+    private final Throwable exception;
 
     public JavaLayerException(String msg, Throwable t) {
         super(msg);
@@ -56,6 +52,4 @@ public class JavaLayerException extends Exception {
             exception.printStackTrace();
         }
     }
-
-
 }

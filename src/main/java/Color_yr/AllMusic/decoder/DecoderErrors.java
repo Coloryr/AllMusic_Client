@@ -29,8 +29,6 @@ package Color_yr.AllMusic.decoder;
  */
 public interface DecoderErrors extends JavaLayerErrors {
 
-    int UNKNOWN_ERROR = DECODER_ERROR;
-
     /**
      * Layer not supported by the decoder.
      */

@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.2.0'
+version = '2.3.0'
 group = 'com.color_yr.AllMusic' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'AllMusic'
 

@@ -71,15 +71,9 @@ public abstract class Obuffer {
      */
     public abstract void write_buffer(int val);
 
-    public abstract void close();
-
     /**
      * Clears all data in the buffer (for seeking).
      */
     public abstract void clear_buffer();
 
-    /**
-     * Notify the buffer that the user has stopped the stream.
-     */
-    public abstract void set_stop_flag();
 }

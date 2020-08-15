@@ -31,39 +31,32 @@ package Color_yr.AllMusic.decoder;
 public class Decoder implements DecoderErrors {
     static private final Params DEFAULT_PARAMS = new Params();
 
-    /**
-     * The Bistream from which the MPEG audio frames are read.
+    /*
+      The Bistream from which the MPEG audio frames are read.
      */
     //private Bitstream				stream;
-
+    private final Equalizer equalizer = new Equalizer();
     /**
      * The Obuffer instance that will receive the decoded
      * PCM samples.
      */
     private Obuffer output;
-
     /**
      * Synthesis filter for the left channel.
      */
     private SynthesisFilter filter1;
-
     /**
      * Sythesis filter for the right channel.
      */
     private SynthesisFilter filter2;
-
     /**
      * The decoder used to decode layer III frames.
      */
     private LayerIIIDecoder l3decoder;
     private LayerIIDecoder l2decoder;
     private LayerIDecoder l1decoder;
-
     private int outputFrequency;
     private int outputChannels;
-
-    private Equalizer equalizer = new Equalizer();
-
     private boolean initialized;
 
 
@@ -95,25 +88,6 @@ public class Decoder implements DecoderErrors {
         }
     }
 
-    static public Params getDefaultParams() {
-        return (Params) DEFAULT_PARAMS.clone();
-    }
-
-    public void setEqualizer(Equalizer eq) {
-        if (eq == null)
-            eq = Equalizer.PASS_THRU_EQ;
-
-        equalizer.setFrom(eq);
-
-        float[] factors = equalizer.getBandFactors();
-
-        if (filter1 != null)
-            filter1.setEQ(factors);
-
-        if (filter2 != null)
-            filter2.setEQ(factors);
-    }
-
     /**
      * Decodes one frame from an MPEG audio bitstream.
      *
@@ -141,14 +115,6 @@ public class Decoder implements DecoderErrors {
     }
 
     /**
-     * Changes the output buffer. This will take effect the next time
-     * decodeFrame() is called.
-     */
-    public void setOutputBuffer(Obuffer out) {
-        output = out;
-    }
-
-    /**
      * Retrieves the sample frequency of the PCM samples output
      * by this decoder. This typically corresponds to the sample
      * rate encoded in the MPEG audio stream.
@@ -169,25 +135,6 @@ public class Decoder implements DecoderErrors {
         return outputChannels;
     }
 
-    /**
-     * Retrieves the maximum number of samples that will be written to
-     * the output buffer when one frame is decoded. This can be used to
-     * help calculate the size of other buffers whose size is based upon
-     * the number of samples written to the output buffer. NB: this is
-     * an upper bound and fewer samples may actually be written, depending
-     * upon the sample rate and number of channels.
-     *
-     * @return The maximum number of samples that are written to the
-     * output buffer when decoding a single frame of MPEG audio.
-     */
-    public int getOutputBlockSize() {
-        return Obuffer.OBUFFERSIZE;
-    }
-
-
-    protected DecoderException newDecoderException(int errorcode) {
-        return new DecoderException(errorcode, null);
-    }
 
     protected DecoderException newDecoderException() {
         return new DecoderException(DecoderErrors.UNSUPPORTED_LAYER, null);
@@ -242,15 +189,13 @@ public class Decoder implements DecoderErrors {
         float scalefactor = 32700.0f;
 
         int mode = header.mode();
-        int layer = header.layer();
         int channels = mode == Header.SINGLE_CHANNEL ? 1 : 2;
 
 
         // set up output buffer if not set up by client.
         if (output == null)
-            output = new SampleBuffer(header.frequency(), channels);
+            output = new SampleBuffer(channels);
 
-        float[] factors = equalizer.getBandFactors();
         filter1 = new SynthesisFilter(0, scalefactor);
 
         // REVIEW: allow mono output for stereo
@@ -270,9 +215,8 @@ public class Decoder implements DecoderErrors {
      * Instances of this class are not thread safe.
      */
     public static class Params implements Cloneable {
-        private OutputChannels outputChannels = OutputChannels.BOTH;
 
-        private Equalizer equalizer = new Equalizer();
+        private final Equalizer equalizer = new Equalizer();
 
         public Params() {
         }
@@ -283,17 +227,6 @@ public class Decoder implements DecoderErrors {
             } catch (CloneNotSupportedException ex) {
                 throw new InternalError(this + ": " + ex);
             }
-        }
-
-        public OutputChannels getOutputChannels() {
-            return outputChannels;
-        }
-
-        public void setOutputChannels(OutputChannels out) {
-            if (out == null)
-                throw new NullPointerException("out");
-
-            outputChannels = out;
         }
 
         /**

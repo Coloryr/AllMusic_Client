@@ -77,19 +77,19 @@ final class SynthesisFilter {
      * with constant offset.
      **/
     private static float[][] d16 = null;
-    private float[] v1;
-    private float[] v2;
-    private float[] actual_v;            // v1 or v2
-    private int actual_write_pos;    // 0-15
-    private float[] samples;            // 32 new subband samples
-    private int channel;
-    private float scalefactor;
-    private float[] eq;
+    private final float[] v1;
+    private final float[] v2;
+    private final float[] samples;            // 32 new subband samples
+    private final int channel;
+    private final float scalefactor;
     /**
      * Compute PCM Samples.
      */
 
-    private float[] _tmpOut = new float[32];
+    private final float[] _tmpOut = new float[32];
+    private float[] actual_v;            // v1 or v2
+    private int actual_write_pos;    // 0-15
+    private float[] eq;
 
     /**
      * Contructor.
@@ -542,275 +542,9 @@ final class SynthesisFilter {
         dest[496 + pos] = new_v16;
     }
 
-    /**
-     * Compute new values via a fast cosine transform.
-     */
-    private void compute_new_v_old() {
-
-        float[] new_v = new float[32]; // new V[0-15] and V[33-48] of Figure 3-A.2 in ISO DIS 11172-3
-        float[] p = new float[16];
-        float[] pp = new float[16];
-
-
-        for (int i = 31; i >= 0; i--) {
-            new_v[i] = 0.0f;
-        }
-
-        float[] x1 = samples;
-
-        p[0] = x1[0] + x1[31];
-        p[1] = x1[1] + x1[30];
-        p[2] = x1[2] + x1[29];
-        p[3] = x1[3] + x1[28];
-        p[4] = x1[4] + x1[27];
-        p[5] = x1[5] + x1[26];
-        p[6] = x1[6] + x1[25];
-        p[7] = x1[7] + x1[24];
-        p[8] = x1[8] + x1[23];
-        p[9] = x1[9] + x1[22];
-        p[10] = x1[10] + x1[21];
-        p[11] = x1[11] + x1[20];
-        p[12] = x1[12] + x1[19];
-        p[13] = x1[13] + x1[18];
-        p[14] = x1[14] + x1[17];
-        p[15] = x1[15] + x1[16];
-
-        pp[0] = p[0] + p[15];
-        pp[1] = p[1] + p[14];
-        pp[2] = p[2] + p[13];
-        pp[3] = p[3] + p[12];
-        pp[4] = p[4] + p[11];
-        pp[5] = p[5] + p[10];
-        pp[6] = p[6] + p[9];
-        pp[7] = p[7] + p[8];
-        pp[8] = (p[0] - p[15]) * cos1_32;
-        pp[9] = (p[1] - p[14]) * cos3_32;
-        pp[10] = (p[2] - p[13]) * cos5_32;
-        pp[11] = (p[3] - p[12]) * cos7_32;
-        pp[12] = (p[4] - p[11]) * cos9_32;
-        pp[13] = (p[5] - p[10]) * cos11_32;
-        pp[14] = (p[6] - p[9]) * cos13_32;
-        pp[15] = (p[7] - p[8]) * cos15_32;
-
-        p[0] = pp[0] + pp[7];
-        p[1] = pp[1] + pp[6];
-        p[2] = pp[2] + pp[5];
-        p[3] = pp[3] + pp[4];
-        p[4] = (pp[0] - pp[7]) * cos1_16;
-        p[5] = (pp[1] - pp[6]) * cos3_16;
-        p[6] = (pp[2] - pp[5]) * cos5_16;
-        p[7] = (pp[3] - pp[4]) * cos7_16;
-        p[8] = pp[8] + pp[15];
-        p[9] = pp[9] + pp[14];
-        p[10] = pp[10] + pp[13];
-        p[11] = pp[11] + pp[12];
-        p[12] = (pp[8] - pp[15]) * cos1_16;
-        p[13] = (pp[9] - pp[14]) * cos3_16;
-        p[14] = (pp[10] - pp[13]) * cos5_16;
-        p[15] = (pp[11] - pp[12]) * cos7_16;
-
-
-        pp[0] = p[0] + p[3];
-        pp[1] = p[1] + p[2];
-        pp[2] = (p[0] - p[3]) * cos1_8;
-        pp[3] = (p[1] - p[2]) * cos3_8;
-        pp[4] = p[4] + p[7];
-        pp[5] = p[5] + p[6];
-        pp[6] = (p[4] - p[7]) * cos1_8;
-        pp[7] = (p[5] - p[6]) * cos3_8;
-        pp[8] = p[8] + p[11];
-        pp[9] = p[9] + p[10];
-        pp[10] = (p[8] - p[11]) * cos1_8;
-        pp[11] = (p[9] - p[10]) * cos3_8;
-        pp[12] = p[12] + p[15];
-        pp[13] = p[13] + p[14];
-        pp[14] = (p[12] - p[15]) * cos1_8;
-        pp[15] = (p[13] - p[14]) * cos3_8;
-
-        p[0] = pp[0] + pp[1];
-        p[1] = (pp[0] - pp[1]) * cos1_4;
-        p[2] = pp[2] + pp[3];
-        p[3] = (pp[2] - pp[3]) * cos1_4;
-        p[4] = pp[4] + pp[5];
-        p[5] = (pp[4] - pp[5]) * cos1_4;
-        p[6] = pp[6] + pp[7];
-        p[7] = (pp[6] - pp[7]) * cos1_4;
-        p[8] = pp[8] + pp[9];
-        p[9] = (pp[8] - pp[9]) * cos1_4;
-        p[10] = pp[10] + pp[11];
-        p[11] = (pp[10] - pp[11]) * cos1_4;
-        p[12] = pp[12] + pp[13];
-        p[13] = (pp[12] - pp[13]) * cos1_4;
-        p[14] = pp[14] + pp[15];
-        p[15] = (pp[14] - pp[15]) * cos1_4;
-
-        // this is pretty insane coding
-        float tmp1;
-        new_v[36 - 17] = -(new_v[4] = (new_v[12] = p[7]) + p[5]) - p[6];
-        new_v[44 - 17] = -p[6] - p[7] - p[4];
-        new_v[6] = (new_v[10] = (new_v[14] = p[15]) + p[11]) + p[13];
-        new_v[34 - 17] = -(new_v[2] = p[15] + p[13] + p[9]) - p[14];
-        new_v[38 - 17] = (tmp1 = -p[14] - p[15] - p[10] - p[11]) - p[13];
-        new_v[46 - 17] = -p[14] - p[15] - p[12] - p[8];
-        new_v[42 - 17] = tmp1 - p[12];
-        new_v[48 - 17] = -p[0];
-        new_v[0] = p[1];
-        new_v[40 - 17] = -(new_v[8] = p[3]) - p[2];
-
-        p[0] = (x1[0] - x1[31]) * cos1_64;
-        p[1] = (x1[1] - x1[30]) * cos3_64;
-        p[2] = (x1[2] - x1[29]) * cos5_64;
-        p[3] = (x1[3] - x1[28]) * cos7_64;
-        p[4] = (x1[4] - x1[27]) * cos9_64;
-        p[5] = (x1[5] - x1[26]) * cos11_64;
-        p[6] = (x1[6] - x1[25]) * cos13_64;
-        p[7] = (x1[7] - x1[24]) * cos15_64;
-        p[8] = (x1[8] - x1[23]) * cos17_64;
-        p[9] = (x1[9] - x1[22]) * cos19_64;
-        p[10] = (x1[10] - x1[21]) * cos21_64;
-        p[11] = (x1[11] - x1[20]) * cos23_64;
-        p[12] = (x1[12] - x1[19]) * cos25_64;
-        p[13] = (x1[13] - x1[18]) * cos27_64;
-        p[14] = (x1[14] - x1[17]) * cos29_64;
-        p[15] = (x1[15] - x1[16]) * cos31_64;
-
-
-        pp[0] = p[0] + p[15];
-        pp[1] = p[1] + p[14];
-        pp[2] = p[2] + p[13];
-        pp[3] = p[3] + p[12];
-        pp[4] = p[4] + p[11];
-        pp[5] = p[5] + p[10];
-        pp[6] = p[6] + p[9];
-        pp[7] = p[7] + p[8];
-        pp[8] = (p[0] - p[15]) * cos1_32;
-        pp[9] = (p[1] - p[14]) * cos3_32;
-        pp[10] = (p[2] - p[13]) * cos5_32;
-        pp[11] = (p[3] - p[12]) * cos7_32;
-        pp[12] = (p[4] - p[11]) * cos9_32;
-        pp[13] = (p[5] - p[10]) * cos11_32;
-        pp[14] = (p[6] - p[9]) * cos13_32;
-        pp[15] = (p[7] - p[8]) * cos15_32;
-
-
-        p[0] = pp[0] + pp[7];
-        p[1] = pp[1] + pp[6];
-        p[2] = pp[2] + pp[5];
-        p[3] = pp[3] + pp[4];
-        p[4] = (pp[0] - pp[7]) * cos1_16;
-        p[5] = (pp[1] - pp[6]) * cos3_16;
-        p[6] = (pp[2] - pp[5]) * cos5_16;
-        p[7] = (pp[3] - pp[4]) * cos7_16;
-        p[8] = pp[8] + pp[15];
-        p[9] = pp[9] + pp[14];
-        p[10] = pp[10] + pp[13];
-        p[11] = pp[11] + pp[12];
-        p[12] = (pp[8] - pp[15]) * cos1_16;
-        p[13] = (pp[9] - pp[14]) * cos3_16;
-        p[14] = (pp[10] - pp[13]) * cos5_16;
-        p[15] = (pp[11] - pp[12]) * cos7_16;
-
-
-        pp[0] = p[0] + p[3];
-        pp[1] = p[1] + p[2];
-        pp[2] = (p[0] - p[3]) * cos1_8;
-        pp[3] = (p[1] - p[2]) * cos3_8;
-        pp[4] = p[4] + p[7];
-        pp[5] = p[5] + p[6];
-        pp[6] = (p[4] - p[7]) * cos1_8;
-        pp[7] = (p[5] - p[6]) * cos3_8;
-        pp[8] = p[8] + p[11];
-        pp[9] = p[9] + p[10];
-        pp[10] = (p[8] - p[11]) * cos1_8;
-        pp[11] = (p[9] - p[10]) * cos3_8;
-        pp[12] = p[12] + p[15];
-        pp[13] = p[13] + p[14];
-        pp[14] = (p[12] - p[15]) * cos1_8;
-        pp[15] = (p[13] - p[14]) * cos3_8;
-
-
-        p[0] = pp[0] + pp[1];
-        p[1] = (pp[0] - pp[1]) * cos1_4;
-        p[2] = pp[2] + pp[3];
-        p[3] = (pp[2] - pp[3]) * cos1_4;
-        p[4] = pp[4] + pp[5];
-        p[5] = (pp[4] - pp[5]) * cos1_4;
-        p[6] = pp[6] + pp[7];
-        p[7] = (pp[6] - pp[7]) * cos1_4;
-        p[8] = pp[8] + pp[9];
-        p[9] = (pp[8] - pp[9]) * cos1_4;
-        p[10] = pp[10] + pp[11];
-        p[11] = (pp[10] - pp[11]) * cos1_4;
-        p[12] = pp[12] + pp[13];
-        p[13] = (pp[12] - pp[13]) * cos1_4;
-        p[14] = pp[14] + pp[15];
-        p[15] = (pp[14] - pp[15]) * cos1_4;
-
-
-        // manually doing something that a compiler should handle sucks
-        // coding like this is hard to read
-        float tmp2;
-        new_v[5] = (new_v[11] = (new_v[13] = (new_v[15] = p[15]) + p[7]) + p[11])
-                + p[5] + p[13];
-        new_v[7] = (new_v[9] = p[15] + p[11] + p[3]) + p[13];
-        new_v[33 - 17] = -(new_v[1] = (tmp1 = p[13] + p[15] + p[9]) + p[1]) - p[14];
-        new_v[35 - 17] = -(new_v[3] = tmp1 + p[5] + p[7]) - p[6] - p[14];
-
-        new_v[39 - 17] = (tmp1 = -p[10] - p[11] - p[14] - p[15])
-                - p[13] - p[2] - p[3];
-        new_v[37 - 17] = tmp1 - p[13] - p[5] - p[6] - p[7];
-        new_v[41 - 17] = tmp1 - p[12] - p[2] - p[3];
-        new_v[43 - 17] = tmp1 - p[12] - (tmp2 = p[4] + p[6] + p[7]);
-        new_v[47 - 17] = (tmp1 = -p[8] - p[12] - p[14] - p[15]) - p[0];
-        new_v[45 - 17] = tmp1 - tmp2;
-
-        // insert V[0-15] (== new_v[0-15]) into actual v:
-        x1 = new_v;
-        // float[] x2 = actual_v + actual_write_pos;
-        float[] dest = actual_v;
-
-        dest[actual_write_pos] = x1[0];
-        dest[16 + actual_write_pos] = x1[1];
-        dest[32 + actual_write_pos] = x1[2];
-        dest[48 + actual_write_pos] = x1[3];
-        dest[64 + actual_write_pos] = x1[4];
-        dest[80 + actual_write_pos] = x1[5];
-        dest[96 + actual_write_pos] = x1[6];
-        dest[112 + actual_write_pos] = x1[7];
-        dest[128 + actual_write_pos] = x1[8];
-        dest[144 + actual_write_pos] = x1[9];
-        dest[160 + actual_write_pos] = x1[10];
-        dest[176 + actual_write_pos] = x1[11];
-        dest[192 + actual_write_pos] = x1[12];
-        dest[208 + actual_write_pos] = x1[13];
-        dest[224 + actual_write_pos] = x1[14];
-        dest[240 + actual_write_pos] = x1[15];
-
-        // V[16] is always 0.0:
-        dest[256 + actual_write_pos] = 0.0f;
-
-        // insert V[17-31] (== -new_v[15-1]) into actual v:
-        dest[272 + actual_write_pos] = -x1[15];
-        dest[288 + actual_write_pos] = -x1[14];
-        dest[304 + actual_write_pos] = -x1[13];
-        dest[320 + actual_write_pos] = -x1[12];
-        dest[336 + actual_write_pos] = -x1[11];
-        dest[352 + actual_write_pos] = -x1[10];
-        dest[368 + actual_write_pos] = -x1[9];
-        dest[384 + actual_write_pos] = -x1[8];
-        dest[400 + actual_write_pos] = -x1[7];
-        dest[416 + actual_write_pos] = -x1[6];
-        dest[432 + actual_write_pos] = -x1[5];
-        dest[448 + actual_write_pos] = -x1[4];
-        dest[464 + actual_write_pos] = -x1[3];
-        dest[480 + actual_write_pos] = -x1[2];
-        dest[496 + actual_write_pos] = -x1[1];
-    }
-
     private void compute_pcm_samples0() {
         final float[] vp = actual_v;
         //int inc = v_inc;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -835,7 +569,7 @@ final class SynthesisFilter {
                     (vp[1 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -843,7 +577,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples1() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -869,7 +602,7 @@ final class SynthesisFilter {
                     (vp[2 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -877,7 +610,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples2() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -903,7 +635,7 @@ final class SynthesisFilter {
                     (vp[3 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -911,7 +643,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples3() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -937,7 +668,7 @@ final class SynthesisFilter {
                     (vp[4 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -945,7 +676,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples4() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -971,7 +701,7 @@ final class SynthesisFilter {
                     (vp[5 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -979,7 +709,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples5() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1005,7 +734,7 @@ final class SynthesisFilter {
                     (vp[6 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1013,7 +742,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples6() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1039,7 +767,7 @@ final class SynthesisFilter {
                     (vp[7 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1047,7 +775,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples7() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1073,7 +800,7 @@ final class SynthesisFilter {
                     (vp[8 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1081,7 +808,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples8() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1107,7 +833,7 @@ final class SynthesisFilter {
                     (vp[9 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1115,7 +841,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples9() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1141,7 +866,7 @@ final class SynthesisFilter {
                     (vp[10 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1149,7 +874,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples10() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1175,7 +899,7 @@ final class SynthesisFilter {
                     (vp[11 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1183,7 +907,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples11() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1209,7 +932,7 @@ final class SynthesisFilter {
                     (vp[12 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1217,7 +940,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples12() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1243,7 +965,7 @@ final class SynthesisFilter {
                     (vp[13 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1255,7 +977,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples13() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1281,7 +1002,7 @@ final class SynthesisFilter {
                     (vp[14 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1289,7 +1010,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples14() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1315,7 +1035,7 @@ final class SynthesisFilter {
                     (vp[15 + dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
 
             dvp += 16;
         } // for
@@ -1323,7 +1043,6 @@ final class SynthesisFilter {
 
     private void compute_pcm_samples15() {
         final float[] vp = actual_v;
-        final float[] tmpOut = _tmpOut;
         int dvp = 0;
 
         // fat chance of having this loop unroll
@@ -1348,7 +1067,7 @@ final class SynthesisFilter {
                     (vp[dvp] * dp[15])
             ) * scalefactor;
 
-            tmpOut[i] = pcm_sample;
+            _tmpOut[i] = pcm_sample;
             dvp += 16;
         } // for
     }

@@ -21,10 +21,15 @@
 package Color_yr.AllMusic.player;
 
 import Color_yr.AllMusic.AllMusic;
-import Color_yr.AllMusic.decoder.*;
+import Color_yr.AllMusic.decoder.Bitstream;
+import Color_yr.AllMusic.decoder.Decoder;
+import Color_yr.AllMusic.decoder.Header;
+import Color_yr.AllMusic.decoder.SampleBuffer;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import javax.sound.sampled.FloatControl;
-import java.io.InputStream;
+import java.net.URL;
 
 /**
  * The <code>Player</code> class implements a simple player for playback
@@ -36,23 +41,25 @@ import java.io.InputStream;
 
 // REVIEW: the audio device should not be opened until the
 // first MPEG audio frame has been decoded. 
-public class Player {
+public class APlayer {
 
+    private HttpClient client;
     private Bitstream bitstream;
     private Decoder decoder;
-    private JavaSoundAudioDevice audio;
+    private SoundAudioDevice audio;
     private boolean isClose;
 
-    public Player() {
+    public APlayer() {
         try {
-            audio = new JavaSoundAudioDevice();
+            client = HttpClientBuilder.create().useSystemProperties().build();
+            audio = new SoundAudioDevice();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public synchronized void SetMusic(InputStream stream) {
-        bitstream = new Bitstream(stream);
+    public synchronized void SetMusic(URL url) throws Exception {
+        bitstream = new Bitstream(client, url);
         decoder = new Decoder();
         audio.open(decoder);
         isClose = false;
@@ -69,7 +76,7 @@ public class Player {
         }
     }
 
-    public void play() {
+    public void play() throws Exception {
         boolean ret = true;
         AllMusic.isPlay = true;
         while (ret) {
@@ -83,16 +90,13 @@ public class Player {
         }
     }
 
-    public synchronized void close() {
-        try {
-            isClose = true;
-            if (bitstream != null)
-                bitstream.close();
-            if (audio != null)
-                audio.close();
-            AllMusic.isPlay = false;
-        } catch (BitstreamException ex) {
-        }
+    public synchronized void close() throws Exception {
+        isClose = true;
+        if (bitstream != null)
+            bitstream.close();
+        if (audio != null)
+            audio.close();
+        AllMusic.isPlay = false;
     }
 
     protected boolean decodeFrame() {
@@ -115,8 +119,8 @@ public class Player {
                 bitstream.closeFrame();
             }
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return true;
     }

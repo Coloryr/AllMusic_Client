@@ -35,7 +35,18 @@
 
 package Color_yr.AllMusic.decoder;
 
-import java.io.*;
+import org.apache.http.ConnectionClosedException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.net.SocketException;
+import java.net.URL;
 
 
 /**
@@ -73,24 +84,28 @@ public final class Bitstream implements BitstreamErrors {
             0x000001FF, 0x000003FF, 0x000007FF, 0x00000FFF,
             0x00001FFF, 0x00003FFF, 0x00007FFF, 0x0000FFFF,
             0x0001FFFF};
-    private final PushbackInputStream source;
     private final Header header = new Header();
     private final byte[] syncbuf = new byte[4];
+    /**
+     * The bytes read from the stream.
+     */
+    private final byte[] frame_bytes = new byte[BUFFER_INT_SIZE * 4];
+    private final Crc16[] crc = new Crc16[1];
+    private final HttpGet get;
+    private final HttpClient client;
+    private PushbackInputStream source;
+    //private int 			current_frame_number;
+    //private int				last_frame_number;
+    private long local = 0;
     /**
      * Number of valid bytes in the frame buffer.
      */
     private int framesize;
     /**
-     * The bytes read from the stream.
-     */
-    private byte[] frame_bytes = new byte[BUFFER_INT_SIZE * 4];
-    /**
      * Index into <code>framebuffer</code> where the next bits are
      * retrieved.
      */
     private int wordpointer;
-    //private int 			current_frame_number;
-    //private int				last_frame_number;
     /**
      * Number (0-31, from MSB to LSB) of next bit for get_bits()
      */
@@ -100,46 +115,28 @@ public final class Bitstream implements BitstreamErrors {
      */
     private int syncword;
     /**
-     * Audio header position in stream.
-     */
-    private int header_pos = 0;
-    /**
      *
      */
     private boolean single_ch_mode;
-    private Crc16[] crc = new Crc16[1];
-
     private byte[] rawid3v2 = null;
-
     private boolean firstframe = true;
-
+    private InputStream content;
 
     /**
      * Construct a IBitstream that reads data from a
      * given InputStream.
-     *
-     * @param in The InputStream to read from.
      */
-    public Bitstream(InputStream in) {
-        if (in == null) throw new NullPointerException("in");
-        in = new BufferedInputStream(in);
-        loadID3v2(in);
+    public Bitstream(HttpClient client, URL url) throws Exception {
+        this.client = client;
+        get = new HttpGet(url.toString());
+        HttpResponse response = this.client.execute(get);
+        HttpEntity entity = response.getEntity();
+        content = entity.getContent();
+        loadID3v2(content);
         firstframe = true;
-        //source = new PushbackInputStream(in, 1024);
-        source = new PushbackInputStream(in, BUFFER_INT_SIZE * 4);
+        source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
 
         closeFrame();
-        //current_frame_number = -1;
-        //last_frame_number = -1;
-    }
-
-    /**
-     * Return position of the first audio header.
-     *
-     * @return size of ID3v2 tag frames.
-     */
-    public int header_pos() {
-        return header_pos;
     }
 
     /**
@@ -153,14 +150,18 @@ public final class Bitstream implements BitstreamErrors {
         try {
             // Read ID3v2 header (10 bytes).
             in.mark(10);
+            local += 10;
             size = readID3v2Header(in);
-            header_pos = size;
-        } catch (IOException e) {
+            /*
+              Audio header position in stream.
+             */
+            int header_pos = size;
+        } catch (IOException ignored) {
         } finally {
             try {
                 // Unread ID3v2 header (10 bytes).
                 in.reset();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
         // Load ID3v2 tags.
@@ -168,8 +169,9 @@ public final class Bitstream implements BitstreamErrors {
             if (size > 0) {
                 rawid3v2 = new byte[size];
                 in.read(rawid3v2, 0, rawid3v2.length);
+                local += rawid3v2.length;
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
@@ -188,8 +190,6 @@ public final class Bitstream implements BitstreamErrors {
         // Look for ID3v2
         if ((id3header[0] == 'I') && (id3header[1] == 'D') && (id3header[2] == '3')) {
             in.read(id3header, 0, 3);
-            int majorVersion = id3header[0];
-            int revision = id3header[1];
             in.read(id3header, 0, 4);
             size = (id3header[0] << 21) + (id3header[1] << 14) + (id3header[2] << 7) + (id3header[3]);
         }
@@ -204,8 +204,7 @@ public final class Bitstream implements BitstreamErrors {
     public InputStream getRawID3v2() {
         if (rawid3v2 == null) return null;
         else {
-            ByteArrayInputStream bain = new ByteArrayInputStream(rawid3v2);
-            return bain;
+            return new ByteArrayInputStream(rawid3v2);
         }
     }
 
@@ -216,6 +215,8 @@ public final class Bitstream implements BitstreamErrors {
      */
     public void close() throws BitstreamException {
         try {
+            get.abort();
+            content.close();
             source.close();
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
@@ -228,7 +229,7 @@ public final class Bitstream implements BitstreamErrors {
      * @return the Header describing details of the frame read,
      * or null if the end of the stream has been reached.
      */
-    public Header readFrame() throws BitstreamException {
+    public Header readFrame() throws Exception {
         Header result = null;
         try {
             result = readNextFrame();
@@ -262,9 +263,9 @@ public final class Bitstream implements BitstreamErrors {
      * Read next MP3 frame.
      *
      * @return MP3 frame header.
-     * @throws BitstreamException
+     * @throws Exception
      */
-    private Header readNextFrame() throws BitstreamException {
+    private Header readNextFrame() throws Exception {
         if (framesize == -1) {
             nextFrame();
         }
@@ -275,9 +276,9 @@ public final class Bitstream implements BitstreamErrors {
     /**
      * Read next MP3 frame.
      *
-     * @throws BitstreamException
+     * @throws Exception
      */
-    private void nextFrame() throws BitstreamException {
+    private void nextFrame() throws Exception {
         // entire frame is read by the header class.
         header.read_header(this, crc);
     }
@@ -285,13 +286,14 @@ public final class Bitstream implements BitstreamErrors {
     /**
      * Unreads the bytes read from the frame.
      *
-     * @throws BitstreamException
+     * @throws Exception
      */
     // REVIEW: add new error codes for this.
     public void unreadFrame() throws BitstreamException {
         if (wordpointer == -1 && bitindex == -1 && (framesize > 0)) {
             try {
                 source.unread(frame_bytes, 0, framesize);
+                local -= framesize;
             } catch (IOException ex) {
                 throw newBitstreamException(STREAM_ERROR);
             }
@@ -311,13 +313,14 @@ public final class Bitstream implements BitstreamErrors {
      * Determines if the next 4 bytes of the stream represent a
      * frame header.
      */
-    public boolean isSyncCurrentPosition(int syncmode) throws BitstreamException {
+    public boolean isSyncCurrentPosition(int syncmode) throws Exception {
         int read = readBytes(syncbuf, 0, 4);
-        int headerstring = ((syncbuf[0] << 24) & 0xFF000000) | ((syncbuf[1] << 16) & 0x00FF0000) | ((syncbuf[2] << 8) & 0x0000FF00) | ((syncbuf[3] << 0) & 0x000000FF);
+        int headerstring = ((syncbuf[0] << 24) & 0xFF000000) | ((syncbuf[1] << 16) & 0x00FF0000) | ((syncbuf[2] << 8) & 0x0000FF00) | ((syncbuf[3]) & 0x000000FF);
 
         try {
             source.unread(syncbuf, 0, read);
-        } catch (IOException ex) {
+            local -= read;
+        } catch (IOException ignored) {
         }
 
         boolean sync = false;
@@ -348,7 +351,7 @@ public final class Bitstream implements BitstreamErrors {
      * The returned value is False at the end of stream.
      */
 
-    int syncHeader(byte syncmode) throws BitstreamException {
+    int syncHeader(byte syncmode) throws Exception {
         boolean sync;
         int headerstring;
         // read additional 2 bytes
@@ -356,7 +359,7 @@ public final class Bitstream implements BitstreamErrors {
 
         if (bytesRead != 3) throw newBitstreamException(STREAM_EOF, null);
 
-        headerstring = ((syncbuf[0] << 16) & 0x00FF0000) | ((syncbuf[1] << 8) & 0x0000FF00) | ((syncbuf[2] << 0) & 0x000000FF);
+        headerstring = ((syncbuf[0] << 16) & 0x00FF0000) | ((syncbuf[1] << 8) & 0x0000FF00) | ((syncbuf[2]) & 0x000000FF);
 
         do {
             headerstring <<= 8;
@@ -374,7 +377,7 @@ public final class Bitstream implements BitstreamErrors {
     }
 
     public boolean isSyncMark(int headerstring, int syncmode, int word) {
-        boolean sync = false;
+        boolean sync;
 
         if (syncmode == INITIAL_SYNC) {
             sync = ((headerstring & 0xFFE00000) == 0xFFE00000);    // SZD: MPEG 2.5
@@ -400,7 +403,7 @@ public final class Bitstream implements BitstreamErrors {
      * Reads the data for the next frame. The frame is not parsed
      * until parse frame is called.
      */
-    int read_frame_data(int bytesize) throws BitstreamException {
+    int read_frame_data(int bytesize) throws Exception {
         int numread = readFully(frame_bytes, 0, bytesize);
         framesize = bytesize;
         wordpointer = -1;
@@ -411,15 +414,14 @@ public final class Bitstream implements BitstreamErrors {
     /**
      * Parses the data previously read with read_frame_data().
      */
-    void parse_frame() throws BitstreamException {
+    void parse_frame() {
         // Convert Bytes read to int
         int b = 0;
         byte[] byteread = frame_bytes;
         int bytesize = framesize;
 
         for (int k = 0; k < bytesize; k = k + 4) {
-            int convert = 0;
-            byte b0 = 0;
+            byte b0;
             byte b1 = 0;
             byte b2 = 0;
             byte b3 = 0;
@@ -439,7 +441,7 @@ public final class Bitstream implements BitstreamErrors {
      * (1 <= number_of_bits <= 16)
      */
     public int get_bits(int number_of_bits) {
-        int returnvalue = 0;
+        int returnvalue;
         int sum = bitindex + number_of_bits;
 
         // E.B
@@ -491,22 +493,29 @@ public final class Bitstream implements BitstreamErrors {
      *                            number of bytes could not be read from the stream.
      */
     private int readFully(byte[] b, int offs, int len)
-            throws BitstreamException {
+            throws Exception {
         int nRead = 0;
         try {
             while (len > 0) {
                 int bytesread = source.read(b, offs, len);
+                local += bytesread;
                 if (bytesread == -1) {
                     while (len-- > 0) {
                         b[offs++] = 0;
                     }
                     break;
-                    //throw newBitstreamException(UNEXPECTED_EOF, new EOFException());
                 }
                 nRead = nRead + bytesread;
                 offs += bytesread;
                 len -= bytesread;
             }
+        } catch (ConnectionClosedException | SocketException ex) {
+            HttpResponse response = this.client.execute(get);
+            HttpEntity entity = response.getEntity();
+            content = entity.getContent();
+            source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+            source.skip(local);
+            return readFully(b, offs, len);
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
         }
@@ -518,11 +527,12 @@ public final class Bitstream implements BitstreamErrors {
      * EOF is reached.
      */
     private int readBytes(byte[] b, int offs, int len)
-            throws BitstreamException {
+            throws Exception {
         int totalBytesRead = 0;
         try {
             while (len > 0) {
                 int bytesread = source.read(b, offs, len);
+                local += bytesread;
                 if (bytesread == -1) {
                     break;
                 }
@@ -530,6 +540,13 @@ public final class Bitstream implements BitstreamErrors {
                 offs += bytesread;
                 len -= bytesread;
             }
+        } catch (ConnectionClosedException | SocketException ex) {
+            HttpResponse response = this.client.execute(get);
+            HttpEntity entity = response.getEntity();
+            content = entity.getContent();
+            source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+            source.skip(local);
+            return readBytes(b, offs, len);
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
         }

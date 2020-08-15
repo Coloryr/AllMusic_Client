@@ -41,8 +41,6 @@ public final class Equalizer {
      */
     static public final float BAND_NOT_PRESENT = Float.NEGATIVE_INFINITY;
 
-    static public final Equalizer PASS_THRU_EQ = new Equalizer();
-
     private static final int BANDS = 32;
 
     private final float[] settings = new float[BANDS];
@@ -103,36 +101,6 @@ public final class Equalizer {
             return 1.0f;
         return Math.max(eq, -1.0f);
 
-    }
-
-    /**
-     * Retrieves an array of floats whose values represent a
-     * scaling factor that can be applied to linear samples
-     * in each band to provide the equalization represented by
-     * this instance.
-     *
-     * @return an array of factors that can be applied to the
-     * subbands.
-     */
-    float[] getBandFactors() {
-        float[] factors = new float[BANDS];
-        for (int i = 0; i < BANDS; i++) {
-            factors[i] = getBandFactor(settings[i]);
-        }
-
-        return factors;
-    }
-
-    /**
-     * Converts an equalizer band setting to a sample factor.
-     * The factor is determined by the function f = 2^n where
-     * n is the equalizer band setting in the range [-1.0,1.0].
-     */
-    float getBandFactor(float eq) {
-        if (eq == BAND_NOT_PRESENT)
-            return 0.0f;
-
-        return (float) Math.pow(2.0, eq);
     }
 
 

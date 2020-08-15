@@ -30,19 +30,17 @@ package Color_yr.AllMusic.decoder;
  * that provides storage for a fixed size block of samples.
  */
 public class SampleBuffer extends Obuffer {
-    private short[] buffer;
-    private int[] bufferp;
-    private int channels;
-    private int frequency;
+    private final short[] buffer;
+    private final int[] bufferp;
+    private final int channels;
 
     /**
      * Constructor
      */
-    public SampleBuffer(int sample_frequency, int number_of_channels) {
+    public SampleBuffer(int number_of_channels) {
         buffer = new short[OBUFFERSIZE];
         bufferp = new int[MAXCHANNELS];
         channels = number_of_channels;
-        frequency = sample_frequency;
 
         for (int i = 0; i < number_of_channels; ++i)
             bufferp[i] = (short) i;
@@ -91,9 +89,6 @@ public class SampleBuffer extends Obuffer {
 
     }
 
-    public void close() {
-    }
-
     /**
      *
      */
@@ -102,9 +97,4 @@ public class SampleBuffer extends Obuffer {
             bufferp[i] = (short) i;
     }
 
-    /**
-     *
-     */
-    public void set_stop_flag() {
-    }
 }

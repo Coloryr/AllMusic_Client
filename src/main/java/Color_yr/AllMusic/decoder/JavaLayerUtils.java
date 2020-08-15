@@ -30,7 +30,7 @@ import java.lang.reflect.Array;
  * @author MDM
  */
 public class JavaLayerUtils {
-    static private JavaLayerHook hook = null;
+    static private final JavaLayerHook hook = null;
 
     /**
      * Deserializes an object from the given <code>InputStream</code>.
@@ -43,7 +43,7 @@ public class JavaLayerUtils {
      * @throws IOException is thrown if there was a problem reading
      *                     the underlying stream, or an object could not be deserialized
      *                     from the stream.
-     * @see java.io.ObjectInputStream
+     * @see ObjectInputStream
      */
     static public Object deserialize(InputStream in)
             throws IOException {
@@ -111,30 +111,6 @@ public class JavaLayerUtils {
         return deserializeArray(str, elemType, length);
     }
 
-    static public void serialize(OutputStream out, Object obj)
-            throws IOException {
-        if (out == null)
-            throw new NullPointerException("out");
-
-        if (obj == null)
-            throw new NullPointerException("obj");
-
-        ObjectOutputStream objOut = new ObjectOutputStream(out);
-        objOut.writeObject(obj);
-
-    }
-
-    static synchronized public JavaLayerHook getHook() {
-        return hook;
-    }
-
-    /**
-     * Sets the system-wide JavaLayer hook.
-     */
-    static synchronized public void setHook(JavaLayerHook hook0) {
-        hook = hook0;
-    }
-
     /**
      * Retrieves an InputStream for a named resource.
      *
@@ -146,7 +122,7 @@ public class JavaLayerUtils {
      * to retrieve the resource.
      */
     static synchronized public InputStream getResourceAsStream(String name) {
-        InputStream is = null;
+        InputStream is;
 
         if (hook != null) {
             is = hook.getResourceAsStream(name);
