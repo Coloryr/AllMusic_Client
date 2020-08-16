@@ -45,27 +45,30 @@ public class APlayer {
 
     private HttpClient client;
     private Bitstream bitstream;
-    private Decoder decoder;
     private SoundAudioDevice audio;
+    private Decoder decoder;
     private boolean isClose;
 
     public APlayer() {
         try {
             client = HttpClientBuilder.create().useSystemProperties().build();
             audio = new SoundAudioDevice();
+            isClose = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public synchronized void SetMusic(URL url) throws Exception {
-        bitstream = new Bitstream(client, url);
-        decoder = new Decoder();
-        audio.open(decoder);
-        isClose = false;
+    public void SetMusic(URL url) throws Exception {
+        synchronized (this) {
+            bitstream = new Bitstream(client, url);
+            decoder = new Decoder();
+            audio.open(decoder);
+            isClose = false;
+        }
     }
 
-    public synchronized void Set(int a) {
+    public void Set(int a) {
         if (audio == null)
             return;
         FloatControl temp = audio.getVolctrl();
@@ -82,15 +85,12 @@ public class APlayer {
         while (ret) {
             ret = decodeFrame();
         }
-
-        if (audio != null) {
-            synchronized (this) {
-                close();
-            }
+        synchronized (this) {
+            close();
         }
     }
 
-    public synchronized void close() throws Exception {
+    public void close() throws Exception {
         isClose = true;
         if (bitstream != null)
             bitstream.close();
@@ -116,12 +116,12 @@ public class APlayer {
                 if (audio != null && !isClose) {
                     audio.write(output.getBuffer(), 0, output.getBufferLength());
                 }
-                bitstream.closeFrame();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
+        bitstream.closeFrame();
         return true;
     }
 }

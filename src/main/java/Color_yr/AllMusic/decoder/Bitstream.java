@@ -41,10 +41,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
+import java.io.*;
 import java.net.SocketException;
 import java.net.URL;
 
@@ -132,6 +129,7 @@ public final class Bitstream implements BitstreamErrors {
         HttpResponse response = this.client.execute(get);
         HttpEntity entity = response.getEntity();
         content = entity.getContent();
+        content = new BufferedInputStream(content);
         loadID3v2(content);
         firstframe = true;
         source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
