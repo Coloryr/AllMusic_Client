@@ -24,14 +24,17 @@ public class Hud {
     private static ByteBuffer byteBuffer;
     private static int textureID;
     private static boolean haveImg;
-    private static int Width;
-    private static int Height;
     public static final Object lock = new Object();
 
     private static MatrixStack stack = new MatrixStack();
 
     static {
         textureID = GL11.glGenTextures();
+    }
+
+    public static void stop() {
+        haveImg = false;
+        Info = List = Lyric = null;
     }
 
     public static void SetImg(String picUrl) {
@@ -48,8 +51,6 @@ public class Hud {
                 connection.connect();
                 InputStream inputStream = connection.getInputStream();
                 BufferedImage image = ImageIO.read(inputStream);
-                Width = image.getWidth();
-                Height = image.getHeight();
                 int[] pixels = new int[image.getWidth() * image.getHeight()];
                 image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
                 byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
