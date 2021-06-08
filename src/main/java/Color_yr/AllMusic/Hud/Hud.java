@@ -34,7 +34,7 @@ public class Hud {
 
     public static void stop() {
         haveImg = false;
-        Info = List = Lyric = null;
+        Info = List = Lyric = "";
     }
 
     public static void SetImg(String picUrl) {
