@@ -130,6 +130,8 @@ public class AllMusic {
                     Hud.Lyric = message.substring(7);
                 } else if (message.startsWith("[Info]")) {
                     Hud.Info = message.substring(6);
+                } else if (message.startsWith("[Img]")) {
+                    Hud.SetImg(message.substring(5));
                 } else if (message.startsWith("[List]")) {
                     Hud.List = message.substring(6);
                 } else if (message.equalsIgnoreCase("[clear]")) {

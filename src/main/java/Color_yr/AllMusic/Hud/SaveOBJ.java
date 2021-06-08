@@ -4,15 +4,37 @@ public class SaveOBJ {
     private PosOBJ List;
     private PosOBJ Lyric;
     private PosOBJ Info;
+    private PosOBJ Pic;
     private boolean EnableList;
     private boolean EnableLyric;
     private boolean EnableInfo;
+    private boolean EnablePic;
 
     public SaveOBJ() {
-        EnableList = false;
+        EnableList = true;
+        EnableLyric = true;
+        EnableInfo = true;
+        EnablePic = true;
         List = new PosOBJ(2, 80);
-        Lyric = new PosOBJ(2, 40);
+        Lyric = new PosOBJ(2, 55);
         Info = new PosOBJ(2, 2);
+        Pic = new PosOBJ(2, 2);
+    }
+
+    public boolean isEnablePic() {
+        return EnablePic;
+    }
+
+    public PosOBJ getPic() {
+        return Pic;
+    }
+
+    public void setEnablePic(boolean enablePic) {
+        EnablePic = enablePic;
+    }
+
+    public void setPic(PosOBJ pic) {
+        Pic = pic;
     }
 
     public boolean isEnableInfo() {
