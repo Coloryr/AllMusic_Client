@@ -90,7 +90,7 @@ public class Hud {
     }
 
     public static void update() {
-        FontRenderer hud = Minecraft.getInstance().fontRenderer;
+        FontRenderer hud = Minecraft.getInstance().font;
         if (save == null)
             return;
         synchronized (lock) {
@@ -98,7 +98,7 @@ public class Hud {
                 int offset = 0;
                 String[] temp = Info.split("\n");
                 for (String item : temp) {
-                    hud.func_238405_a_(stack, item, (float) save.getInfo().getX(),
+                    hud.draw(stack, item, (float) save.getInfo().getX(),
                             (float) save.getInfo().getY() + offset, 0xffffff);
                     offset += 10;
                 }
@@ -107,7 +107,7 @@ public class Hud {
                 String[] temp = List.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    hud.func_238405_a_(stack, item, (float) save.getList().getX(),
+                    hud.draw(stack, item, (float) save.getList().getX(),
                             (float) save.getList().getY() + offset, 0xffffff);
                     offset += 10;
                 }
@@ -116,13 +116,12 @@ public class Hud {
                 String[] temp = Lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    hud.func_238405_a_(stack, item, (float) save.getLyric().getX(),
+                    hud.draw(stack, item, (float) save.getLyric().getX(),
                             (float) save.getLyric().getY() + offset, 0xffffff);
                     offset += 10;
                 }
             }
-            if(haveImg)
-            {
+            if (save.isEnablePic() && haveImg) {
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
                 GL11.glPushMatrix();
                 GL11.glTranslatef((float) save.getPic().getX(), (float) save.getPic().getY(), 0.0f);

@@ -33,8 +33,8 @@ public class AllMusic {
     public final Thread thread = new Thread(() -> {
         while (true) {
             try {
-                int nowV = (int) (Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.RECORDS) *
-                        Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.MASTER) * 100);
+                int nowV = (int) (Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.RECORDS) *
+                        Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.MASTER) * 100);
                 if (v != nowV) {
                     nowPlaying.Set(nowV);
                 }
@@ -75,7 +75,7 @@ public class AllMusic {
     public void onSound(final SoundEvent.SoundSourceEvent e) {
         if (!isPlay)
             return;
-        SoundCategory data = e.getSound().getCategory();
+        SoundCategory data = e.getSound().getSource();
         switch (data) {
             case MUSIC:
             case RECORDS:
@@ -117,8 +117,8 @@ public class AllMusic {
                 if (message.equals("[Stop]")) {
                     stopPlaying();
                 } else if (message.startsWith("[Play]")) {
-                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
-                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
+                    Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.MUSIC);
+                    Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.RECORDS);
                     stopPlaying();
                     nowURL = new URL(message.replace("[Play]", ""));
                     nowURL = Get(nowURL);
