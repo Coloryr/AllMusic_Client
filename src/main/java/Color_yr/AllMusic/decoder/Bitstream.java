@@ -508,11 +508,11 @@ public final class Bitstream implements BitstreamErrors {
                 len -= bytesread;
             }
         } catch (ConnectionClosedException | SocketException ex) {
+            this.get.setHeader("Range", "bytes=" + local + "-");
             HttpResponse response = this.client.execute(get);
             HttpEntity entity = response.getEntity();
             content = entity.getContent();
             source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
-            source.skip(local);
             return readFully(b, offs, len);
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
@@ -539,11 +539,11 @@ public final class Bitstream implements BitstreamErrors {
                 len -= bytesread;
             }
         } catch (ConnectionClosedException | SocketException ex) {
+            this.get.setHeader("Range", "bytes=" + local + "-");
             HttpResponse response = this.client.execute(get);
             HttpEntity entity = response.getEntity();
             content = entity.getContent();
             source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
-            source.skip(local);
             return readBytes(b, offs, len);
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);

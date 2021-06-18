@@ -54,7 +54,28 @@
     <property name="project.structure.proportion" value="0.1484375" />
     <property name="project.structure.side.proportion" value="0.26865673" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Gradle.AllMusic_M [build]">
+    <configuration name="AllMusic_M [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="assemble" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="AllMusic_M [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -76,9 +97,14 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Gradle.AllMusic_M [build]" />
+      <item itemvalue="Gradle.AllMusic_M [assemble]" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.AllMusic_M [build]" />
+        <item itemvalue="Gradle.AllMusic_M [assemble]" />
       </list>
     </recent_temporary>
   </component>

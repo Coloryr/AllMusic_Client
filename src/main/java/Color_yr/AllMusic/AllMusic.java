@@ -87,6 +87,7 @@ public class AllMusic {
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
         stopPlaying();
         Hud.Lyric = Hud.Info = Hud.List = "";
+        Hud.haveImg = false;
         Hud.save = null;
     }
 
@@ -136,6 +137,7 @@ public class AllMusic {
                     Hud.List = message.substring(6);
                 } else if (message.equalsIgnoreCase("[clear]")) {
                     Hud.Lyric = Hud.Info = Hud.List = "";
+                    Hud.haveImg = false;
                 } else if (message.startsWith("{")) {
                     Hud.Set(message);
                 }
