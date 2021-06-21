@@ -32,7 +32,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *----------------------------------------------------------------------
  */
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * Base Class for audio output.
@@ -65,11 +65,6 @@ public abstract class Obuffer {
                 ((sample < -32768.0f) ? -32768 :
                         (short) sample));
     }
-
-    /**
-     * Write the samples to the file or directly to the audio hardware.
-     */
-    public abstract void write_buffer(int val);
 
     /**
      * Clears all data in the buffer (for seeking).

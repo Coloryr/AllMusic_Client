@@ -1,6 +1,6 @@
 /*
  * 11/19/04		1.0 moved to LGPL.
- * 01/12/99		Initial version.	mdm@techie.com
+ * 12/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -18,32 +18,38 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
+
+import java.io.PrintStream;
+
 
 /**
- * The <code>DecoderException</code> represents the class of
- * errors that can occur when decoding MPEG audio.
+ * The JavaLayerException is the base class for all API-level
+ * exceptions thrown by JavaLayer. To facilitate conversion and
+ * common handling of exceptions from other domains, the class
+ * can delegate some functionality to a contained Throwable instance.
+ * <p>
  *
  * @author MDM
  */
-public class DecoderException extends JavaLayerException
-        implements DecoderErrors {
+public class JavaLayerException extends Exception {
 
-    public DecoderException(String msg, Throwable t) {
-        super(msg, t);
+    private final Throwable exception;
+
+    public JavaLayerException(String msg, Throwable t) {
+        super(msg);
+        exception = t;
     }
 
-    public DecoderException(int errorcode, Throwable t) {
-        this(getErrorString(errorcode), t);
+    public void printStackTrace() {
+        printStackTrace(System.err);
     }
 
-    static public String getErrorString(int errorcode) {
-        // REVIEW: use resource file to map error codes
-        // to locale-sensitive strings.
-
-        return "Decoder errorcode " + Integer.toHexString(errorcode);
+    public void printStackTrace(PrintStream ps) {
+        if (this.exception == null) {
+            super.printStackTrace(ps);
+        } else {
+            exception.printStackTrace();
+        }
     }
-
-
 }
-

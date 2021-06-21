@@ -37,7 +37,7 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * Class to implements Huffman decoder.

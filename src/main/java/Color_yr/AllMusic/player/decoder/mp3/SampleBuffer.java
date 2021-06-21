@@ -23,7 +23,7 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * The <code>SampleBuffer</code> class implements an output buffer
@@ -79,14 +79,6 @@ public class SampleBuffer extends Obuffer {
         }
 
         bufferp[channel] = pos;
-    }
-
-
-    /**
-     * Write the samples to the file (Random Acces).
-     */
-    public void write_buffer(int val) {
-
     }
 
     /**

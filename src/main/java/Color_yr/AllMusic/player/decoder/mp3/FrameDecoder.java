@@ -1,4 +1,5 @@
 /*
+ * 09/26/08     throw exception on subbband alloc error: Christopher G. Jennings (cjennings@acm.org)
  * 11/19/04		1.0 moved to LGPL.
  * 12/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
@@ -18,22 +19,19 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
- * Exception erorr codes for components of the JavaLayer API.
+ * Implementations of FrameDecoder are responsible for decoding
+ * an MPEG audio frame.
  */
-public interface JavaLayerErrors {
+//REVIEW: the interface currently is too thin. There should be
+// methods to specify the output buffer, the synthesis filters and
+// possibly other objects used by the decoder. 
+public interface FrameDecoder {
     /**
-     * The first bitstream error code. See the {@link DecoderErrors DecoderErrors}
-     * interface for other bitstream error codes.
+     * Decodes one frame of MPEG audio.
      */
-    int BITSTREAM_ERROR = 0x100;
-
-    /**
-     * The first decoder error code. See the {@link DecoderErrors DecoderErrors}
-     * interface for other decoder error codes.
-     */
-    int DECODER_ERROR = 0x200;
+    void decodeFrame() throws DecoderException;
 
 }

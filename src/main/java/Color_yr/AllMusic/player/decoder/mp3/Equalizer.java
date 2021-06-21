@@ -19,7 +19,7 @@
  */
 
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * The <code>Equalizer</code> class can be used to specify
@@ -32,7 +32,7 @@ package Color_yr.AllMusic.decoder;
  * amplified by 6dB.
  *
  * @author MDM
- * @see Decoder
+ * @see Mp3Decoder
  */
 public final class Equalizer {
     /**

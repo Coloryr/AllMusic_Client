@@ -1,5 +1,6 @@
 /*
  * 11/19/04		1.0 moved to LGPL.
+ * 12/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -17,19 +18,22 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
-
-import java.io.InputStream;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
- * The <code>JavaLayerHooks</code> class allows developers to change
- * the way the JavaLayer library uses Resources.
+ * Exception erorr codes for components of the JavaLayer API.
  */
-
-public interface JavaLayerHook {
+public interface JavaLayerErrors {
     /**
-     * Retrieves the named resource. This allows resources to be
-     * obtained without specifying how they are retrieved.
+     * The first bitstream error code. See the {@link DecoderErrors DecoderErrors}
+     * interface for other bitstream error codes.
      */
-    InputStream getResourceAsStream(String name);
+    int BITSTREAM_ERROR = 0x100;
+
+    /**
+     * The first decoder error code. See the {@link DecoderErrors DecoderErrors}
+     * interface for other decoder error codes.
+     */
+    int DECODER_ERROR = 0x200;
+
 }

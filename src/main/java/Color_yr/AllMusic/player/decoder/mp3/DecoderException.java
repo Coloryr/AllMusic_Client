@@ -1,5 +1,4 @@
 /*
- * 09/26/08     throw exception on subbband alloc error: Christopher G. Jennings (cjennings@acm.org)
  * 11/19/04		1.0 moved to LGPL.
  * 01/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
@@ -19,24 +18,32 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
- * This interface provides constants describing the error
- * codes used by the Decoder to indicate errors.
+ * The <code>DecoderException</code> represents the class of
+ * errors that can occur when decoding MPEG audio.
  *
  * @author MDM
  */
-public interface DecoderErrors extends JavaLayerErrors {
+public class DecoderException extends JavaLayerException
+        implements DecoderErrors {
 
-    /**
-     * Layer not supported by the decoder.
-     */
-    int UNSUPPORTED_LAYER = DECODER_ERROR + 1;
+    public DecoderException(String msg, Throwable t) {
+        super(msg, t);
+    }
 
-    /**
-     * Illegal allocation in subband layer. Indicates a corrupt stream.
-     */
-    int ILLEGAL_SUBBAND_ALLOCATION = DECODER_ERROR + 2;
+    public DecoderException(int errorcode, Throwable t) {
+        this(getErrorString(errorcode), t);
+    }
+
+    static public String getErrorString(int errorcode) {
+        // REVIEW: use resource file to map error codes
+        // to locale-sensitive strings.
+
+        return "Decoder errorcode " + Integer.toHexString(errorcode);
+    }
+
 
 }
+

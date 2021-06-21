@@ -1,6 +1,5 @@
 /*
  * 11/19/04		1.0 moved to LGPL.
- * 12/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -18,38 +17,19 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
-import java.io.PrintStream;
-
+import java.io.InputStream;
 
 /**
- * The JavaLayerException is the base class for all API-level
- * exceptions thrown by JavaLayer. To facilitate conversion and
- * common handling of exceptions from other domains, the class
- * can delegate some functionality to a contained Throwable instance.
- * <p>
- *
- * @author MDM
+ * The <code>JavaLayerHooks</code> class allows developers to change
+ * the way the JavaLayer library uses Resources.
  */
-public class JavaLayerException extends Exception {
 
-    private final Throwable exception;
-
-    public JavaLayerException(String msg, Throwable t) {
-        super(msg);
-        exception = t;
-    }
-
-    public void printStackTrace() {
-        printStackTrace(System.err);
-    }
-
-    public void printStackTrace(PrintStream ps) {
-        if (this.exception == null) {
-            super.printStackTrace(ps);
-        } else {
-            exception.printStackTrace();
-        }
-    }
+public interface JavaLayerHook {
+    /**
+     * Retrieves the named resource. This allows resources to be
+     * obtained without specifying how they are retrieved.
+     */
+    InputStream getResourceAsStream(String name);
 }

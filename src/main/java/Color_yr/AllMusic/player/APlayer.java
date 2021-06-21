@@ -20,11 +20,11 @@
 
 package Color_yr.AllMusic.player;
 
-import Color_yr.AllMusic.AllMusic;
-import Color_yr.AllMusic.decoder.Bitstream;
-import Color_yr.AllMusic.decoder.Decoder;
-import Color_yr.AllMusic.decoder.Header;
-import Color_yr.AllMusic.decoder.SampleBuffer;
+import Color_yr.AllMusic.player.decoder.BuffPack;
+import Color_yr.AllMusic.player.decoder.IDecoder;
+import Color_yr.AllMusic.player.decoder.flac.DataFormatException;
+import Color_yr.AllMusic.player.decoder.flac.FlacDecoder;
+import Color_yr.AllMusic.player.decoder.mp3.Mp3Decoder;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -44,9 +44,8 @@ import java.net.URL;
 public class APlayer {
 
     private HttpClient client;
-    private Bitstream bitstream;
     private SoundAudioDevice audio;
-    private Decoder decoder;
+    private IDecoder decoder;
     private boolean isClose;
 
     public APlayer() {
@@ -61,8 +60,13 @@ public class APlayer {
 
     public void SetMusic(URL url) throws Exception {
         synchronized (this) {
-            bitstream = new Bitstream(client, url);
-            decoder = new Decoder();
+            try {
+                decoder = new FlacDecoder();
+                decoder.set(client, url);
+            } catch (DataFormatException e) {
+                decoder = new Mp3Decoder();
+                decoder.set(client, url);
+            }
             audio.open(decoder);
             isClose = false;
         }
@@ -75,13 +79,11 @@ public class APlayer {
         if (temp != null) {
             float temp1 = (a == 0) ? -80.0f : ((float) (a * 0.2 - 35.0));
             temp.setValue(temp1);
-            AllMusic.v = a;
         }
     }
 
     public void play() throws Exception {
         boolean ret = true;
-        AllMusic.isPlay = true;
         while (ret) {
             ret = decodeFrame();
         }
@@ -92,11 +94,10 @@ public class APlayer {
 
     public void close() throws Exception {
         isClose = true;
-        if (bitstream != null)
-            bitstream.close();
+        if (decoder != null)
+            decoder.close();
         if (audio != null)
             audio.close();
-        AllMusic.isPlay = false;
     }
 
     protected boolean decodeFrame() {
@@ -105,23 +106,21 @@ public class APlayer {
                 return false;
             if (isClose)
                 return false;
-            Header h = bitstream.readFrame();
 
-            if (h == null)
+            BuffPack output = decoder.decodeFrame();
+            if (output == null)
                 return false;
-
-            SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
 
             synchronized (this) {
                 if (audio != null && !isClose) {
-                    audio.write(output.getBuffer(), 0, output.getBufferLength());
+                    audio.write(output.buff, output.len);
                 }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-        bitstream.closeFrame();
         return true;
     }
 }

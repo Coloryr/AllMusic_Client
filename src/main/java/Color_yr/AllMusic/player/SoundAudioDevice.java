@@ -24,8 +24,8 @@
 
 package Color_yr.AllMusic.player;
 
-import Color_yr.AllMusic.decoder.Decoder;
-import Color_yr.AllMusic.decoder.JavaLayerException;
+import Color_yr.AllMusic.player.decoder.IDecoder;
+import Color_yr.AllMusic.player.decoder.mp3.JavaLayerException;
 
 import javax.sound.sampled.*;
 
@@ -40,10 +40,8 @@ public class SoundAudioDevice {
     public boolean startplay = false;
     private SourceDataLine source = null;
     private boolean open = false;
-    private Decoder decoder = null;
+    private IDecoder decoder = null;
     private AudioFormatSelf fmt = null;
-
-    private byte[] byteBuf = new byte[4096];
 
     private FloatControl volctrl;
 
@@ -70,7 +68,7 @@ public class SoundAudioDevice {
         return volctrl;
     }
 
-    public synchronized void open(Decoder decoder) {
+    public synchronized void open(IDecoder decoder) {
         this.decoder = decoder;
         open = true;
     }
@@ -81,9 +79,9 @@ public class SoundAudioDevice {
         open = false;
     }
 
-    public void write(short[] samples, int offs, int len) throws LineUnavailableException {
+    public void write(byte[] samples, int len) throws LineUnavailableException {
         if (open) {
-            writeImpl(samples, offs, len);
+            writeImpl(samples, len);
         }
     }
 
@@ -94,7 +92,7 @@ public class SoundAudioDevice {
         }
     }
 
-    protected void writeImpl(short[] samples, int offs, int len) throws LineUnavailableException {
+    protected void writeImpl(byte[] samples, int len) throws LineUnavailableException {
         if (!startplay) {
             fmt.setSampleRate(decoder.getOutputFrequency());
             fmt.setChannels(decoder.getOutputChannels());
@@ -103,26 +101,7 @@ public class SoundAudioDevice {
             volctrl = (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
             startplay = true;
         }
-        byte[] b = toByteArray(samples, offs, len);
-        source.write(b, 0, len * 2);
+        source.write(samples, 0, len);
     }
 
-    protected byte[] getByteArray(int length) {
-        if (byteBuf.length < length) {
-            byteBuf = new byte[length + 1024];
-        }
-        return byteBuf;
-    }
-
-    protected byte[] toByteArray(short[] samples, int offs, int len) {
-        byte[] b = getByteArray(len * 2);
-        int idx = 0;
-        short s;
-        while (len-- > 0) {
-            s = samples[offs++];
-            b[idx++] = (byte) s;
-            b[idx++] = (byte) (s >>> 8);
-        }
-        return b;
-    }
 }

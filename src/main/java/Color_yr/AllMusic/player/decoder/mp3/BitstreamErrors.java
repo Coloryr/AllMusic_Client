@@ -1,7 +1,7 @@
 /*
- * 09/26/08     throw exception on subbband alloc error: Christopher G. Jennings (cjennings@acm.org)
  * 11/19/04		1.0 moved to LGPL.
- * 12/12/99		Initial version.	mdm@techie.com
+ * 11/17/04		INVALIDFRAME code added.	javalayer@javazoom.net
+ * 12/12/99		Initial version.			mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -19,19 +19,37 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
- * Implementations of FrameDecoder are responsible for decoding
- * an MPEG audio frame.
+ * This interface describes all error codes that can be thrown
+ * in <code>BistreamException</code>s.
+ *
+ * @author MDM        12/12/99
+ * @see BitstreamException
+ * @since 0.0.6
  */
-//REVIEW: the interface currently is too thin. There should be
-// methods to specify the output buffer, the synthesis filters and
-// possibly other objects used by the decoder. 
-public interface FrameDecoder {
+
+public interface BitstreamErrors extends JavaLayerErrors {
+
     /**
-     * Decodes one frame of MPEG audio.
+     * An undeterminable error occurred.
      */
-    void decodeFrame() throws DecoderException;
+    int UNKNOWN_ERROR = BITSTREAM_ERROR;
+
+    /**
+     * A problem occurred reading from the stream.
+     */
+    int STREAM_ERROR = BITSTREAM_ERROR + 2;
+
+    /**
+     * The end of the stream was reached.
+     */
+    int STREAM_EOF = BITSTREAM_ERROR + 4;
+
+    /**
+     * Frame data are missing.
+     */
+    int INVALIDFRAME = BITSTREAM_ERROR + 5;
 
 }

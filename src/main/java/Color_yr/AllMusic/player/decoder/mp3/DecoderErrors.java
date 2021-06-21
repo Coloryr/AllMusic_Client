@@ -1,7 +1,7 @@
 /*
+ * 09/26/08     throw exception on subbband alloc error: Christopher G. Jennings (cjennings@acm.org)
  * 11/19/04		1.0 moved to LGPL.
- * 11/17/04		INVALIDFRAME code added.	javalayer@javazoom.net
- * 12/12/99		Initial version.			mdm@techie.com
+ * 01/12/99		Initial version.	mdm@techie.com
  *-----------------------------------------------------------------------
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
@@ -19,37 +19,24 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
- * This interface describes all error codes that can be thrown
- * in <code>BistreamException</code>s.
+ * This interface provides constants describing the error
+ * codes used by the Decoder to indicate errors.
  *
- * @author MDM        12/12/99
- * @see BitstreamException
- * @since 0.0.6
+ * @author MDM
  */
-
-public interface BitstreamErrors extends JavaLayerErrors {
-
-    /**
-     * An undeterminable error occurred.
-     */
-    int UNKNOWN_ERROR = BITSTREAM_ERROR;
+public interface DecoderErrors extends JavaLayerErrors {
 
     /**
-     * A problem occurred reading from the stream.
+     * Layer not supported by the decoder.
      */
-    int STREAM_ERROR = BITSTREAM_ERROR + 2;
+    int UNSUPPORTED_LAYER = DECODER_ERROR + 1;
 
     /**
-     * The end of the stream was reached.
+     * Illegal allocation in subband layer. Indicates a corrupt stream.
      */
-    int STREAM_EOF = BITSTREAM_ERROR + 4;
-
-    /**
-     * Frame data are missing.
-     */
-    int INVALIDFRAME = BITSTREAM_ERROR + 5;
+    int ILLEGAL_SUBBAND_ALLOCATION = DECODER_ERROR + 2;
 
 }

@@ -18,7 +18,7 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * Instances of <code>BitstreamException</code> are thrown

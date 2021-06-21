@@ -27,7 +27,7 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * Implements decoding of MPEG Audio Layer II frames.

@@ -18,7 +18,13 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
+
+import Color_yr.AllMusic.player.decoder.BuffPack;
+import Color_yr.AllMusic.player.decoder.IDecoder;
+import org.apache.http.client.HttpClient;
+
+import java.net.URL;
 
 /**
  * The <code>Decoder</code> class encapsulates the details of
@@ -28,19 +34,14 @@ package Color_yr.AllMusic.decoder;
  * @version 0.0.7 12/12/99
  * @since 0.0.5
  */
-public class Decoder implements DecoderErrors {
+public class Mp3Decoder implements DecoderErrors, IDecoder {
     static private final Params DEFAULT_PARAMS = new Params();
 
-    /*
-      The Bistream from which the MPEG audio frames are read.
-     */
-    //private Bitstream				stream;
-    private final Equalizer equalizer = new Equalizer();
     /**
      * The Obuffer instance that will receive the decoded
      * PCM samples.
      */
-    private Obuffer output;
+    private SampleBuffer output;
     /**
      * Synthesis filter for the left channel.
      */
@@ -58,60 +59,80 @@ public class Decoder implements DecoderErrors {
     private int outputFrequency;
     private int outputChannels;
     private boolean initialized;
-
+    private Bitstream bitstream;
 
     /**
      * Creates a new <code>Decoder</code> instance with default
      * parameters.
      */
 
-    public Decoder() {
-        this(null);
-    }
-
-    /**
-     * Creates a new <code>Decoder</code> instance with default
-     * parameters.
-     *
-     * @param params0 The <code>Params</code> instance that describes
-     *                the customizable aspects of the decoder.
-     */
-    public Decoder(Params params0) {
-        if (params0 == null)
-            params0 = DEFAULT_PARAMS;
-
-        Params params = params0;
-
-        Equalizer eq = params.getInitialEqualizerSettings();
+    public Mp3Decoder() {
+        Equalizer eq = DEFAULT_PARAMS.getInitialEqualizerSettings();
         if (eq != null) {
+            /*
+      The Bistream from which the MPEG audio frames are read.
+     */
+            //private Bitstream				stream;
+            Equalizer equalizer = new Equalizer();
             equalizer.setFrom(eq);
         }
     }
 
+    private byte[] byteBuf = new byte[4096];
+
+    protected byte[] getByteArray(int length) {
+        if (byteBuf.length < length) {
+            byteBuf = new byte[length + 1024];
+        }
+        return byteBuf;
+    }
+
+    protected byte[] toByteArray(short[] samples, int offs, int len) {
+        byte[] b = getByteArray(len * 2);
+        int idx = 0;
+        short s;
+        while (len-- > 0) {
+            s = samples[offs++];
+            b[idx++] = (byte) s;
+            b[idx++] = (byte) (s >>> 8);
+        }
+        return b;
+    }
+
+    private final BuffPack pack = new BuffPack();
+
     /**
      * Decodes one frame from an MPEG audio bitstream.
      *
-     * @param header The header describing the frame to decode.
-     * @param stream The bistream that provides the bits for te body of the frame.
      * @return A SampleBuffer containing the decoded samples.
      */
-    public Obuffer decodeFrame(Header header, Bitstream stream)
-            throws DecoderException {
+    public BuffPack decodeFrame()
+            throws Exception {
+        Header header = bitstream.readFrame();
+        if (header == null)
+            return null;
         if (!initialized) {
             initialize(header);
         }
 
         int layer = header.layer();
-
         output.clear_buffer();
-
-        FrameDecoder decoder = retrieveDecoder(header, stream, layer);
-
+        FrameDecoder decoder = retrieveDecoder(header, bitstream, layer);
         decoder.decodeFrame();
+        bitstream.closeFrame();
+        pack.buff = toByteArray(output.getBuffer(), 0, output.getBufferLength());
+        pack.len = output.getBufferLength() * 2;
+        return pack;
+    }
 
-        output.write_buffer(1);
+    @Override
+    public void close() throws Exception {
+        bitstream.close();
+    }
 
-        return output;
+    @Override
+    public void set(HttpClient client, URL url) throws Exception {
+        bitstream = new Bitstream(client, url);
     }
 
     /**

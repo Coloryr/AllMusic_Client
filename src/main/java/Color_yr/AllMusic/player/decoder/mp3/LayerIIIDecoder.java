@@ -32,7 +32,7 @@
  *----------------------------------------------------------------------
  */
 
-package Color_yr.AllMusic.decoder;
+package Color_yr.AllMusic.player.decoder.mp3;
 
 /**
  * Class Implementing Layer 3 Decoder.
@@ -461,8 +461,6 @@ final class LayerIIIDecoder implements FrameDecoder {
                 }
             }
         }
-
-        buffer.write_buffer(1);
     }
 
     /**
