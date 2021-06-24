@@ -67,6 +67,7 @@ public class Hud {
 
                 byteBuffer.flip();
                 inputStream.close();
+                Thread.sleep(500);
                 Minecraft.getInstance().execute(() -> {
                     GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
                     GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);

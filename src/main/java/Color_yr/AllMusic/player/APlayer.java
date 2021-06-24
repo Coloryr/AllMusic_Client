@@ -6,9 +6,7 @@ import Color_yr.AllMusic.player.decoder.flac.DataFormatException;
 import Color_yr.AllMusic.player.decoder.flac.FlacDecoder;
 import Color_yr.AllMusic.player.decoder.mp3.Mp3Decoder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.*;
 import net.minecraft.util.SoundCategory;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.BufferUtils;
@@ -73,17 +71,8 @@ public class APlayer {
                 IntBuffer intBuffer;
 
                 // Clear out any previously queued buffers:
-                int processed = AL10.alGetSourcei(index,
-                        AL10.AL_BUFFERS_PROCESSED);
-                if (processed > 0) {
-                    intBuffer = BufferUtils.createIntBuffer(processed);
-                    AL10.alGenBuffers(intBuffer);
-                    AL10.alSourceUnqueueBuffers(index, intBuffer);
-                    AL10.alIsBuffer(intBuffer.get(0));
-                } else {
-                    intBuffer = BufferUtils.createIntBuffer(1);
-                    AL10.alGenBuffers(intBuffer);
-                }
+                intBuffer = BufferUtils.createIntBuffer(1);
+                AL10.alGenBuffers(intBuffer);
 
                 int soundFormat = 0;
                 if (audioformat.getChannels() == 1) {
@@ -92,7 +81,7 @@ public class APlayer {
                     } else if (audioformat.getSampleSizeInBits() == 16) {
                         soundFormat = AL10.AL_FORMAT_MONO16;
                     } else {
-                        return;
+                        break;
                     }
                 } else if (audioformat.getChannels() == 2) {
                     if (audioformat.getSampleSizeInBits() == 8) {
@@ -100,16 +89,16 @@ public class APlayer {
                     } else if (audioformat.getSampleSizeInBits() == 16) {
                         soundFormat = AL10.AL_FORMAT_STEREO16;
                     } else {
-                        return;
+                        break;
                     }
                 } else {
-                    return;
+                    break;
                 }
 
                 AL10.alBufferData(intBuffer.get(0), soundFormat, byteBuffer, (int) audioformat.getSampleRate());
 
                 AL10.alSourceQueueBuffers(index, intBuffer);
-                AL10.alSourcef(index,AL10.AL_GAIN,Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.MASTER));
+                AL10.alSourcef(index, AL10.AL_GAIN, Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.MASTER));
                 if (AL10.alGetSourcei(index,
                         AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
                     AL10.alSourcePlay(index);
@@ -120,6 +109,11 @@ public class APlayer {
                 break;
             }
         }
+        if (!isClose)
+            if (decoder != null) {
+                decoder.close();
+                decoder = null;
+            }
         while (AL10.alGetSourcei(index,
                 AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
             Thread.sleep(10);
