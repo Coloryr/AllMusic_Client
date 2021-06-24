@@ -13,6 +13,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -25,28 +26,13 @@ import java.util.function.Supplier;
 
 @Mod("allmusic")
 public class AllMusic {
-    private static final APlayer nowPlaying = new APlayer();
+    private static APlayer nowPlaying;
     private static URL nowURL;
     public static boolean isPlay = false;
-    public static int v = -1;
-
-    public final Thread thread = new Thread(() -> {
-        while (true) {
-            try {
-                int nowV = (int) (Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.RECORDS) *
-                        Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.MASTER) * 100);
-                if (v != nowV) {
-                    nowPlaying.Set(nowV);
-                }
-                Thread.sleep(100);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    });
 
     public AllMusic() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup1);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -54,7 +40,10 @@ public class AllMusic {
         SimpleChannel channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("allmusic", "channel"),
                 () -> "1.0", s -> true, s -> true);
         channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
-        thread.start();
+    }
+
+    private void setup1(final FMLLoadCompleteEvent event) {
+        nowPlaying = new APlayer();
     }
 
     private void enc(String str, PacketBuffer buffer) {

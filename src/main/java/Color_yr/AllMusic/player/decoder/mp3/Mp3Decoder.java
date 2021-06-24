@@ -109,12 +109,8 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     public BuffPack decodeFrame()
             throws Exception {
         Header header = bitstream.readFrame();
-        if (header == null)
+        if(header == null)
             return null;
-        if (!initialized) {
-            initialize(header);
-        }
-
         int layer = header.layer();
         output.clear_buffer();
         FrameDecoder decoder = retrieveDecoder(header, bitstream, layer);
@@ -133,6 +129,10 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     @Override
     public void set(HttpClient client, URL url) throws Exception {
         bitstream = new Bitstream(client, url);
+        Header header = bitstream.readFrame();
+        if (!initialized) {
+            initialize(header);
+        }
     }
 
     /**

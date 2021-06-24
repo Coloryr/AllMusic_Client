@@ -29,7 +29,6 @@ import org.apache.http.client.methods.HttpGet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Objects;
 
 
 /**
@@ -150,21 +149,21 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
     @Override
     public BuffPack decodeFrame() throws Exception {
-		int blockSamples = readAudioBlock(samples, 0);
-		int sampleBytesLen = 0;
-		for (int i = 0; i < blockSamples; i++) {
-			for (int ch = 0; ch < streamInfo.numChannels; ch++) {
-				int val = samples[ch][i];
-				float temp = val / 16777216f;
-				val = (int) (temp * 0x7FFF);
-				for (int j = 0; j < 2; j++, sampleBytesLen++)
-					sampleBytes[sampleBytesLen] = (byte) (val >>> (j << 3));
-			}
-		}
-		pack.len = sampleBytesLen;
-		pack.buff = sampleBytes;
-		return pack;
-	}
+        int blockSamples = readAudioBlock(samples, 0);
+        int sampleBytesLen = 0;
+        for (int i = 0; i < blockSamples; i++) {
+            for (int ch = 0; ch < streamInfo.numChannels; ch++) {
+                int val = samples[ch][i];
+                float temp = val / 16777216f;
+                val = (int) (temp * 0x7FFF);
+                for (int j = 0; j < 2; j++, sampleBytesLen++)
+                    sampleBytes[sampleBytesLen] = (byte) (val >>> (j << 3));
+            }
+        }
+        pack.len = sampleBytesLen;
+        pack.buff = sampleBytes;
+        return pack;
+    }
 
     // Closes the underlying input streams and discards object data.
     // This decoder object becomes invalid for any method calls or field usages.
