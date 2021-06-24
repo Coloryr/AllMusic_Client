@@ -122,7 +122,7 @@ public class Hud {
             }
             if (save.isEnablePic() && haveImg) {
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GL11.glPushMatrix();
                 GL11.glTranslatef((float) save.getPic().getX(), (float) save.getPic().getY(), 0.0f);
                 GL11.glBegin(7);
