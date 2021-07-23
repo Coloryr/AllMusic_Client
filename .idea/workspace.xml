@@ -5,45 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="092cf627-79a1-4146-9b0d-6c371989a98b" name="默认变更列表" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/AllMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/AllMusic.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/Hud/Hud.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/Hud/Hud.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/APlayer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/BuffPack.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/IDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/AbstractFlacLowLevelInput.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/ByteArrayFlacInput.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/DataFormatException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/FlacDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/FlacLowLevelInput.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/FrameDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/FrameInfo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/SeekTable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/SeekableFileFlacInput.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/flac/StreamInfo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/BitReserve.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/Bitstream.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/BitstreamErrors.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/BitstreamException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/Crc16.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/DecoderErrors.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/DecoderException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/Equalizer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/FrameDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/Header.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/JavaLayerErrors.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/JavaLayerException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/JavaLayerHook.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/JavaLayerUtils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/LayerIDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/LayerIIDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/LayerIIIDecoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/Mp3Decoder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/Obuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/OutputChannels.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/SampleBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/SynthesisFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/decoder/mp3/huffcodetab.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/APlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Color_yr/AllMusic/player/APlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/mods.toml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/mods.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +50,12 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AllMusic_M" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="forgegradle runs" type="c8890929:TasksNode$1" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -111,7 +88,7 @@
       <recent name="E:\java-src\AllMusic_M\src\main\java\Color_yr\AllMusic" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.AllMusic_M [build]">
+  <component name="RunManager" selected="Gradle.AllMusic_M [runClient]">
     <configuration name="AllMusic_M [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -154,12 +131,58 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="AllMusic_M [runClient]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runClient" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="AllMusic_M [runServer]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runServer" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Gradle.AllMusic_M [build]" />
       <item itemvalue="Gradle.AllMusic_M [assemble]" />
+      <item itemvalue="Gradle.AllMusic_M [runServer]" />
+      <item itemvalue="Gradle.AllMusic_M [runClient]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.AllMusic_M [runClient]" />
+        <item itemvalue="Gradle.AllMusic_M [runServer]" />
         <item itemvalue="Gradle.AllMusic_M [build]" />
         <item itemvalue="Gradle.AllMusic_M [assemble]" />
       </list>

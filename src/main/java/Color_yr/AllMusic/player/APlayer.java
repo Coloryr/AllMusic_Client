@@ -6,7 +6,7 @@ import Color_yr.AllMusic.player.decoder.flac.DataFormatException;
 import Color_yr.AllMusic.player.decoder.flac.FlacDecoder;
 import Color_yr.AllMusic.player.decoder.mp3.Mp3Decoder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.sounds.SoundSource;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.BufferUtils;
@@ -98,7 +98,7 @@ public class APlayer {
                 AL10.alBufferData(intBuffer.get(0), soundFormat, byteBuffer, (int) audioformat.getSampleRate());
 
                 AL10.alSourceQueueBuffers(index, intBuffer);
-                AL10.alSourcef(index, AL10.AL_GAIN, Minecraft.getInstance().options.getSoundSourceVolume(SoundCategory.MASTER));
+                AL10.alSourcef(index, AL10.AL_GAIN, Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.MASTER));
                 if (AL10.alGetSourcei(index,
                         AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
                     AL10.alSourcePlay(index);

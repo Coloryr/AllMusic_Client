@@ -1,12 +1,10 @@
 package Color_yr.AllMusic.Hud;
 
 import com.google.gson.Gson;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
@@ -26,7 +24,7 @@ public class Hud {
     public static boolean haveImg;
     public static final Object lock = new Object();
 
-    private static MatrixStack stack = new MatrixStack();
+    private static final PoseStack stack = new PoseStack();
 
     static {
         textureID = GL11.glGenTextures();
@@ -90,7 +88,7 @@ public class Hud {
     }
 
     public static void update() {
-        FontRenderer hud = Minecraft.getInstance().font;
+        Font hud = Minecraft.getInstance().font;
         if (save == null)
             return;
         synchronized (lock) {

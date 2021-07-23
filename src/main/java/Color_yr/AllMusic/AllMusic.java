@@ -3,9 +3,9 @@ package Color_yr.AllMusic;
 import Color_yr.AllMusic.Hud.Hud;
 import Color_yr.AllMusic.player.APlayer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,9 +15,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -46,11 +46,11 @@ public class AllMusic {
         nowPlaying = new APlayer();
     }
 
-    private void enc(String str, PacketBuffer buffer) {
+    private void enc(String str, FriendlyByteBuf buffer) {
         buffer.writeBytes(str.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String dec(PacketBuffer buffer) {
+    private String dec(FriendlyByteBuf buffer) {
         return buffer.toString(StandardCharsets.UTF_8);
     }
 
@@ -64,11 +64,9 @@ public class AllMusic {
     public void onSound(final SoundEvent.SoundSourceEvent e) {
         if (!isPlay)
             return;
-        SoundCategory data = e.getSound().getSource();
+        SoundSource data = e.getSound().getSource();
         switch (data) {
-            case MUSIC:
-            case RECORDS:
-                e.getSource().stop();
+            case MUSIC, RECORDS -> e.getSource().stop();
         }
     }
 
@@ -107,8 +105,8 @@ public class AllMusic {
                 if (message.equals("[Stop]")) {
                     stopPlaying();
                 } else if (message.startsWith("[Play]")) {
-                    Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.MUSIC);
-                    Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.RECORDS);
+                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
                     stopPlaying();
                     nowURL = new URL(message.replace("[Play]", ""));
                     nowURL = Get(nowURL);
