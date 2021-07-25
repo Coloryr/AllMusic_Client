@@ -1,7 +1,6 @@
 package Color_yr.AllMusic.player;
 
 import Color_yr.AllMusic.AllMusic;
-import Color_yr.AllMusic.player.decoder.BuffPack;
 import Color_yr.AllMusic.player.decoder.IDecoder;
 import Color_yr.AllMusic.player.decoder.flac.DataFormatException;
 import Color_yr.AllMusic.player.decoder.flac.FlacDecoder;
@@ -15,7 +14,6 @@ import org.lwjgl.openal.AL10;
 
 import javax.sound.sampled.AudioFormat;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class APlayer {

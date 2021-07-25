@@ -3,7 +3,6 @@ package Color_yr.AllMusic.Hud;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 

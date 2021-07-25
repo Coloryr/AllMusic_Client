@@ -17,7 +17,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.minecraftforge.fmllegacy.network.NetworkRegistry;
-import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.net.HttpURLConnection;
 import java.net.URL;

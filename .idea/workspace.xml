@@ -77,7 +77,7 @@
       <recent name="E:\java-src\AllMusic_M\src\main\java\Color_yr\AllMusic" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.AllMusic_M [runClient]">
+  <component name="RunManager" selected="Gradle.AllMusic_M [build]">
     <configuration name="AllMusic_M [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -170,9 +170,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.AllMusic_M [build]" />
         <item itemvalue="Gradle.AllMusic_M [runClient]" />
         <item itemvalue="Gradle.AllMusic_M [runServer]" />
-        <item itemvalue="Gradle.AllMusic_M [build]" />
         <item itemvalue="Gradle.AllMusic_M [assemble]" />
       </list>
     </recent_temporary>
