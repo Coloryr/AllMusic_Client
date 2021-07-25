@@ -88,7 +88,7 @@ public class Hud {
     }
 
     public static void update() {
-        Font hud = Minecraft.getInstance().font;
+        var hud = Minecraft.getInstance().font;
         if (save == null)
             return;
         synchronized (lock) {

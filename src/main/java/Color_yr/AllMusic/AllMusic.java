@@ -37,7 +37,7 @@ public class AllMusic {
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        SimpleChannel channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("allmusic", "channel"),
+        var channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("allmusic", "channel"),
                 () -> "1.0", s -> true, s -> true);
         channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
     }
@@ -100,7 +100,7 @@ public class AllMusic {
     }
 
     private void onClicentPacket(final String message) {
-        final Thread asyncThread = new Thread(() -> {
+        final var asyncThread = new Thread(() -> {
             try {
                 if (message.equals("[Stop]")) {
                     stopPlaying();

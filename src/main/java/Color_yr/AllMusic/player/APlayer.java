@@ -59,13 +59,13 @@ public class APlayer {
                 if (isClose)
                     break;
 
-                BuffPack output = decoder.decodeFrame();
+                var output = decoder.decodeFrame();
                 if (output == null)
                     break;
 
                 // Stream buffers can only be queued for streaming sources:
 
-                ByteBuffer byteBuffer = (ByteBuffer) BufferUtils.createByteBuffer(
+                var byteBuffer = BufferUtils.createByteBuffer(
                         output.len).put(output.buff, 0, output.len).flip();
 
                 IntBuffer intBuffer;
