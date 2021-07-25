@@ -157,8 +157,7 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
                 if (streamInfo.sampleDepth == 24) {
                     float temp = val / 16777216f;
                     val = (int) (temp * 0x7FFF);
-                }
-                else if (streamInfo.sampleDepth == 32) {
+                } else if (streamInfo.sampleDepth == 32) {
                     float temp = val / 1099511627776f;
                     val = (int) (temp * 0x7FFF);
                 }

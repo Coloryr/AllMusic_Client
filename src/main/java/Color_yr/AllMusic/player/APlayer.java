@@ -1,5 +1,6 @@
 package Color_yr.AllMusic.player;
 
+import Color_yr.AllMusic.AllMusic;
 import Color_yr.AllMusic.player.decoder.BuffPack;
 import Color_yr.AllMusic.player.decoder.IDecoder;
 import Color_yr.AllMusic.player.decoder.flac.DataFormatException;
@@ -54,6 +55,7 @@ public class APlayer {
     }
 
     public void play() throws Exception {
+        AllMusic.isPlay = true;
         while (true) {
             try {
                 if (isClose)
@@ -134,5 +136,6 @@ public class APlayer {
         AL10.alDeleteSources(index);
         if (decoder != null)
             decoder.close();
+        AllMusic.isPlay = false;
     }
 }
