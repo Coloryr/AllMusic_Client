@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
@@ -121,23 +122,11 @@ public class Hud {
                 }
             }
             if (save.isEnablePic() && haveImg) {
-//                GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-//                GuiComponent.blit(stack);
-//                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-//                GL11.glPushMatrix();
-//                GL11.glTranslatef((float) save.getPic().getX(), (float) save.getPic().getY(), 0.0f);
-//                GL11.glBegin(7);
-//                GL11.glTexCoord2f(0.0f, 0.0f);
-//                GL11.glVertex3f(0.0f, 0.0f, 0.0f);
-//                GL11.glTexCoord2f(0.0f, 1.0f);
-//                GL11.glVertex3f(0.0f, (float) 70, 0.0f);
-//                GL11.glTexCoord2f(1.0f, 1.0f);
-//                GL11.glVertex3f((float) 70, (float) 70, 0.0f);
-//                GL11.glTexCoord2f(1.0f, 0.0f);
-//                GL11.glVertex3f((float) 70, 0.0f, 0.0f);
-//                GL11.glEnd();
-//                GL11.glPopMatrix();
-//                GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.setShaderTexture(0, textureID);
+                GuiComponent.blit(stack, save.getPic().getX(), save.getPic().getY(),
+                        0, 0, 0, 70, 70, 70, 70);
             }
         }
     }
