@@ -63,7 +63,7 @@
     <property name="project.structure.proportion" value="0.1484375" />
     <property name="project.structure.side.proportion" value="0.26865673" />
   </component>
-  <component name="RunManager" selected="Gradle.AllMusic_M [runClient]">
+  <component name="RunManager" selected="Gradle.AllMusic_M [build]">
     <configuration name="AllMusic_M [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -112,8 +112,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.AllMusic_M [runClient]" />
         <item itemvalue="Gradle.AllMusic_M [build]" />
+        <item itemvalue="Gradle.AllMusic_M [runClient]" />
       </list>
     </recent_temporary>
   </component>
