@@ -156,6 +156,15 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
         return outputChannels;
     }
 
+    @Override
+    public void set(int time) {
+        try {
+            long data = (long) (time / 26) * bitstream.getframesize();
+            bitstream.setLocal(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     protected DecoderException newDecoderException() {
         return new DecoderException(UNSUPPORTED_LAYER, null);

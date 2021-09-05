@@ -39,6 +39,7 @@ import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.*;
@@ -88,8 +89,9 @@ public final class Bitstream implements BitstreamErrors {
      */
     private final byte[] frame_bytes = new byte[BUFFER_INT_SIZE * 4];
     private final Crc16[] crc = new Crc16[1];
-    private final HttpGet get;
+    private HttpGet get;
     private final HttpClient client;
+    private final URL url;
     private PushbackInputStream source;
     //private int 			current_frame_number;
     //private int				last_frame_number;
@@ -125,7 +127,12 @@ public final class Bitstream implements BitstreamErrors {
      */
     public Bitstream(HttpClient client, URL url) throws Exception {
         this.client = client;
+        this.url = url;
         get = new HttpGet(url.toString());
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(2000)
+                .setConnectTimeout(2000).build();
+        get.setConfig(requestConfig);
         HttpResponse response = this.client.execute(get);
         HttpEntity entity = response.getEntity();
         content = entity.getContent();
@@ -135,6 +142,11 @@ public final class Bitstream implements BitstreamErrors {
         source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
 
         closeFrame();
+    }
+
+    public int getframesize()
+    {
+        return framesize;
     }
 
     /**
@@ -549,5 +561,25 @@ public final class Bitstream implements BitstreamErrors {
             throw newBitstreamException(STREAM_ERROR, ex);
         }
         return totalBytesRead;
+    }
+
+    public void setLocal(long local) {
+        try {
+            this.get.abort();
+            get = new HttpGet(url.toString());
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(2000)
+                    .setConnectTimeout(2000).build();
+            get.setConfig(requestConfig);
+            this.local = local;
+            this.get.setHeader("Range", "bytes=" + local + "-");
+            HttpResponse response;
+            response = this.client.execute(get);
+            HttpEntity entity = response.getEntity();
+            content = entity.getContent();
+            source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

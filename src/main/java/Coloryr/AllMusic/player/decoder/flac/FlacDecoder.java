@@ -23,6 +23,7 @@ package Coloryr.AllMusic.player.decoder.flac;
 
 import Coloryr.AllMusic.player.decoder.BuffPack;
 import Coloryr.AllMusic.player.decoder.IDecoder;
+import Coloryr.AllMusic.player.decoder.mp3.Header;
 import org.apache.http.client.HttpClient;
 
 import java.io.IOException;
@@ -204,5 +205,10 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
     @Override
     public int getOutputChannels() {
         return streamInfo.numChannels;
+    }
+
+    @Override
+    public void set(int time) {
+
     }
 }

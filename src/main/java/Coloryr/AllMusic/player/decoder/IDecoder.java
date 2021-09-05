@@ -1,5 +1,6 @@
 package Coloryr.AllMusic.player.decoder;
 
+import Coloryr.AllMusic.player.decoder.mp3.Header;
 import org.apache.http.client.HttpClient;
 
 import java.net.URL;
@@ -14,4 +15,6 @@ public interface IDecoder {
     int getOutputFrequency();
 
     int getOutputChannels();
+
+    void set(int time);
 }
