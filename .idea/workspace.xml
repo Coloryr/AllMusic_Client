@@ -5,55 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a802f46-9f68-41e3-b6f5-fcc4d6a66ded" name="默认变更列表" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/AllMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/Hud/HudUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/Hud/PosOBJ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/PosOBJ.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/Hud/SaveOBJ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/SaveOBJ.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/APlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/BuffPack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/BuffPack.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/IDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/IDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/AbstractFlacLowLevelInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/AbstractFlacLowLevelInput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/ByteArrayFlacInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/ByteArrayFlacInput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/DataFormatException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/DataFormatException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/FlacDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/FlacDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/FlacLowLevelInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/FlacLowLevelInput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/FrameDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/FrameDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/FrameInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/FrameInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/SeekTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/SeekTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/SeekableFileFlacInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/SeekableFileFlacInput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/flac/StreamInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/StreamInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/BitReserve.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/BitReserve.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/Bitstream.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Bitstream.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/BitstreamErrors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/BitstreamErrors.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/BitstreamException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/BitstreamException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/Crc16.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Crc16.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/DecoderErrors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/DecoderErrors.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/DecoderException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/DecoderException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/Equalizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Equalizer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/FrameDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/FrameDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/Header.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Header.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/JavaLayerErrors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/JavaLayerErrors.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/JavaLayerException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/JavaLayerException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/JavaLayerHook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/JavaLayerHook.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/JavaLayerUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/JavaLayerUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/LayerIDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/LayerIDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/LayerIIDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/LayerIIDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/LayerIIIDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/LayerIIIDecoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/Mp3Decoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Mp3Decoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/Obuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Obuffer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/OutputChannels.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/OutputChannels.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/SampleBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/SampleBuffer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/SynthesisFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/SynthesisFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Coloryr/AllMusic/player/decoder/mp3/huffcodetab.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/huffcodetab.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Coloryr/AllMusic/player/decoder/mp3/au2lin.ser" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/coloryr/allmusic/player/decoder/mp3/au2lin.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Coloryr/AllMusic/player/decoder/mp3/l3reorder.ser" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/coloryr/allmusic/player/decoder/mp3/l3reorder.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Coloryr/AllMusic/player/decoder/mp3/lin2au.ser" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/coloryr/allmusic/player/decoder/mp3/lin2au.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Coloryr/AllMusic/player/decoder/mp3/sfd.ser" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/coloryr/allmusic/player/decoder/mp3/sfd.ser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/mods.toml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/mods.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" afterDir="false" />
     </list>
@@ -91,6 +47,12 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AllMusic_M" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="forgegradle runs" type="c8890929:TasksNode$1" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -113,19 +75,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="dart.analysis.tool.window.visible" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="项目" />
-    <property name="project.structure.proportion" value="0.1484375" />
-    <property name="project.structure.side.proportion" value="0.26865673" />
-    <property name="show.migrate.to.gradle.popup" value="false" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/code/AllMusic_M&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  }
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\code\AllMusic_M" />
       <recent name="E:\java-src\AllMusic_M\src\main\java\Coloryr\AllMusic" />
     </key>
   </component>
@@ -142,6 +110,27 @@
         <option name="taskNames">
           <list>
             <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="AllMusic_M [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -173,12 +162,14 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Gradle.AllMusic_M [clean]" />
       <item itemvalue="Gradle.AllMusic_M [build]" />
       <item itemvalue="Gradle.AllMusic_M [runClient]" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.AllMusic_M [build]" />
+        <item itemvalue="Gradle.AllMusic_M [clean]" />
         <item itemvalue="Gradle.AllMusic_M [runClient]" />
       </list>
     </recent_temporary>
@@ -191,8 +182,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1627213237754</updated>
+      <workItem from="1654872957264" duration="1128000" />
+      <workItem from="1654917461572" duration="1378000" />
+      <workItem from="1654931914212" duration="169000" />
+      <workItem from="1655032247159" duration="1170000" />
+      <workItem from="1655171556048" duration="598000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
