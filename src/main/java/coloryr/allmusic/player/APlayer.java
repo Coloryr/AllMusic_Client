@@ -65,9 +65,7 @@ public class APlayer {
                 semaphore.acquire();
                 if (urls.size() > 0) {
                     AllMusic.isPlay = true;
-                    if (index == -1) {
-                        index = AL10.alGenSources();
-                    }
+                    index = AL10.alGenSources();
                     url = urls.remove(urls.size() - 1);
                     urls.clear();
                     try {
@@ -151,6 +149,7 @@ public class APlayer {
                             AL10.alDeleteBuffers(temp);
                             m_numqueued--;
                         }
+                        AL10.alDeleteSources(index);
                         decoder.close();
                     } catch (Exception e) {
                         e.printStackTrace();
