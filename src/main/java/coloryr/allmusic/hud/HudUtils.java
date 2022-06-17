@@ -151,8 +151,9 @@ public class HudUtils {
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 RenderSystem.setShaderTexture(0, textureID);
+                int size = save.getPicSize();
                 GuiComponent.blit(stack, save.getPic().getX(), save.getPic().getY(),
-                        0, 0, 0, 70, 70, 70, 70);
+                        0, 0, 0, size, size, size, size);
             }
         }
     }
