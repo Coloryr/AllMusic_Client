@@ -123,13 +123,13 @@ public class AllMusic {
                     if (nowURL == null)
                         return;
                     stopPlaying();
-                    nowPlaying.SetMusic(nowURL);
+                    nowPlaying.setMusic(nowURL);
                 } else if (message.startsWith("[Lyric]")) {
                     HudUtils.Lyric = message.substring(7);
                 } else if (message.startsWith("[Info]")) {
                     HudUtils.Info = message.substring(6);
                 } else if (message.startsWith("[Img]")) {
-                    HudUtils.SetImg(message.substring(5));
+                    HudUtils.setImg(message.substring(5));
                 } else if (message.startsWith("[Pos]")) {
                     nowPlaying.set(message.substring(5));
                 } else if (message.startsWith("[List]")) {
@@ -138,7 +138,7 @@ public class AllMusic {
                     HudUtils.Lyric = HudUtils.Info = HudUtils.List = "";
                     HudUtils.haveImg = false;
                 } else if (message.startsWith("{")) {
-                    HudUtils.Set(message);
+                    HudUtils.setPos(message);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

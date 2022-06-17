@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Semaphore;
 
 public class HudUtils {
     public String Info = "";
@@ -25,65 +28,88 @@ public class HudUtils {
     private int textureID = -1;
     public boolean haveImg;
     public final Object lock = new Object();
-
     private final PoseStack stack = new PoseStack();
+    private final Queue<String> urlList= new ConcurrentLinkedDeque<>();
+    private final Semaphore semaphore = new Semaphore(0);
 
+    public HudUtils(){;
+        Thread thread = new Thread(this::run);
+        thread.setName("allmusic_pic");
+        thread.start();
+    }
 
     public void stop() {
         haveImg = false;
         Info = List = Lyric = "";
     }
 
-    public void SetImg(String picUrl) {
+    private void loadPic(String picUrl){
+        try {
+            URL url = new URL(picUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(4 * 1000);
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
+            connection.setRequestProperty("Host", "music.163.com");
+            connection.connect();
+            InputStream inputStream = connection.getInputStream();
+            BufferedImage image = ImageIO.read(inputStream);
+            int[] pixels = new int[image.getWidth() * image.getHeight()];
+            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+            byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
 
-        if (picUrl != null) {
+            for (int h = 0; h < image.getHeight(); h++) {
+                for (int w = 0; w < image.getWidth(); w++) {
+                    int pixel = pixels[h * image.getWidth() + w];
+
+                    byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
+                    byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
+                    byteBuffer.put((byte) (pixel & 0xFF));
+                    byteBuffer.put((byte) ((pixel >> 24) & 0xFF));
+                }
+            }
+
+            byteBuffer.flip();
+            inputStream.close();
+            Minecraft.getInstance().execute(() -> {
+                if (textureID == -1) {
+                    textureID = GL11.glGenTextures();
+                }
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+
+                GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
+                haveImg = true;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            haveImg = false;
+        }
+    }
+
+    private void run() {
+        while (true) {
             try {
-                URL url = new URL(picUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setConnectTimeout(4 * 1000);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
-                connection.setRequestProperty("Host", "music.163.com");
-                connection.connect();
-                InputStream inputStream = connection.getInputStream();
-                BufferedImage image = ImageIO.read(inputStream);
-                int[] pixels = new int[image.getWidth() * image.getHeight()];
-                image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-                byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
-
-                for (int h = 0; h < image.getHeight(); h++) {
-                    for (int w = 0; w < image.getWidth(); w++) {
-                        int pixel = pixels[h * image.getWidth() + w];
-
-                        byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
-                        byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
-                        byteBuffer.put((byte) (pixel & 0xFF));
-                        byteBuffer.put((byte) ((pixel >> 24) & 0xFF));
+                semaphore.acquire();
+                while (!urlList.isEmpty()) {
+                    String picUrl = urlList.poll();
+                    if (picUrl != null) {
+                        loadPic(picUrl);
                     }
                 }
-
-                byteBuffer.flip();
-                inputStream.close();
-                Thread.sleep(500);
-                Minecraft.getInstance().execute(() -> {
-                    if (textureID == -1) {
-                        textureID = GL11.glGenTextures();
-                    }
-                    GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-                    GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
-
-                    GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
-                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
-                    haveImg = true;
-                });
             } catch (Exception e) {
                 e.printStackTrace();
-                haveImg = false;
             }
         }
     }
 
-    public void Set(String data) {
+    public void setImg(String picUrl) {
+        urlList.add(picUrl);
+        semaphore.release();
+    }
+
+    public void setPos(String data) {
         synchronized (lock) {
             save = new Gson().fromJson(data, SaveOBJ.class);
         }

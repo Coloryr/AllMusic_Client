@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a802f46-9f68-41e3-b6f5-fcc4d6a66ded" name="默认变更列表" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/mods.toml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/mods.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,12 +44,6 @@
                 <item name="AllMusic_M" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="AllMusic_M" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="forgegradle runs" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -103,7 +95,7 @@
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="scriptParameters" value="" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -161,10 +153,21 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="未命名" type="Remote" nameIsGenerated="true">
+      <module name="AllMusic_M" />
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5015" />
+      <option name="AUTO_RESTART" value="false" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Gradle.AllMusic_M [clean]" />
       <item itemvalue="Gradle.AllMusic_M [build]" />
       <item itemvalue="Gradle.AllMusic_M [runClient]" />
+      <item itemvalue="远程 JVM 调试.未命名" />
     </list>
     <recent_temporary>
       <list>
@@ -187,6 +190,7 @@
       <workItem from="1654931914212" duration="169000" />
       <workItem from="1655032247159" duration="1170000" />
       <workItem from="1655171556048" duration="598000" />
+      <workItem from="1655453730927" duration="2210000" />
     </task>
     <servers />
   </component>

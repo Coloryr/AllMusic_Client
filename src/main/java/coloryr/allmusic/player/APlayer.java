@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class APlayer {
 
@@ -29,6 +30,9 @@ public class APlayer {
     private final List<URL> urls = new ArrayList<>();
     private int time;
     private URL url;
+
+    private final Semaphore semaphore = new Semaphore(0);
+    private int index = -1;
 
     public APlayer() {
         try {
@@ -52,14 +56,18 @@ public class APlayer {
         close();
         this.time = time;
         urls.add(url);
+        semaphore.release();
     }
 
     private void run() {
         while (true) {
             try {
-                int index;
+                semaphore.acquire();
                 if (urls.size() > 0) {
                     AllMusic.isPlay = true;
+                    if (index == -1) {
+                        index = AL10.alGenSources();
+                    }
                     url = urls.remove(urls.size() - 1);
                     urls.clear();
                     try {
@@ -74,7 +82,6 @@ public class APlayer {
                             decoder.getOutputChannels(),
                             true,
                             false);
-                    index = AL10.alGenSources();
                     if (time != 0) {
                         decoder.set(time);
                     }
@@ -144,7 +151,6 @@ public class APlayer {
                             AL10.alDeleteBuffers(temp);
                             m_numqueued--;
                         }
-                        AL10.alDeleteSources(index);
                         decoder.close();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -159,11 +165,12 @@ public class APlayer {
         }
     }
 
-    public void SetMusic(URL url) {
+    public void setMusic(URL url) {
         time = 0;
         this.url = url;
         urls.add(url);
         isClose = true;
+        semaphore.release();
     }
 
     public void close() {
