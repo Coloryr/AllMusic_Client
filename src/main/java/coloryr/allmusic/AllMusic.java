@@ -4,6 +4,7 @@ import coloryr.allmusic.hud.HudUtils;
 import coloryr.allmusic.player.APlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -39,6 +40,14 @@ public class AllMusic {
         modEventBus.addListener(this::setup1);
 
         MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    public static void sendMessage(String data) {
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(data));
+        });
     }
 
     private void setup(final FMLClientSetupEvent event) {

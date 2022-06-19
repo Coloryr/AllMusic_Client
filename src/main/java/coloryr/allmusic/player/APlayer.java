@@ -5,9 +5,13 @@ import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
 import coloryr.allmusic.player.decoder.flac.DataFormatException;
 import coloryr.allmusic.player.decoder.flac.FlacDecoder;
+import coloryr.allmusic.player.decoder.mp3.BitstreamException;
 import coloryr.allmusic.player.decoder.mp3.Mp3Decoder;
+import coloryr.allmusic.player.decoder.ogg.OggDecoder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+import net.minecraftforge.fml.loading.targets.FMLClientLaunchHandler;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.BufferUtils;
@@ -64,17 +68,28 @@ public class APlayer {
             try {
                 semaphore.acquire();
                 if (urls.size() > 0) {
-                    AllMusic.isPlay = true;
-                    index = AL10.alGenSources();
                     url = urls.remove(urls.size() - 1);
                     urls.clear();
                     try {
                         decoder = new FlacDecoder();
                         decoder.set(client, url);
                     } catch (DataFormatException e) {
-                        decoder = new Mp3Decoder();
-                        decoder.set(client, url);
+                        try {
+                            decoder = new OggDecoder();
+                            decoder.set(client, url);
+                        } catch (DataFormatException e1) {
+                            try {
+                                decoder = new Mp3Decoder();
+                                decoder.set(client, url);
+                            } catch (DataFormatException e2) {
+                                AllMusic.sendMessage("[AllMusic客户端]不支持这样的文件播放");
+                                continue;
+                            }
+                        }
                     }
+
+                    AllMusic.isPlay = true;
+                    index = AL10.alGenSources();
                     AudioFormat audioformat = new AudioFormat(decoder.getOutputFrequency(),
                             16,
                             decoder.getOutputChannels(),

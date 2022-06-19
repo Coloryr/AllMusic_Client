@@ -5,7 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a802f46-9f68-41e3-b6f5-fcc4d6a66ded" name="默认变更列表" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Mp3Decoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Mp3Decoder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/pack.mcmeta" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +55,13 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -63,26 +77,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/code/AllMusic_M&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "E:/code/AllMusic_M/src/main/java/coloryr/allmusic/player/decoder/ogg",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "project.structure.last.edited": "项目",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\code\AllMusic_M\src\main\java\coloryr\allmusic\player\decoder\ogg" />
       <recent name="E:\code\AllMusic_M" />
       <recent name="E:\java-src\AllMusic_M\src\main\java\Coloryr\AllMusic" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\code\AllMusic_M\src\main\java\coloryr\allmusic\player\decoder\ogg" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="coloryr.allmusic.player.decoder.ogg" />
     </key>
   </component>
   <component name="RunManager" selected="Gradle.AllMusic_M [build]">
@@ -128,6 +149,27 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="AllMusic_M [genIntellijRuns]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="genIntellijRuns" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="AllMusic_M [runClient]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -164,14 +206,20 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Gradle.AllMusic_M [genIntellijRuns]" />
       <item itemvalue="Gradle.AllMusic_M [clean]" />
       <item itemvalue="Gradle.AllMusic_M [build]" />
       <item itemvalue="Gradle.AllMusic_M [runClient]" />
+      <item itemvalue="应用程序.runClient" />
+      <item itemvalue="应用程序.runData" />
+      <item itemvalue="应用程序.runGameTestServer" />
+      <item itemvalue="应用程序.runServer" />
       <item itemvalue="远程 JVM 调试.未命名" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.AllMusic_M [build]" />
+        <item itemvalue="Gradle.AllMusic_M [genIntellijRuns]" />
         <item itemvalue="Gradle.AllMusic_M [clean]" />
         <item itemvalue="Gradle.AllMusic_M [runClient]" />
       </list>
@@ -192,6 +240,7 @@
       <workItem from="1655171556048" duration="598000" />
       <workItem from="1655453730927" duration="4794000" />
       <workItem from="1655474397648" duration="645000" />
+      <workItem from="1655619088634" duration="7704000" />
     </task>
     <servers />
   </component>
@@ -208,6 +257,27 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/ogg/jcraft/jorbis/Info.java</url>
+          <line>460</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/build/classes/java/main/coloryr/allmusic/player/decoder/ogg/OggDecoder.class</url>
+          <line>304</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/build/classes/java/main/coloryr/allmusic/player/decoder/ogg/OggDecoder.class</url>
+          <line>276</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AllMusic_M$AllMusic_M__runClient_.ic" NAME="AllMusic_M [runClient] 覆盖结果" MODIFIED="1624508671127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

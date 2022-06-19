@@ -1,5 +1,6 @@
 package coloryr.allmusic.hud;
 
+import coloryr.allmusic.AllMusic;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -84,6 +85,7 @@ public class HudUtils {
             });
         } catch (Exception e) {
             e.printStackTrace();
+            AllMusic.sendMessage("[AllMusic客户端]图片解析错误");
             haveImg = false;
         }
     }

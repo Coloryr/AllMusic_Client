@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="runData" type="Application" factoryName="Application" singleton="false">
+    <envs>
+      <env name="MOD_CLASSES" value="AllMusic_M%%$PROJECT_DIR$/../AllMusic_M\build\resources\main;AllMusic_M%%$PROJECT_DIR$/../AllMusic_M\build\classes\java\main" />
+      <env name="MCP_MAPPINGS" value="official_1.19" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="cpw.mods.bootstraplauncher.BootstrapLauncher" />
+    <module name="AllMusic_M.main" />
+    <option name="PROGRAM_PARAMETERS" value="--launchTarget forgedatauserdev --assetIndex 1.19 --assetsDir C:\Users\40206\.gradle\caches\forge_gradle\assets --gameDir . --fml.forgeVersion 41.0.36 --fml.mcVersion 1.19 --fml.forgeGroup net.minecraftforge --fml.mcpVersion 20220607.102129 --mod AllMusic_M --all --output E:\code\AllMusic_M\src\generated\resources --existing E:\code\AllMusic_M\src\main\resources" />
+    <option name="VM_PARAMETERS" value="-Dforge.logging.console.level=debug -Dforge.logging.markers=REGISTRIES -DlegacyClassPath.file=E:\code\AllMusic_M\build\classpath\runData_minecraftClasspath.txt -DignoreList=bootstraplauncher,securejarhandler,asm-commons,asm-util,asm-analysis,asm-tree,asm,client-extra,fmlcore,javafmllanguage,lowcodelanguage,mclanguage,forge- -DmergeModules=jna-5.10.0.jar,jna-platform-5.10.0.jar,java-objc-bridge-1.0.0.jar -p C:\Users\40206\.gradle\caches\modules-2\files-2.1\cpw.mods\bootstraplauncher\1.1.0\b21ce52984549723fa2cb1127fbf10683c50f67a\bootstraplauncher-1.1.0.jar;C:\Users\40206\.gradle\caches\modules-2\files-2.1\cpw.mods\securejarhandler\1.0.5\b21c073ef6d2bcd50bb0b1b967eac84e99eeb8fd\securejarhandler-1.0.5.jar;C:\Users\40206\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-commons\9.3\1f2a432d1212f5c352ae607d7b61dcae20c20af5\asm-commons-9.3.jar;C:\Users\40206\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-util\9.3\9595bc05510d0bd4b610188b77333fe4851a1975\asm-util-9.3.jar;C:\Users\40206\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-analysis\9.3\4b071f211b37c38e0e9f5998550197c8593f6ad8\asm-analysis-9.3.jar;C:\Users\40206\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-tree\9.3\78d2ecd61318b5a58cd04fb237636c0e86b77d97\asm-tree-9.3.jar;C:\Users\40206\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm\9.3\8e6300ef51c1d801a7ed62d07cd221aca3a90640\asm-9.3.jar --add-modules ALL-MODULE-PATH --add-opens java.base/java.util.jar=cpw.mods.securejarhandler --add-exports java.base/sun.security.util=cpw.mods.securejarhandler --add-exports jdk.naming.dns/com.sun.jndi.dns=java.naming" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks=":prepareRunData" externalProjectPath="$PROJECT_DIR$" />
+    </method>
+  </configuration>
+</component>

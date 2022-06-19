@@ -22,6 +22,7 @@ package coloryr.allmusic.player.decoder.mp3;
 
 import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
+import coloryr.allmusic.player.decoder.flac.DataFormatException;
 import org.apache.http.client.HttpClient;
 
 import java.net.URL;
@@ -130,6 +131,9 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     public void set(HttpClient client, URL url) throws Exception {
         bitstream = new Bitstream(client, url);
         Header header = bitstream.readFrame();
+        if(header == null){
+            throw new DataFormatException();
+        }
         if (!initialized) {
             initialize(header);
         }
@@ -220,7 +224,6 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
 
         int mode = header.mode();
         int channels = mode == Header.SINGLE_CHANNEL ? 1 : 2;
-
 
         // set up output buffer if not set up by client.
         if (output == null)

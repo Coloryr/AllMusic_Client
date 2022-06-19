@@ -4,8 +4,8 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
 }
 
-version = '2.6.0'
-group = 'com.coloryr.AllMusic' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = '2.6.1'
+group = 'com.coloryr.allmusic' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = '[forge-1.19]AllMusic'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -47,10 +47,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'AllMusic_M'
 
             mods {
-                examplemod {
+                AllMusic_M {
                     source sourceSets.main
                 }
             }
@@ -63,10 +63,10 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'AllMusic_M'
 
             mods {
-                examplemod {
+                AllMusic_M {
                     source sourceSets.main
                 }
             }
@@ -82,10 +82,10 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'AllMusic_M'
 
             mods {
-                examplemod {
+                AllMusic_M {
                     source sourceSets.main
                 }
             }
@@ -99,10 +99,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'AllMusic_M', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                examplemod {
+                AllMusic_M {
                     source sourceSets.main
                 }
             }
@@ -143,7 +143,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "examplemod",
+            "Specification-Title": "allmusic",
             "Specification-Vendor": "examplemodsareus",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
