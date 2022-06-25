@@ -3,7 +3,7 @@ package coloryr.allmusic.hud;
 import coloryr.allmusic.AllMusic;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
@@ -29,11 +29,11 @@ public class HudUtils {
     private int textureID = -1;
     public boolean haveImg;
     public final Object lock = new Object();
-    private final PoseStack stack = new PoseStack();
-    private final Queue<String> urlList= new ConcurrentLinkedDeque<>();
+    private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
     private final Semaphore semaphore = new Semaphore(0);
 
-    public HudUtils(){;
+    public HudUtils() {
+        ;
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
@@ -44,7 +44,7 @@ public class HudUtils {
         Info = List = Lyric = "";
     }
 
-    private void loadPic(String picUrl){
+    private void loadPic(String picUrl) {
         try {
             URL url = new URL(picUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -118,7 +118,6 @@ public class HudUtils {
     }
 
     public void update() {
-        var hud = Minecraft.getInstance().font;
         if (save == null)
             return;
         synchronized (lock) {
@@ -126,8 +125,7 @@ public class HudUtils {
                 int offset = 0;
                 String[] temp = Info.split("\n");
                 for (String item : temp) {
-                    hud.draw(stack, item, (float) save.getInfo().getX(),
-                            (float) save.getInfo().getY() + offset, 0xffffff);
+                    AllMusic.drawText(item, (float) save.getLyric().getX(), (float) save.getLyric().getY() + offset);
                     offset += 10;
                 }
             }
@@ -135,8 +133,7 @@ public class HudUtils {
                 String[] temp = List.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    hud.draw(stack, item, (float) save.getList().getX(),
-                            (float) save.getList().getY() + offset, 0xffffff);
+                    AllMusic.drawText(item, (float) save.getList().getX(), (float) save.getList().getY() + offset);
                     offset += 10;
                 }
             }
@@ -144,18 +141,12 @@ public class HudUtils {
                 String[] temp = Lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    hud.draw(stack, item, (float) save.getLyric().getX(),
-                            (float) save.getLyric().getY() + offset, 0xffffff);
+                    AllMusic.drawText(item, (float) save.getLyric().getX(), (float) save.getLyric().getY() + offset);
                     offset += 10;
                 }
             }
             if (save.isEnablePic() && haveImg) {
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                RenderSystem.setShaderTexture(0, textureID);
-                int size = save.getPicSize();
-                GuiComponent.blit(stack, save.getPic().getX(), save.getPic().getY(),
-                        0, 0, 0, size, size, size, size);
+                AllMusic.drawPic(textureID, save.getPicSize(), save.getPic().getX(), save.getPic().getY());
             }
         }
     }
