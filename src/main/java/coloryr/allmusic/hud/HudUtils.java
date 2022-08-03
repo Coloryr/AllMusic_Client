@@ -141,7 +141,7 @@ public class HudUtils {
                 String[] temp = Lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.getLyric().getX(), (float) save.getLyric().getY() + offset);
+                    AllMusic.drawText(item, (float) save.getInfo().getX(), (float) save.getInfo().getY() + offset);
                     offset += 10;
                 }
             }

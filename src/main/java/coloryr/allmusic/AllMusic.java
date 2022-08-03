@@ -12,8 +12,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,8 +25,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
@@ -89,7 +88,7 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
+    public void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
         try {
             stopPlaying();
         } catch (Exception e1) {
@@ -149,8 +148,8 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post e) {
-        if (e.getType() == RenderGameOverlayEvent.ElementType.LAYER) {
+    public void onRenderOverlay(RenderGuiOverlayEvent.Post e) {
+        if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
             HudUtils.update();
         }
     }
