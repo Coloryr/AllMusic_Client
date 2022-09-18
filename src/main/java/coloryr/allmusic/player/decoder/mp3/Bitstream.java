@@ -36,16 +36,11 @@
 package coloryr.allmusic.player.decoder.mp3;
 
 import coloryr.allmusic.player.APlayer;
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
 
-import java.io.*;
-import java.net.SocketException;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 
 
 /**
@@ -123,18 +118,16 @@ public final class Bitstream implements BitstreamErrors {
      * Construct a IBitstream that reads data from a
      * given InputStream.
      */
-    public Bitstream(APlayer player) throws Exception {
+    public Bitstream(APlayer player) {
         this.player = player;
-        player.connect(local);
-        loadID3v2(player.content);
+        loadID3v2(player);
         firstframe = true;
-        source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
+        source = new PushbackInputStream(player, BUFFER_INT_SIZE * 4);
 
         closeFrame();
     }
 
-    public int getframesize()
-    {
+    public int getframesize() {
         return framesize;
     }
 
@@ -492,26 +485,18 @@ public final class Bitstream implements BitstreamErrors {
     private int readFully(byte[] b, int offs, int len)
             throws Exception {
         int nRead = 0;
-        try {
-            while (len > 0) {
-                int bytesread = source.read(b, offs, len);
-                local += bytesread;
-                if (bytesread == -1) {
-                    while (len-- > 0) {
-                        b[offs++] = 0;
-                    }
-                    break;
+        while (len > 0) {
+            int bytesread = source.read(b, offs, len);
+            local += bytesread;
+            if (bytesread == -1) {
+                while (len-- > 0) {
+                    b[offs++] = 0;
                 }
-                nRead = nRead + bytesread;
-                offs += bytesread;
-                len -= bytesread;
+                break;
             }
-        } catch (ConnectionClosedException | SocketException ex) {
-            player.connect(local);
-            source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
-            return readFully(b, offs, len);
-        } catch (IOException ex) {
-            throw newBitstreamException(STREAM_ERROR, ex);
+            nRead = nRead + bytesread;
+            offs += bytesread;
+            len -= bytesread;
         }
         return nRead;
     }
@@ -523,33 +508,16 @@ public final class Bitstream implements BitstreamErrors {
     private int readBytes(byte[] b, int offs, int len)
             throws Exception {
         int totalBytesRead = 0;
-        try {
-            while (len > 0) {
-                int bytesread = source.read(b, offs, len);
-                local += bytesread;
-                if (bytesread == -1) {
-                    break;
-                }
-                totalBytesRead += bytesread;
-                offs += bytesread;
-                len -= bytesread;
+        while (len > 0) {
+            int bytesread = source.read(b, offs, len);
+            local += bytesread;
+            if (bytesread == -1) {
+                break;
             }
-        } catch (ConnectionClosedException | SocketException ex) {
-            player.connect(local);
-            source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
-            return readBytes(b, offs, len);
-        } catch (IOException ex) {
-            throw newBitstreamException(STREAM_ERROR, ex);
+            totalBytesRead += bytesread;
+            offs += bytesread;
+            len -= bytesread;
         }
         return totalBytesRead;
-    }
-
-    public void setLocal(long local) {
-        try {
-            player.connect(local);
-            source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

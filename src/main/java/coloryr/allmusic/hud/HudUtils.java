@@ -2,15 +2,10 @@ package coloryr.allmusic.hud;
 
 import coloryr.allmusic.AllMusic;
 import com.google.gson.Gson;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.opengl.GL11;
@@ -19,8 +14,6 @@ import org.lwjgl.opengl.GL30;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -38,6 +31,8 @@ public class HudUtils {
     private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
     private final Semaphore semaphore = new Semaphore(0);
     private final HttpClient client;
+    private HttpGet get;
+    private InputStream inputStream;
 
     public HudUtils() {
         Thread thread = new Thread(this::run);
@@ -46,24 +41,38 @@ public class HudUtils {
         client = HttpClientBuilder.create().useSystemProperties().build();
     }
 
-    public void stop() {
+    public void close() {
         haveImg = false;
         Info = List = Lyric = "";
+        getClose();
+    }
+
+    private void getClose() {
+        if (get != null && !get.isAborted()) {
+            get.abort();
+            get = null;
+        }
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+                inputStream = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadPic(String picUrl) {
         try {
-            HttpGet get = new HttpGet(picUrl);
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setSocketTimeout(2000)
-                    .setConnectTimeout(2000).build();
-            get.setConfig(requestConfig);
-            HttpResponse response = this.client.execute(get);
+            getClose();
+            get = new HttpGet(picUrl);
+            HttpResponse response = client.execute(get);
             HttpEntity entity = response.getEntity();
-            InputStream inputStream = entity.getContent();
+            inputStream = entity.getContent();
             BufferedImage image = ImageIO.read(inputStream);
             int[] pixels = new int[image.getWidth() * image.getHeight()];
             image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+            getClose();
             byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
 
             for (int h = 0; h < image.getHeight(); h++) {
@@ -78,7 +87,7 @@ public class HudUtils {
             }
 
             byteBuffer.flip();
-            inputStream.close();
+
             Minecraft.getInstance().execute(() -> {
                 if (textureID == -1) {
                     textureID = GL11.glGenTextures();

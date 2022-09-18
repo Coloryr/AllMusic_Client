@@ -32,7 +32,6 @@ import java.util.function.Supplier;
 @Mod("allmusic")
 public class AllMusic {
     private static APlayer nowPlaying;
-    public static boolean isPlay = false;
     private HudUtils HudUtils;
     private String url;
 
@@ -82,14 +81,13 @@ public class AllMusic {
 
     public void onLoad(final SoundEngineLoadEvent e) {
         if (nowPlaying != null) {
-            nowPlaying.close();
-            nowPlaying.setMusic(url);
+            nowPlaying.setReload();
         }
     }
 
     @SubscribeEvent
     public void onSound(final SoundEvent.SoundSourceEvent e) {
-        if (!isPlay)
+        if (!nowPlaying.isPlay())
             return;
         SoundSource data = e.getSound().getSource();
         switch (data) {
@@ -140,13 +138,13 @@ public class AllMusic {
         }
     }
 
-    public static float getVolume(){
+    public static float getVolume() {
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
     private static final PoseStack stack = new PoseStack();
 
-    public static void drawPic(int textureID, int size, int x, int y){
+    public static void drawPic(int textureID, int size, int x, int y) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, textureID);
@@ -166,7 +164,7 @@ public class AllMusic {
     }
 
     private void stopPlaying() {
-        nowPlaying.close();
-        HudUtils.stop();
+        nowPlaying.closePlayer();
+        HudUtils.close();
     }
 }

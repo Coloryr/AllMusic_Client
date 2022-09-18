@@ -7,10 +7,10 @@ import coloryr.allmusic.player.decoder.flac.DataFormatException;
 import coloryr.allmusic.player.decoder.flac.FlacDecoder;
 import coloryr.allmusic.player.decoder.mp3.Mp3Decoder;
 import coloryr.allmusic.player.decoder.ogg.OggDecoder;
+import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.BufferUtils;
@@ -19,35 +19,54 @@ import org.lwjgl.openal.AL10;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
 import java.net.URL;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
-public class APlayer {
+public class APlayer extends InputStream {
 
-    public HttpClient client;
-    public String url;
-    public HttpGet get;
-    public InputStream content;
+    private HttpClient client;
+    private String url;
+    private HttpGet get;
+    private InputStream content;
 
-    private boolean isClose;
+    private boolean isClose = false;
+    private boolean reload = false;
     private IDecoder decoder;
     private final List<String> urls = new ArrayList<>();
-    private int time;
-
+    private int time = 0;
+    private long local = 0;
     private final Semaphore semaphore = new Semaphore(0);
+    private boolean isPlay = false;
 
     public APlayer() {
         try {
             new Thread(this::run, "allmusic_run").start();
             client = HttpClientBuilder.create().useSystemProperties().build();
+            ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+            service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void run1() {
+        if (isPlay) {
+            time += 10;
+        }
+    }
+
+    public boolean isPlay() {
+        return isPlay;
     }
 
     public static URL Get(URL url) {
@@ -81,21 +100,17 @@ public class APlayer {
     }
 
     public void set(int time) {
-        close();
+        closePlayer();
         this.time = time;
         urls.add(url);
         semaphore.release();
     }
 
-    public void connect(long local) throws IOException {
+    public void connect() throws IOException {
         getClose();
         streamClose();
         get = new HttpGet(url);
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(2000)
-                .setConnectTimeout(2000).build();
-        get.setConfig(requestConfig);
-        this.get.setHeader("Range", "bytes=" + local + "-");
+        get.setHeader("Range", "bytes=" + local + "-");
         HttpResponse response = this.client.execute(get);
         HttpEntity entity = response.getEntity();
         content = entity.getContent();
@@ -115,7 +130,8 @@ public class APlayer {
                     if (nowURL == null)
                         continue;
                     try {
-                        connect(0);
+                        local = 0;
+                        connect();
                     } catch (Exception e) {
                         e.printStackTrace();
                         AllMusic.sendMessage("[AllMusic客户端]获取音乐失败");
@@ -127,12 +143,14 @@ public class APlayer {
                         decoder.set();
                     } catch (DataFormatException e) {
                         try {
-                            connect(0);
+                            local = 0;
+                            connect();
                             decoder = new OggDecoder(this);
                             decoder.set();
                         } catch (DataFormatException e1) {
                             try {
-                                connect(0);
+                                local = 0;
+                                connect();
                                 decoder = new Mp3Decoder(this);
                                 decoder.set();
                             } catch (DataFormatException e2) {
@@ -142,12 +160,13 @@ public class APlayer {
                         }
                     }
 
-                    AllMusic.isPlay = true;
+                    isPlay = true;
                     int index = AL10.alGenSources();
                     int frequency = decoder.getOutputFrequency();
                     int channels = decoder.getOutputChannels();
                     if (time != 0) {
                         decoder.set(time);
+                        time = 0;
                     }
                     isClose = false;
                     while (true) {
@@ -177,78 +196,126 @@ public class APlayer {
                                 AL10.alSourcePlay(index);
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            if (!isClose) {
+                                e.printStackTrace();
+                            }
                             break;
                         }
                     }
                     try {
-                        content.close();
-                        get.abort();
+                        getClose();
+                        streamClose();
+                        decodeClose();
                         while (!isClose && AL10.alGetSourcei(index,
                                 AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
                             AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
                             Thread.sleep(100);
                         }
-                        AL10.alSourceStop(index);
-                        int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                        while (m_numqueued > 0) {
-                            int temp = AL10.alSourceUnqueueBuffers(index);
-                            AL10.alDeleteBuffers(temp);
-                            m_numqueued--;
+                        if (!reload) {
+                            isPlay = false;
+                            AL10.alSourceStop(index);
+                            int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                            while (m_numqueued > 0) {
+                                int temp = AL10.alSourceUnqueueBuffers(index);
+                                AL10.alDeleteBuffers(temp);
+                                m_numqueued--;
+                            }
+                            AL10.alDeleteSources(index);
+                        } else {
+                            reload = false;
+                            urls.add(url);
+                            semaphore.release();
+                            Thread.sleep(100);
                         }
-                        AL10.alDeleteSources(index);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    AllMusic.isPlay = false;
                 } else {
                     Thread.sleep(50);
                 }
-                close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public void closePlayer() {
+        isClose = true;
+    }
+
     public void setMusic(String url) {
         time = 0;
-        close();
+        closePlayer();
         urls.add(url);
         semaphore.release();
     }
 
-    public void close() {
-        urls.clear();
-        isClose = true;
-        getClose();
-
-        try {
-            streamClose();
-            decodeClose();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getClose(){
+    private void getClose() {
         if (get != null && !get.isAborted()) {
             get.abort();
             get = null;
         }
     }
 
-    private void streamClose() throws IOException{
+    private void streamClose() throws IOException {
         if (content != null) {
             content.close();
             content = null;
         }
     }
 
-    private void decodeClose() throws Exception{
+    private void decodeClose() throws Exception {
         if (decoder != null) {
             decoder.close();
             decoder = null;
+        }
+    }
+
+
+    @Override
+    public int read() throws IOException {
+        return content.read();
+    }
+
+    @Override
+    public int read(byte[] buf) throws IOException {
+        return content.read(buf);
+    }
+
+    @Override
+    public synchronized int read(byte[] buf, int off, int len)
+            throws IOException {
+        try {
+            int temp = content.read(buf, off, len);
+            local += temp;
+            return temp;
+        } catch (ConnectionClosedException | SocketException ex) {
+            connect();
+            return read(buf, off, len);
+        }
+    }
+
+    @Override
+    public synchronized int available() throws IOException {
+        return content.available();
+    }
+
+    @Override
+    public void close() throws IOException {
+        streamClose();
+    }
+
+    public void setLocal(long local) throws IOException {
+        getClose();
+        streamClose();
+        this.local = local;
+        connect();
+    }
+
+    public void setReload() {
+        if (isPlay) {
+            reload = true;
+            isClose = true;
         }
     }
 }

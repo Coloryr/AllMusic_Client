@@ -33,7 +33,7 @@ public class OggDecoder implements IDecoder {
      * The conversion buffer size
      */
     private int convsize = 4096 * 2;
-    private boolean isDone =false;
+    private boolean isDone = false;
     private int size;
     private boolean isClose;
     private boolean isOK;
@@ -342,7 +342,7 @@ public class OggDecoder implements IDecoder {
     @Override
     public void close() throws Exception {
         isClose = true;
-        player.content.close();
+        player.close();
         get1.release();
         get2.release();
     }
@@ -351,7 +351,7 @@ public class OggDecoder implements IDecoder {
     public void set() throws Exception {
         new Thread(() -> {
             try {
-                getData(player.content);
+                getData(player);
             } catch (IOException e) {
                 isOK = false;
                 get1.release();

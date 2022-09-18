@@ -24,9 +24,6 @@ import coloryr.allmusic.player.APlayer;
 import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
 import coloryr.allmusic.player.decoder.flac.DataFormatException;
-import org.apache.http.client.HttpClient;
-
-import java.net.URL;
 
 /**
  * The <code>Decoder</code> class encapsulates the details of
@@ -113,7 +110,7 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     public BuffPack decodeFrame()
             throws Exception {
         Header header = bitstream.readFrame();
-        if(header == null)
+        if (header == null)
             return null;
         int layer = header.layer();
         output.clear_buffer();
@@ -134,7 +131,7 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     public void set() throws Exception {
         bitstream = new Bitstream(player);
         Header header = bitstream.readFrame();
-        if(header == null){
+        if (header == null) {
             throw new DataFormatException();
         }
         if (!initialized) {
@@ -166,8 +163,8 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     @Override
     public void set(int time) {
         try {
-            long data = (long) (time / 26) * bitstream.getframesize();
-            bitstream.setLocal(data);
+            long data = ((time / 26) * (long) bitstream.getframesize()) + bitstream.getframesize();
+            player.setLocal(data);
         } catch (Exception e) {
             e.printStackTrace();
         }

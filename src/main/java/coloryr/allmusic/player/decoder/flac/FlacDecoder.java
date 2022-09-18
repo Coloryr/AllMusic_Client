@@ -25,10 +25,8 @@ import coloryr.allmusic.AllMusic;
 import coloryr.allmusic.player.APlayer;
 import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
-import org.apache.http.client.HttpClient;
 
 import java.io.IOException;
-import java.net.URL;
 
 
 /**
@@ -153,8 +151,7 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
                 if (streamInfo.sampleDepth == 24) {
                     float temp = val / 16777216f;
                     val = (int) (temp * 0x7FFF);
-                }
-                else if (streamInfo.sampleDepth == 32) {
+                } else if (streamInfo.sampleDepth == 32) {
                     float temp = val / 1099511627776f;
                     val = (int) (temp * 0x7FFF);
                 }

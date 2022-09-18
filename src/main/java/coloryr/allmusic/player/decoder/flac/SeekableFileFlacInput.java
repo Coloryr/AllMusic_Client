@@ -22,19 +22,10 @@
 package coloryr.allmusic.player.decoder.flac;
 
 import coloryr.allmusic.player.APlayer;
-import net.minecraft.world.entity.player.Player;
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.SocketException;
-import java.net.URL;
 
 
 /**
@@ -46,15 +37,12 @@ public final class SeekableFileFlacInput extends AbstractFlacLowLevelInput {
 
     // The underlying byte-based input stream to read from.
     private BufferedInputStream raf;
-    private long local;
-    private APlayer player;
 
     /*---- Constructors ----*/
 
     public SeekableFileFlacInput(APlayer player) {
         super();
-        this.player = player;
-        this.raf = new BufferedInputStream(player.content);
+        this.raf = new BufferedInputStream(player);
     }
 
     /*---- Methods ----*/
@@ -68,15 +56,7 @@ public final class SeekableFileFlacInput extends AbstractFlacLowLevelInput {
     }
 
     protected int readUnderlying(byte[] buf, int off, int len) throws IOException {
-        try {
-            int temp = raf.read(buf, off, len);
-            local += temp;
-            return temp;
-        } catch (ConnectionClosedException | SocketException ex) {
-            player.connect(local);
-            this.raf = new BufferedInputStream(player.content);
-            return readUnderlying(buf, off, len);
-        }
+        return raf.read(buf, off, len);
     }
 
     // Closes the underlying RandomAccessFile stream (very important).
