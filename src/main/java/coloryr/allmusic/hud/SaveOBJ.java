@@ -30,6 +30,7 @@ public class SaveOBJ {
     public int getPicSize() {
         return PicSize;
     }
+
     public boolean isEnablePic() {
         return EnablePic;
     }
