@@ -211,21 +211,18 @@ public class APlayer extends InputStream {
                             AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
                             Thread.sleep(100);
                         }
+                        AL10.alSourceStop(index);
+                        int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                        while (m_numqueued > 0) {
+                            int temp = AL10.alSourceUnqueueBuffers(index);
+                            AL10.alDeleteBuffers(temp);
+                            m_numqueued--;
+                        }
+                        AL10.alDeleteSources(index);
                         if (!reload) {
                             isPlay = false;
-                            AL10.alSourceStop(index);
-                            int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                            while (m_numqueued > 0) {
-                                int temp = AL10.alSourceUnqueueBuffers(index);
-                                AL10.alDeleteBuffers(temp);
-                                m_numqueued--;
-                            }
-                            AL10.alDeleteSources(index);
                         } else {
                             reload = false;
-                            urls.add(url);
-                            semaphore.release();
-                            Thread.sleep(100);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -316,6 +313,8 @@ public class APlayer extends InputStream {
         if (isPlay) {
             reload = true;
             isClose = true;
+            urls.add(url);
+            semaphore.release();
         }
     }
 }

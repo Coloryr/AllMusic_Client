@@ -6,13 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="6a802f46-9f68-41e3-b6f5-fcc4d6a66ded" name="默认变更列表" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/AllMusic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/hud/HudUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/APlayer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/SeekableFileFlacInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/flac/SeekableFileFlacInput.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Bitstream.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Bitstream.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Mp3Decoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/mp3/Mp3Decoder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/ogg/OggDecoder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/coloryr/allmusic/player/decoder/ogg/OggDecoder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +105,7 @@
       <recent name="coloryr.allmusic.player.decoder.ogg" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.AllMusic_M [build]">
+  <component name="RunManager" selected="远程 JVM 调试.未命名">
     <configuration name="AllMusic_M [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -245,7 +241,7 @@
       <workItem from="1661063761644" duration="819000" />
       <workItem from="1661420588425" duration="136000" />
       <workItem from="1663483003783" duration="1045000" />
-      <workItem from="1663484969414" duration="10603000" />
+      <workItem from="1663484969414" duration="11892000" />
     </task>
     <servers />
   </component>

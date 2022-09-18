@@ -163,7 +163,7 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     @Override
     public void set(int time) {
         try {
-            long data = ((time / 26) * (long) bitstream.getframesize()) + bitstream.getframesize();
+            long data = ((time / 26) * (long) bitstream.getframesize()) + bitstream.local;
             player.setLocal(data);
         } catch (Exception e) {
             e.printStackTrace();

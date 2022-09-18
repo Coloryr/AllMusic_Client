@@ -88,7 +88,7 @@ public final class Bitstream implements BitstreamErrors {
     private PushbackInputStream source;
     //private int 			current_frame_number;
     //private int				last_frame_number;
-    private long local = 0;
+    public long local = 0;
     /**
      * Number of valid bytes in the frame buffer.
      */
@@ -111,15 +111,13 @@ public final class Bitstream implements BitstreamErrors {
      */
     private boolean single_ch_mode;
     private byte[] rawid3v2 = null;
-    private boolean firstframe = true;
-    private final APlayer player;
+    private boolean firstframe;
 
     /**
      * Construct a IBitstream that reads data from a
      * given InputStream.
      */
     public Bitstream(APlayer player) {
-        this.player = player;
         loadID3v2(player);
         firstframe = true;
         source = new PushbackInputStream(player, BUFFER_INT_SIZE * 4);
