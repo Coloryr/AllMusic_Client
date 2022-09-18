@@ -128,15 +128,17 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     }
 
     @Override
-    public void set() throws Exception {
+    public boolean set() throws Exception {
         bitstream = new Bitstream(player);
         Header header = bitstream.readFrame();
         if (header == null) {
-            throw new DataFormatException();
+            return false;
         }
         if (!initialized) {
             initialize(header);
         }
+
+        return true;
     }
 
     /**

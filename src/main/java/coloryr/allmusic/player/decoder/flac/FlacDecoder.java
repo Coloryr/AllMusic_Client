@@ -177,13 +177,13 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
     }
 
     @Override
-    public void set() throws Exception {
+    public boolean set() throws Exception {
         input = new SeekableFileFlacInput(player);
 
         // Read basic header
         if (input.readUint(32) != 0x664C6143)  // Magic string "fLaC"
         {
-            throw new DataFormatException("Invalid magic string");
+            return false;
         }
         metadataEndPos = -1;
 
@@ -193,6 +193,8 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
         int bytesPerSample = streamInfo.sampleDepth / 8;
         samples = new int[streamInfo.numChannels][65536];
         sampleBytes = new byte[65536 * streamInfo.numChannels * bytesPerSample];
+
+        return true;
     }
 
     @Override

@@ -5,7 +5,7 @@ public interface IDecoder {
 
     void close() throws Exception;
 
-    void set() throws Exception;
+    boolean set() throws Exception;
 
     int getOutputFrequency();
 

@@ -26,10 +26,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 public class APlayer extends InputStream {
 
@@ -41,11 +39,17 @@ public class APlayer extends InputStream {
     private boolean isClose = false;
     private boolean reload = false;
     private IDecoder decoder;
-    private final List<String> urls = new ArrayList<>();
+    private final Queue<String> urls = new ConcurrentLinkedQueue<>();
     private int time = 0;
     private long local = 0;
     private final Semaphore semaphore = new Semaphore(0);
+    private final Semaphore semaphore1 = new Semaphore(0);
+    private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private boolean isPlay = false;
+    private boolean wait = false;
+    private int index;
+    private int frequency;
+    private int channels;
 
     public APlayer() {
         try {
@@ -120,123 +124,135 @@ public class APlayer extends InputStream {
         while (true) {
             try {
                 semaphore.acquire();
-                if (urls.size() > 0) {
-                    url = urls.remove(urls.size() - 1);
-                    if (url == null || url.isEmpty())
-                        continue;
-                    urls.clear();
-                    URL nowURL = new URL(url);
-                    nowURL = Get(nowURL);
-                    if (nowURL == null)
-                        continue;
-                    try {
+                url = urls.poll();
+                if (url == null || url.isEmpty())
+                    continue;
+                urls.clear();
+                URL nowURL = new URL(url);
+                nowURL = Get(nowURL);
+                if (nowURL == null)
+                    continue;
+                try {
+                    local = 0;
+                    connect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    AllMusic.sendMessage("[AllMusic客户端]获取音乐失败");
+                    continue;
+                }
+
+                decoder = new FlacDecoder(this);
+                if (!decoder.set()) {
+                    local = 0;
+                    connect();
+                    decoder = new OggDecoder(this);
+                    if (!decoder.set()) {
                         local = 0;
                         connect();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        AllMusic.sendMessage("[AllMusic客户端]获取音乐失败");
-                        continue;
-                    }
-
-                    try {
-                        decoder = new FlacDecoder(this);
-                        decoder.set();
-                    } catch (DataFormatException e) {
-                        try {
-                            local = 0;
-                            connect();
-                            decoder = new OggDecoder(this);
-                            decoder.set();
-                        } catch (DataFormatException e1) {
-                            try {
-                                local = 0;
-                                connect();
-                                decoder = new Mp3Decoder(this);
-                                decoder.set();
-                            } catch (DataFormatException e2) {
-                                AllMusic.sendMessage("[AllMusic客户端]不支持这样的文件播放");
-                                continue;
-                            }
+                        decoder = new Mp3Decoder(this);
+                        if (!decoder.set()) {
+                            AllMusic.sendMessage("[AllMusic客户端]不支持这样的文件播放");
+                            continue;
                         }
                     }
+                }
 
-                    isPlay = true;
-                    int index = AL10.alGenSources();
-                    int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                isPlay = true;
+                index = AL10.alGenSources();
+                int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                while (m_numqueued > 0) {
+                    int temp = AL10.alSourceUnqueueBuffers(index);
+                    AL10.alDeleteBuffers(temp);
+                    m_numqueued--;
+                }
+                frequency = decoder.getOutputFrequency();
+                channels = decoder.getOutputChannels();
+                if (channels != 1 && channels != 2)
+                    continue;
+                if (time != 0) {
+                    decoder.set(time);
+                }
+                queue.clear();
+                reload = false;
+                isClose = false;
+                while (true) {
+                    try {
+                        if (isClose) break;
+                        BuffPack output = decoder.decodeFrame();
+                        if (output == null) break;
+                        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(
+                                output.len).put(output.buff, 0, output.len);
+                        ((Buffer) byteBuffer).flip();
+                        queue.add(byteBuffer);
+                    } catch (Exception e) {
+                        if (!isClose) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                }
+                getClose();
+                streamClose();
+                decodeClose();
+                while (!isClose && AL10.alGetSourcei(index,
+                        AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
+                    AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
+                    Thread.sleep(100);
+                }
+                if (!reload) {
+                    wait = true;
+                    if (semaphore1.tryAcquire(500, TimeUnit.MILLISECONDS)) {
+                        if (reload) {
+                            urls.add(url);
+                            semaphore.release();
+                            continue;
+                        }
+                    }
+                    isPlay = false;
+                    AL10.alSourceStop(index);
+                    m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
                     while (m_numqueued > 0) {
                         int temp = AL10.alSourceUnqueueBuffers(index);
                         AL10.alDeleteBuffers(temp);
                         m_numqueued--;
                     }
-                    int frequency = decoder.getOutputFrequency();
-                    int channels = decoder.getOutputChannels();
-                    if (time != 0) {
-                        decoder.set(time);
-                    }
-                    isClose = false;
-                    while (true) {
-                        try {
-                            if (isClose)
-                                break;
-                            BuffPack output = decoder.decodeFrame();
-                            if (output == null)
-                                break;
-
-                            ByteBuffer byteBuffer = BufferUtils.createByteBuffer(
-                                    output.len).put(output.buff, 0, output.len);
-                            ((Buffer) byteBuffer).flip();
-                            IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
-                            AL10.alGenBuffers(intBuffer);
-
-                            if (channels != 1 && channels != 2)
-                                break;
-
-                            AL10.alBufferData(intBuffer.get(0), channels == 1
-                                    ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16, byteBuffer, frequency);
-                            AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
-
-                            AL10.alSourceQueueBuffers(index, intBuffer);
-                            if (AL10.alGetSourcei(index,
-                                    AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
-                                AL10.alSourcePlay(index);
-                            }
-                        } catch (Exception e) {
-                            if (!isClose) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        }
-                    }
-                    try {
-                        getClose();
-                        streamClose();
-                        decodeClose();
-                        while (!isClose && AL10.alGetSourcei(index,
-                                AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
-                            AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
-                            Thread.sleep(100);
-                        }
-                        if (!reload) {
-                            isPlay = false;
-                            AL10.alSourceStop(index);
-                            m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                            while (m_numqueued > 0) {
-                                int temp = AL10.alSourceUnqueueBuffers(index);
-                                AL10.alDeleteBuffers(temp);
-                                m_numqueued--;
-                            }
-                            AL10.alDeleteSources(index);
-                        } else {
-                            reload = false;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    AL10.alDeleteSources(index);
                 } else {
-                    Thread.sleep(50);
+                    urls.add(url);
+                    semaphore.release();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public void tick() {
+        if (wait) {
+            wait = false;
+            semaphore1.release();
+        }
+        if (isClose) {
+            queue.clear();
+            return;
+        }
+        while (!queue.isEmpty()) {
+            ByteBuffer byteBuffer = queue.poll();
+            if (byteBuffer == null)
+                continue;
+            if (isClose)
+                return;
+            IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
+            AL10.alGenBuffers(intBuffer);
+
+            AL10.alBufferData(intBuffer.get(0), channels == 1
+                    ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16, byteBuffer, frequency);
+            AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
+
+            AL10.alSourceQueueBuffers(index, intBuffer);
+            if (AL10.alGetSourcei(index,
+                    AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
+                AL10.alSourcePlay(index);
             }
         }
     }
@@ -318,8 +334,6 @@ public class APlayer extends InputStream {
         if (isPlay) {
             reload = true;
             isClose = true;
-            urls.add(url);
-            semaphore.release();
         }
     }
 }

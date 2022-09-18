@@ -17,6 +17,7 @@ import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -163,8 +164,17 @@ public class AllMusic {
         }
     }
 
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event){
+        nowPlaying.tick();
+    }
+
     private void stopPlaying() {
         nowPlaying.closePlayer();
         HudUtils.close();
+    }
+
+    public static void runMain(Runnable runnable){
+        Minecraft.getInstance().execute(runnable);
     }
 }

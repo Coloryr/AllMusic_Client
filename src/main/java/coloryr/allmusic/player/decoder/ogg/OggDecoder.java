@@ -348,7 +348,7 @@ public class OggDecoder implements IDecoder {
     }
 
     @Override
-    public void set() throws Exception {
+    public boolean set() throws Exception {
         new Thread(() -> {
             try {
                 getData(player);
@@ -361,9 +361,7 @@ public class OggDecoder implements IDecoder {
             get1.release();
         }, "allmusic_ogg").start();
         get1.acquire();
-        if (!isOK) {
-            throw new DataFormatException("");
-        }
+        return isOK;
     }
 
     @Override

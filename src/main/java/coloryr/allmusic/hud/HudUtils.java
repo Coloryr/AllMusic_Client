@@ -88,7 +88,7 @@ public class HudUtils {
 
             byteBuffer.flip();
 
-            Minecraft.getInstance().execute(() -> {
+            AllMusic.runMain(() -> {
                 if (textureID == -1) {
                     textureID = GL11.glGenTextures();
                 }
