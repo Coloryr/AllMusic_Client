@@ -172,7 +172,6 @@ public class APlayer extends InputStream {
                     int channels = decoder.getOutputChannels();
                     if (time != 0) {
                         decoder.set(time);
-                        time = 0;
                     }
                     isClose = false;
                     while (true) {
@@ -217,16 +216,16 @@ public class APlayer extends InputStream {
                             AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
                             Thread.sleep(100);
                         }
-                        AL10.alSourceStop(index);
-                        m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                        while (m_numqueued > 0) {
-                            int temp = AL10.alSourceUnqueueBuffers(index);
-                            AL10.alDeleteBuffers(temp);
-                            m_numqueued--;
-                        }
-                        AL10.alDeleteSources(index);
                         if (!reload) {
                             isPlay = false;
+                            AL10.alSourceStop(index);
+                            m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                            while (m_numqueued > 0) {
+                                int temp = AL10.alSourceUnqueueBuffers(index);
+                                AL10.alDeleteBuffers(temp);
+                                m_numqueued--;
+                            }
+                            AL10.alDeleteSources(index);
                         } else {
                             reload = false;
                         }
