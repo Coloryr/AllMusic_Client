@@ -1,9 +1,10 @@
 package coloryr.allmusic.player.decoder.ogg;
 
+import coloryr.allmusic.AllMusic;
+import coloryr.allmusic.player.APlayer;
 import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
 import coloryr.allmusic.player.decoder.flac.DataFormatException;
-import coloryr.allmusic.player.decoder.mp3.BitstreamException;
 import coloryr.allmusic.player.decoder.ogg.jcraft.jogg.Packet;
 import coloryr.allmusic.player.decoder.ogg.jcraft.jogg.Page;
 import coloryr.allmusic.player.decoder.ogg.jcraft.jogg.StreamState;
@@ -13,18 +14,11 @@ import coloryr.allmusic.player.decoder.ogg.jcraft.jorbis.Comment;
 import coloryr.allmusic.player.decoder.ogg.jcraft.jorbis.DspState;
 import coloryr.allmusic.player.decoder.ogg.jcraft.jorbis.Info;
 import coloryr.allmusic.player.decoder.ogg.jcraft.oggdecoder.OggData;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Decode an OGG file to PCM data. This class is based on the example
@@ -34,44 +28,41 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Kevin Glass
  */
 public class OggDecoder implements IDecoder {
+    private final APlayer player;
     /**
      * The conversion buffer size
      */
     private int convsize = 4096 * 2;
-    private HttpClient client;
-    private URL url;
-    private HttpGet get;
-    private InputStream content;
     private boolean isDone =false;
     private int size;
     private boolean isClose;
     private boolean isOK;
 
-    private SyncState oy = new SyncState(); // sync and verify incoming physical bitstream
-    private StreamState os = new StreamState(); // take physical pages, weld into a logical stream of packets
-    private Page og = new Page(); // one Ogg bitstream page.  Vorbis packets are inside
-    private Packet op = new Packet(); // one raw packet of data for decode
+    private final SyncState oy = new SyncState(); // sync and verify incoming physical bitstream
+    private final StreamState os = new StreamState(); // take physical pages, weld into a logical stream of packets
+    private final Page og = new Page(); // one Ogg bitstream page.  Vorbis packets are inside
+    private final Packet op = new Packet(); // one raw packet of data for decode
 
-    private Info vi = new Info(); // struct that stores all the static vorbis bitstream settings
-    private Comment vc = new Comment(); // struct that stores all the bitstream user comments
-    private DspState vd = new DspState(); // central working state for the packet->PCM decoder
-    private Block vb = new Block(vd); // local working space for packet->PCM decode
+    private final Info vi = new Info(); // struct that stores all the static vorbis bitstream settings
+    private final Comment vc = new Comment(); // struct that stores all the bitstream user comments
+    private final DspState vd = new DspState(); // central working state for the packet->PCM decoder
+    private final Block vb = new Block(vd); // local working space for packet->PCM decode
 
     /**
      * The buffer used to read OGG file
      */
-    private byte[] convbuffer = new byte[convsize]; // take 8k out of the data segment, not the stack
+    private final byte[] convbuffer = new byte[convsize]; // take 8k out of the data segment, not the stack
     private OggData ogg;
-    private BuffPack buff = new BuffPack();
+    private final BuffPack buff = new BuffPack();
 
-    private Semaphore get1 = new Semaphore(0);
-    private Semaphore get2 = new Semaphore(0);
+    private final Semaphore get1 = new Semaphore(0);
+    private final Semaphore get2 = new Semaphore(0);
 
     /**
      * Create a new OGG decoder
      */
-    public OggDecoder() {
-
+    public OggDecoder(APlayer player) {
+        this.player = player;
     }
 
     /**
@@ -351,34 +342,24 @@ public class OggDecoder implements IDecoder {
     @Override
     public void close() throws Exception {
         isClose = true;
-        get.abort();
-        content.close();
+        player.content.close();
         get1.release();
         get2.release();
     }
 
     @Override
-    public void set(HttpClient client, URL url) throws Exception {
-        this.client = client;
-        this.url = url;
-        get = new HttpGet(url.toString());
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(2000)
-                .setConnectTimeout(2000).build();
-        get.setConfig(requestConfig);
-        HttpResponse response = this.client.execute(get);
-        HttpEntity entity = response.getEntity();
-        content = entity.getContent();
+    public void set() throws Exception {
         new Thread(() -> {
             try {
-                getData(content);
+                getData(player.content);
             } catch (IOException e) {
                 isOK = false;
+                get1.release();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             get1.release();
-        }).start();
+        }, "allmusic_ogg").start();
         get1.acquire();
         if (!isOK) {
             throw new DataFormatException("");
@@ -397,6 +378,6 @@ public class OggDecoder implements IDecoder {
 
     @Override
     public void set(int time) {
-
+        AllMusic.sendMessage("[AllMusic客户端]不支持中间播放");
     }
 }

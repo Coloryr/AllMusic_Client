@@ -20,6 +20,7 @@
 
 package coloryr.allmusic.player.decoder.mp3;
 
+import coloryr.allmusic.player.APlayer;
 import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
 import coloryr.allmusic.player.decoder.flac.DataFormatException;
@@ -61,13 +62,15 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     private int outputChannels;
     private boolean initialized;
     private Bitstream bitstream;
+    private final APlayer player;
 
     /**
      * Creates a new <code>Decoder</code> instance with default
      * parameters.
      */
 
-    public Mp3Decoder() {
+    public Mp3Decoder(APlayer player) {
+        this.player = player;
         Equalizer eq = DEFAULT_PARAMS.getInitialEqualizerSettings();
         if (eq != null) {
             /*
@@ -128,8 +131,8 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     }
 
     @Override
-    public void set(HttpClient client, URL url) throws Exception {
-        bitstream = new Bitstream(client, url);
+    public void set() throws Exception {
+        bitstream = new Bitstream(player);
         Header header = bitstream.readFrame();
         if(header == null){
             throw new DataFormatException();

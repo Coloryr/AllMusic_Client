@@ -21,6 +21,8 @@
 
 package coloryr.allmusic.player.decoder.flac;
 
+import coloryr.allmusic.AllMusic;
+import coloryr.allmusic.player.APlayer;
 import coloryr.allmusic.player.decoder.BuffPack;
 import coloryr.allmusic.player.decoder.IDecoder;
 import org.apache.http.client.HttpClient;
@@ -59,6 +61,7 @@ import java.net.URL;
  */
 public final class FlacDecoder implements AutoCloseable, IDecoder {
 
+    private final APlayer player;
     /*---- Fields ----*/
 
     public StreamInfo streamInfo;
@@ -74,9 +77,9 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
     // Constructs a new FLAC decoder to read the given file.
     // This immediately reads the basic header but not metadata blocks.
-    public FlacDecoder() {
+    public FlacDecoder(APlayer player) {
         // Initialize streams
-
+        this.player = player;
     }
 
     /*---- Methods ----*/
@@ -177,13 +180,12 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
     }
 
     @Override
-    public void set(HttpClient client, URL url) throws Exception {
-        input = new SeekableFileFlacInput(client, url);
+    public void set() throws Exception {
+        input = new SeekableFileFlacInput(player);
 
         // Read basic header
         if (input.readUint(32) != 0x664C6143)  // Magic string "fLaC"
         {
-            input.close();
             throw new DataFormatException("Invalid magic string");
         }
         metadataEndPos = -1;
@@ -208,6 +210,6 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
     @Override
     public void set(int time) {
-
+        AllMusic.sendMessage("[AllMusic客户端]不支持中间播放");
     }
 }

@@ -35,6 +35,7 @@
 
 package coloryr.allmusic.player.decoder.mp3;
 
+import coloryr.allmusic.player.APlayer;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -89,9 +90,6 @@ public final class Bitstream implements BitstreamErrors {
      */
     private final byte[] frame_bytes = new byte[BUFFER_INT_SIZE * 4];
     private final Crc16[] crc = new Crc16[1];
-    private HttpGet get;
-    private final HttpClient client;
-    private final URL url;
     private PushbackInputStream source;
     //private int 			current_frame_number;
     //private int				last_frame_number;
@@ -119,27 +117,18 @@ public final class Bitstream implements BitstreamErrors {
     private boolean single_ch_mode;
     private byte[] rawid3v2 = null;
     private boolean firstframe = true;
-    private InputStream content;
+    private final APlayer player;
 
     /**
      * Construct a IBitstream that reads data from a
      * given InputStream.
      */
-    public Bitstream(HttpClient client, URL url) throws Exception {
-        this.client = client;
-        this.url = url;
-        get = new HttpGet(url.toString());
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(2000)
-                .setConnectTimeout(2000).build();
-        get.setConfig(requestConfig);
-        HttpResponse response = this.client.execute(get);
-        HttpEntity entity = response.getEntity();
-        content = entity.getContent();
-        content = new BufferedInputStream(content);
-        loadID3v2(content);
+    public Bitstream(APlayer player) throws Exception {
+        this.player = player;
+        player.connect(local);
+        loadID3v2(player.content);
         firstframe = true;
-        source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+        source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
 
         closeFrame();
     }
@@ -225,8 +214,6 @@ public final class Bitstream implements BitstreamErrors {
      */
     public void close() throws BitstreamException {
         try {
-            get.abort();
-            content.close();
             source.close();
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
@@ -520,11 +507,8 @@ public final class Bitstream implements BitstreamErrors {
                 len -= bytesread;
             }
         } catch (ConnectionClosedException | SocketException ex) {
-            this.get.setHeader("Range", "bytes=" + local + "-");
-            HttpResponse response = this.client.execute(get);
-            HttpEntity entity = response.getEntity();
-            content = entity.getContent();
-            source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+            player.connect(local);
+            source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
             return readFully(b, offs, len);
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
@@ -551,11 +535,8 @@ public final class Bitstream implements BitstreamErrors {
                 len -= bytesread;
             }
         } catch (ConnectionClosedException | SocketException ex) {
-            this.get.setHeader("Range", "bytes=" + local + "-");
-            HttpResponse response = this.client.execute(get);
-            HttpEntity entity = response.getEntity();
-            content = entity.getContent();
-            source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+            player.connect(local);
+            source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
             return readBytes(b, offs, len);
         } catch (IOException ex) {
             throw newBitstreamException(STREAM_ERROR, ex);
@@ -565,19 +546,8 @@ public final class Bitstream implements BitstreamErrors {
 
     public void setLocal(long local) {
         try {
-            this.get.abort();
-            get = new HttpGet(url.toString());
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setSocketTimeout(2000)
-                    .setConnectTimeout(2000).build();
-            get.setConfig(requestConfig);
-            this.local = local;
-            this.get.setHeader("Range", "bytes=" + local + "-");
-            HttpResponse response;
-            response = this.client.execute(get);
-            HttpEntity entity = response.getEntity();
-            content = entity.getContent();
-            source = new PushbackInputStream(content, BUFFER_INT_SIZE * 4);
+            player.connect(local);
+            source = new PushbackInputStream(player.content, BUFFER_INT_SIZE * 4);
         } catch (IOException e) {
             e.printStackTrace();
         }

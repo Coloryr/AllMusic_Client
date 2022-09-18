@@ -7,6 +7,12 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
@@ -31,12 +37,13 @@ public class HudUtils {
     public final Object lock = new Object();
     private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
     private final Semaphore semaphore = new Semaphore(0);
+    private final HttpClient client;
 
     public HudUtils() {
-        ;
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
+        client = HttpClientBuilder.create().useSystemProperties().build();
     }
 
     public void stop() {
@@ -46,14 +53,14 @@ public class HudUtils {
 
     private void loadPic(String picUrl) {
         try {
-            URL url = new URL(picUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(4 * 1000);
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
-            connection.setRequestProperty("Host", "music.163.com");
-            connection.connect();
-            InputStream inputStream = connection.getInputStream();
+            HttpGet get = new HttpGet(picUrl);
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(2000)
+                    .setConnectTimeout(2000).build();
+            get.setConfig(requestConfig);
+            HttpResponse response = this.client.execute(get);
+            HttpEntity entity = response.getEntity();
+            InputStream inputStream = entity.getContent();
             BufferedImage image = ImageIO.read(inputStream);
             int[] pixels = new int[image.getWidth() * image.getHeight()];
             image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());

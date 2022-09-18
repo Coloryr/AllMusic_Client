@@ -9,7 +9,7 @@ public interface IDecoder {
 
     void close() throws Exception;
 
-    void set(HttpClient client, URL url) throws Exception;
+    void set() throws Exception;
 
     int getOutputFrequency();
 

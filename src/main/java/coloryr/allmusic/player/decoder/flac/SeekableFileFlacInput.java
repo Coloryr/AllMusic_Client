@@ -21,6 +21,8 @@
 
 package coloryr.allmusic.player.decoder.flac;
 
+import coloryr.allmusic.player.APlayer;
+import net.minecraft.world.entity.player.Player;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -44,23 +46,15 @@ public final class SeekableFileFlacInput extends AbstractFlacLowLevelInput {
 
     // The underlying byte-based input stream to read from.
     private BufferedInputStream raf;
-    private final HttpGet get;
-    private final HttpClient client;
-    private InputStream content;
     private long local;
-
+    private APlayer player;
 
     /*---- Constructors ----*/
 
-    public SeekableFileFlacInput(HttpClient client, URL url) throws Exception {
+    public SeekableFileFlacInput(APlayer player) {
         super();
-        this.client = client;
-        this.get = new HttpGet(url.toString());
-        this.get.setHeader("Range", "bytes=" + local + "-");
-        HttpResponse response = this.client.execute(get);
-        HttpEntity entity = response.getEntity();
-        content = entity.getContent();
-        this.raf = new BufferedInputStream(content);
+        this.player = player;
+        this.raf = new BufferedInputStream(player.content);
     }
 
     /*---- Methods ----*/
@@ -79,18 +73,14 @@ public final class SeekableFileFlacInput extends AbstractFlacLowLevelInput {
             local += temp;
             return temp;
         } catch (ConnectionClosedException | SocketException ex) {
-            this.get.setHeader("Range", "bytes=" + local + "-");
-            HttpResponse response = this.client.execute(get);
-            HttpEntity entity = response.getEntity();
-            content = entity.getContent();
-            this.raf = new BufferedInputStream(content);
+            player.connect(local);
+            this.raf = new BufferedInputStream(player.content);
             return readUnderlying(buf, off, len);
         }
     }
 
     // Closes the underlying RandomAccessFile stream (very important).
     public void close() throws IOException {
-        get.abort();
         if (raf != null) {
             raf.close();
             raf = null;
