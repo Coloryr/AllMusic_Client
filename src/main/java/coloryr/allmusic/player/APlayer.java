@@ -162,6 +162,12 @@ public class APlayer extends InputStream {
 
                     isPlay = true;
                     int index = AL10.alGenSources();
+                    int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                    while (m_numqueued > 0) {
+                        int temp = AL10.alSourceUnqueueBuffers(index);
+                        AL10.alDeleteBuffers(temp);
+                        m_numqueued--;
+                    }
                     int frequency = decoder.getOutputFrequency();
                     int channels = decoder.getOutputChannels();
                     if (time != 0) {
@@ -212,7 +218,7 @@ public class APlayer extends InputStream {
                             Thread.sleep(100);
                         }
                         AL10.alSourceStop(index);
-                        int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                        m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
                         while (m_numqueued > 0) {
                             int temp = AL10.alSourceUnqueueBuffers(index);
                             AL10.alDeleteBuffers(temp);
