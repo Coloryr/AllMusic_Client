@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,6 +34,7 @@ public class AllMusic {
     private static APlayer nowPlaying;
     public static boolean isPlay = false;
     private HudUtils HudUtils;
+    private String url;
 
     public AllMusic() {
 
@@ -40,6 +42,7 @@ public class AllMusic {
 
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::setup1);
+        modEventBus.addListener(this::onLoad);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -77,6 +80,13 @@ public class AllMusic {
         context.setPacketHandled(true);
     }
 
+    public void onLoad(final SoundEngineLoadEvent e) {
+        if (nowPlaying != null) {
+            nowPlaying.close();
+            nowPlaying.setMusic(url);
+        }
+    }
+
     @SubscribeEvent
     public void onSound(final SoundEvent.SoundSourceEvent e) {
         if (!isPlay)
@@ -107,7 +117,8 @@ public class AllMusic {
                 Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
                 Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
                 stopPlaying();
-                nowPlaying.setMusic(message.replace("[Play]", ""));
+                url = message.replace("[Play]", "");
+                nowPlaying.setMusic(url);
             } else if (message.startsWith("[Lyric]")) {
                 HudUtils.Lyric = message.substring(7);
             } else if (message.startsWith("[Info]")) {

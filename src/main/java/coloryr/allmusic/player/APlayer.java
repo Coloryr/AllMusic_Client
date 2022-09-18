@@ -177,13 +177,20 @@ public class APlayer {
 
     public void setMusic(String url) {
         time = 0;
+        close();
         urls.add(url);
-        isClose = true;
         semaphore.release();
     }
 
     public void close() {
         urls.clear();
         isClose = true;
+        if (decoder != null) {
+            try {
+                decoder.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
