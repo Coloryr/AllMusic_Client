@@ -3,7 +3,9 @@ package coloryr.allmusic;
 import coloryr.allmusic.hud.HudUtils;
 import coloryr.allmusic.player.APlayer;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
@@ -28,13 +30,19 @@ import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 @Mod("allmusic")
 public class AllMusic {
     private static APlayer nowPlaying;
-    private HudUtils HudUtils;
-    private String url;
+    private static HudUtils hudUtils;
+    private static int ang = 0;
+    private static int count = 0;
+
+    private static ScheduledExecutorService service;
 
     public AllMusic() {
 
@@ -49,9 +57,7 @@ public class AllMusic {
 
     public static void sendMessage(String data) {
         Minecraft.getInstance().execute(() -> {
-            if (Minecraft.getInstance().player == null)
-                return;
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal(data));
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data));
         });
     }
 
@@ -63,7 +69,10 @@ public class AllMusic {
 
     private void setup1(final FMLLoadCompleteEvent event) {
         nowPlaying = new APlayer();
-        HudUtils = new HudUtils();
+        hudUtils = new HudUtils();
+
+        service = Executors.newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(AllMusic::time1, 0, 1, TimeUnit.MILLISECONDS);
     }
 
     private void enc(String str, FriendlyByteBuf buffer) {
@@ -103,9 +112,9 @@ public class AllMusic {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        HudUtils.Lyric = HudUtils.Info = HudUtils.List = "";
-        HudUtils.haveImg = false;
-        HudUtils.save = null;
+        hudUtils.Lyric = hudUtils.Info = hudUtils.List = "";
+        hudUtils.haveImg = false;
+        hudUtils.save = null;
     }
 
     private void onClicentPacket(final String message) {
@@ -116,23 +125,23 @@ public class AllMusic {
                 Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
                 Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
                 stopPlaying();
-                url = message.replace("[Play]", "");
+                String url = message.replace("[Play]", "");
                 nowPlaying.setMusic(url);
             } else if (message.startsWith("[Lyric]")) {
-                HudUtils.Lyric = message.substring(7);
+                hudUtils.Lyric = message.substring(7);
             } else if (message.startsWith("[Info]")) {
-                HudUtils.Info = message.substring(6);
+                hudUtils.Info = message.substring(6);
             } else if (message.startsWith("[Img]")) {
-                HudUtils.setImg(message.substring(5));
+                hudUtils.setImg(message.substring(5));
             } else if (message.startsWith("[Pos]")) {
                 nowPlaying.set(message.substring(5));
             } else if (message.startsWith("[List]")) {
-                HudUtils.List = message.substring(6);
+                hudUtils.List = message.substring(6);
             } else if (message.equalsIgnoreCase("[clear]")) {
-                HudUtils.Lyric = HudUtils.Info = HudUtils.List = "";
-                HudUtils.haveImg = false;
+                hudUtils.Lyric = hudUtils.Info = hudUtils.List = "";
+                hudUtils.haveImg = false;
             } else if (message.startsWith("{")) {
-                HudUtils.setPos(message);
+                hudUtils.setPos(message);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,7 +158,37 @@ public class AllMusic {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, textureID);
-        GuiComponent.blit(stack, x, y, 0, 0, 0, size, size, size, size);
+
+        PoseStack stack = new PoseStack();
+        Matrix4f matrix = stack.last().pose();
+
+        int a = size / 2;
+
+        matrix.multiplyWithTranslation(x + a, y + a, 0);
+        if(hudUtils.save.EnablePicRotate && hudUtils.thisRoute) {
+            matrix.multiply(new Quaternion(0, 0, ang, true));
+        }
+        int x0 = -a;
+        int x1 = a;
+        int y0 = -a;
+        int y1 = a;
+        int z = 0;
+        int u0 = 0;
+        float u1 = 1;
+        float v0 = 0;
+        float v1 = 1;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
+
+        BufferUploader.drawWithShader(bufferBuilder.end());
+
+        //GuiComponent.blit(stack, x, y, 0, 0, 0, size, size, size, size);
     }
 
     public static void drawText(String item, float x, float y) {
@@ -160,8 +199,20 @@ public class AllMusic {
     @SubscribeEvent
     public void onRenderOverlay(RenderGuiOverlayEvent.Post e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
-            HudUtils.update();
+            hudUtils.update();
         }
+    }
+
+    private static void time1() {
+        if (hudUtils.save == null)
+            return;
+        if (count < hudUtils.save.PicRotateSpeed) {
+            count++;
+            return;
+        }
+        count = 0;
+        ang++;
+        ang = ang % 360;
     }
 
     @SubscribeEvent
@@ -171,7 +222,7 @@ public class AllMusic {
 
     private void stopPlaying() {
         nowPlaying.closePlayer();
-        HudUtils.close();
+        hudUtils.close();
     }
 
     public static void runMain(Runnable runnable){

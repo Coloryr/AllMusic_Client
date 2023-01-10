@@ -2,7 +2,6 @@ package coloryr.allmusic.hud;
 
 import coloryr.allmusic.AllMusic;
 import com.google.gson.Gson;
-import net.minecraft.client.Minecraft;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -12,6 +11,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -33,6 +34,7 @@ public class HudUtils {
     private final HttpClient client;
     private HttpGet get;
     private InputStream inputStream;
+    public boolean thisRoute;
 
     public HudUtils() {
         Thread thread = new Thread(this::run);
@@ -71,9 +73,65 @@ public class HudUtils {
             inputStream = entity.getContent();
             BufferedImage image = ImageIO.read(inputStream);
             int[] pixels = new int[image.getWidth() * image.getHeight()];
-            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-            getClose();
             byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
+
+            int width = image.getWidth();
+            if(save.EnablePicRotate) {
+                // 透明底的图片
+                BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D graphics = formatAvatarImage.createGraphics();
+                //把图片切成一个园
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                //留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
+                int border = (int) (width * 0.11);
+                //图片是一个圆型
+                Ellipse2D.Double shape = new Ellipse2D.Double(border, border, width - border * 2, width - border * 2);
+                //需要保留的区域
+                graphics.setClip(shape);
+                graphics.drawImage(image, border, border, width - border * 2, width - border * 2, null);
+                graphics.dispose();
+                //在圆图外面再画一个圆
+                //新创建一个graphics，这样画的圆不会有锯齿
+                graphics = formatAvatarImage.createGraphics();
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                //画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
+                //使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
+                int border1;
+
+                border1 = (int) (width * 0.08);
+                BasicStroke s = new BasicStroke(border1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+                graphics.setStroke(s);
+                graphics.setColor(Color.decode("#121212"));
+                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+
+                border1 = (int) (width * 0.05);
+                float si =(float) (border1 / 6);
+                s = new BasicStroke(si, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+                graphics.setStroke(s);
+                graphics.setColor(Color.decode("#181818"));
+                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+
+                border1 = (int) (width * 0.065);
+                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+
+                border1 = (int) (width * 0.08);
+                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+
+                border1 = (int) (width * 0.095);
+                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+
+                graphics.dispose();
+
+                formatAvatarImage.getRGB(0, 0, formatAvatarImage.getWidth(), formatAvatarImage.getHeight(), pixels, 0, formatAvatarImage.getWidth());
+                getClose();
+                thisRoute = true;
+            }
+            else
+            {
+                image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+                getClose();
+                thisRoute = false;
+            }
 
             for (int h = 0; h < image.getHeight(); h++) {
                 for (int w = 0; w < image.getWidth(); w++) {
@@ -137,32 +195,32 @@ public class HudUtils {
         if (save == null)
             return;
         synchronized (lock) {
-            if (save.isEnableInfo() && !Info.isEmpty()) {
+            if (save.EnableInfo && !Info.isEmpty()) {
                 int offset = 0;
                 String[] temp = Info.split("\n");
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.getInfo().getX(), (float) save.getInfo().getY() + offset);
+                    AllMusic.drawText(item, (float) save.Info.x, (float) save.Info.y + offset);
                     offset += 10;
                 }
             }
-            if (save.isEnableList() && !List.isEmpty()) {
+            if (save.EnableList && !List.isEmpty()) {
                 String[] temp = List.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.getList().getX(), (float) save.getList().getY() + offset);
+                    AllMusic.drawText(item, (float) save.List.x, (float) save.List.y + offset);
                     offset += 10;
                 }
             }
-            if (save.isEnableLyric() && !Lyric.isEmpty()) {
+            if (save.EnableLyric && !Lyric.isEmpty()) {
                 String[] temp = Lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.getLyric().getX(), (float) save.getLyric().getY() + offset);
+                    AllMusic.drawText(item, (float) save.Lyric.x, (float) save.Lyric.y + offset);
                     offset += 10;
                 }
             }
-            if (save.isEnablePic() && haveImg) {
-                AllMusic.drawPic(textureID, save.getPicSize(), save.getPic().getX(), save.getPic().getY());
+            if (save.EnablePic && haveImg) {
+                AllMusic.drawPic(textureID, save.PicSize, save.Pic.x, save.Pic.y);
             }
         }
     }
