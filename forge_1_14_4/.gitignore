@@ -5,7 +5,6 @@ bin
 .metadata
 .classpath
 .project
-.idea
 
 # idea
 out
@@ -24,4 +23,5 @@ run
 # Files from Forge MDK
 forge*changelog.txt
 
+logs
 workspace.xml

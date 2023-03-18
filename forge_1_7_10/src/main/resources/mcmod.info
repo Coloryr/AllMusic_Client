@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "allmusic",
+    "name": "AllMusic",
+    "description": "allmusic mod",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/Coloryr/AllMusic_Client",
+    "updateUrl": "",
+    "authorList": [
+      "Color_yr"
+    ],
+    "credits": "This mod is use in AllMusic.",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

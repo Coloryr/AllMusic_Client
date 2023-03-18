@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "coloryr.allmusic.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "client": [
+    "GuiShow",
+    "QuitServer",
+    "SoundEvent",
+    "Tick"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
