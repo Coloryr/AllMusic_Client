@@ -1,3 +1,6 @@
+mkdir "build"
+mkdir ".gradle"
+
 mkdir "forge_1_19_3/src/main/java/coloryr/allmusic_client"
 mkdir "forge_1_19_3/src/main/resources/coloryr/allmusic_client/player/decoder"
 mkdir "forge_1_19_2/src/main/java/coloryr/allmusic_client"
