@@ -1,35 +1,30 @@
 /*
- * 11/19/04	 1.0 moved to LGPL.
- *
- * 18/06/01  Michael Scheerer,  Fixed bugs which causes
- *           negative indexes in method huffmann_decode and in method
- *           dequanisize_sample.
- *
- * 16/07/01  Michael Scheerer, Catched a bug in method
- *           huffmann_decode, which causes an outOfIndexException.
- *           Cause : Indexnumber of 24 at SfBandIndex,
- *           which has only a length of 22. I have simply and dirty
- *           fixed the index to <= 22, because I'm not really be able
- *           to fix the bug. The Indexnumber is taken from the MP3
- *           file and the origin Ma-Player with the same code works
- *           well.
- *
- * 02/19/99  Java Conversion by E.B, javalayer@javazoom.net
- *-----------------------------------------------------------------------
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU Library General Public License as published
- *   by the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Library General Public License for more details.
- *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the Free Software
- *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *----------------------------------------------------------------------
+ * 11/19/04 1.0 moved to LGPL.
+ * 18/06/01 Michael Scheerer, Fixed bugs which causes
+ * negative indexes in method huffmann_decode and in method
+ * dequanisize_sample.
+ * 16/07/01 Michael Scheerer, Catched a bug in method
+ * huffmann_decode, which causes an outOfIndexException.
+ * Cause : Indexnumber of 24 at SfBandIndex,
+ * which has only a length of 22. I have simply and dirty
+ * fixed the index to <= 22, because I'm not really be able
+ * to fix the bug. The Indexnumber is taken from the MP3
+ * file and the origin Ma-Player with the same code works
+ * well.
+ * 02/19/99 Java Conversion by E.B, javalayer@javazoom.net
+ * -----------------------------------------------------------------------
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Library General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Library General Public License for more details.
+ * You should have received a copy of the GNU Library General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * ----------------------------------------------------------------------
  */
 
 package coloryr.allmusic_client.player.decoder.mp3;
@@ -40,122 +35,91 @@ package coloryr.allmusic_client.player.decoder.mp3;
  * @since 0.0
  */
 final class LayerIIIDecoder implements FrameDecoder {
-    public static final int[] pretab =
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0};
-    public static final float[] two_to_negative_half_pow =
-            {1.0000000000E+00f, 7.0710678119E-01f, 5.0000000000E-01f, 3.5355339059E-01f,
-                    2.5000000000E-01f, 1.7677669530E-01f, 1.2500000000E-01f, 8.8388347648E-02f,
-                    6.2500000000E-02f, 4.4194173824E-02f, 3.1250000000E-02f, 2.2097086912E-02f,
-                    1.5625000000E-02f, 1.1048543456E-02f, 7.8125000000E-03f, 5.5242717280E-03f,
-                    3.9062500000E-03f, 2.7621358640E-03f, 1.9531250000E-03f, 1.3810679320E-03f,
-                    9.7656250000E-04f, 6.9053396600E-04f, 4.8828125000E-04f, 3.4526698300E-04f,
-                    2.4414062500E-04f, 1.7263349150E-04f, 1.2207031250E-04f, 8.6316745750E-05f,
-                    6.1035156250E-05f, 4.3158372875E-05f, 3.0517578125E-05f, 2.1579186438E-05f,
-                    1.5258789062E-05f, 1.0789593219E-05f, 7.6293945312E-06f, 5.3947966094E-06f,
-                    3.8146972656E-06f, 2.6973983047E-06f, 1.9073486328E-06f, 1.3486991523E-06f,
-                    9.5367431641E-07f, 6.7434957617E-07f, 4.7683715820E-07f, 3.3717478809E-07f,
-                    2.3841857910E-07f, 1.6858739404E-07f, 1.1920928955E-07f, 8.4293697022E-08f,
-                    5.9604644775E-08f, 4.2146848511E-08f, 2.9802322388E-08f, 2.1073424255E-08f,
-                    1.4901161194E-08f, 1.0536712128E-08f, 7.4505805969E-09f, 5.2683560639E-09f,
-                    3.7252902985E-09f, 2.6341780319E-09f, 1.8626451492E-09f, 1.3170890160E-09f,
-                    9.3132257462E-10f, 6.5854450798E-10f, 4.6566128731E-10f, 3.2927225399E-10f
-            };
+
+    public static final int[] pretab = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0 };
+    public static final float[] two_to_negative_half_pow = { 1.0000000000E+00f, 7.0710678119E-01f, 5.0000000000E-01f,
+        3.5355339059E-01f, 2.5000000000E-01f, 1.7677669530E-01f, 1.2500000000E-01f, 8.8388347648E-02f,
+        6.2500000000E-02f, 4.4194173824E-02f, 3.1250000000E-02f, 2.2097086912E-02f, 1.5625000000E-02f,
+        1.1048543456E-02f, 7.8125000000E-03f, 5.5242717280E-03f, 3.9062500000E-03f, 2.7621358640E-03f,
+        1.9531250000E-03f, 1.3810679320E-03f, 9.7656250000E-04f, 6.9053396600E-04f, 4.8828125000E-04f,
+        3.4526698300E-04f, 2.4414062500E-04f, 1.7263349150E-04f, 1.2207031250E-04f, 8.6316745750E-05f,
+        6.1035156250E-05f, 4.3158372875E-05f, 3.0517578125E-05f, 2.1579186438E-05f, 1.5258789062E-05f,
+        1.0789593219E-05f, 7.6293945312E-06f, 5.3947966094E-06f, 3.8146972656E-06f, 2.6973983047E-06f,
+        1.9073486328E-06f, 1.3486991523E-06f, 9.5367431641E-07f, 6.7434957617E-07f, 4.7683715820E-07f,
+        3.3717478809E-07f, 2.3841857910E-07f, 1.6858739404E-07f, 1.1920928955E-07f, 8.4293697022E-08f,
+        5.9604644775E-08f, 4.2146848511E-08f, 2.9802322388E-08f, 2.1073424255E-08f, 1.4901161194E-08f,
+        1.0536712128E-08f, 7.4505805969E-09f, 5.2683560639E-09f, 3.7252902985E-09f, 2.6341780319E-09f,
+        1.8626451492E-09f, 1.3170890160E-09f, 9.3132257462E-10f, 6.5854450798E-10f, 4.6566128731E-10f,
+        3.2927225399E-10f };
     public static final float[] t_43 = create_t_43();
-    public static final float[][] io =
-            {
-                    {1.0000000000E+00f, 8.4089641526E-01f, 7.0710678119E-01f, 5.9460355751E-01f,
-                            5.0000000001E-01f, 4.2044820763E-01f, 3.5355339060E-01f, 2.9730177876E-01f,
-                            2.5000000001E-01f, 2.1022410382E-01f, 1.7677669530E-01f, 1.4865088938E-01f,
-                            1.2500000000E-01f, 1.0511205191E-01f, 8.8388347652E-02f, 7.4325444691E-02f,
-                            6.2500000003E-02f, 5.2556025956E-02f, 4.4194173826E-02f, 3.7162722346E-02f,
-                            3.1250000002E-02f, 2.6278012978E-02f, 2.2097086913E-02f, 1.8581361173E-02f,
-                            1.5625000001E-02f, 1.3139006489E-02f, 1.1048543457E-02f, 9.2906805866E-03f,
-                            7.8125000006E-03f, 6.5695032447E-03f, 5.5242717285E-03f, 4.6453402934E-03f},
-                    {1.0000000000E+00f, 7.0710678119E-01f, 5.0000000000E-01f, 3.5355339060E-01f,
-                            2.5000000000E-01f, 1.7677669530E-01f, 1.2500000000E-01f, 8.8388347650E-02f,
-                            6.2500000001E-02f, 4.4194173825E-02f, 3.1250000001E-02f, 2.2097086913E-02f,
-                            1.5625000000E-02f, 1.1048543456E-02f, 7.8125000002E-03f, 5.5242717282E-03f,
-                            3.9062500001E-03f, 2.7621358641E-03f, 1.9531250001E-03f, 1.3810679321E-03f,
-                            9.7656250004E-04f, 6.9053396603E-04f, 4.8828125002E-04f, 3.4526698302E-04f,
-                            2.4414062501E-04f, 1.7263349151E-04f, 1.2207031251E-04f, 8.6316745755E-05f,
-                            6.1035156254E-05f, 4.3158372878E-05f, 3.0517578127E-05f, 2.1579186439E-05f}
-            };
-    public static final float[] TAN12 =
-            {
-                    0.0f, 0.26794919f, 0.57735027f, 1.0f,
-                    1.73205081f, 3.73205081f, 9.9999999e10f, -3.73205081f,
-                    -1.73205081f, -1.0f, -0.57735027f, -0.26794919f,
-                    0.0f, 0.26794919f, 0.57735027f, 1.0f
-            };
+    public static final float[][] io = {
+        { 1.0000000000E+00f, 8.4089641526E-01f, 7.0710678119E-01f, 5.9460355751E-01f, 5.0000000001E-01f,
+            4.2044820763E-01f, 3.5355339060E-01f, 2.9730177876E-01f, 2.5000000001E-01f, 2.1022410382E-01f,
+            1.7677669530E-01f, 1.4865088938E-01f, 1.2500000000E-01f, 1.0511205191E-01f, 8.8388347652E-02f,
+            7.4325444691E-02f, 6.2500000003E-02f, 5.2556025956E-02f, 4.4194173826E-02f, 3.7162722346E-02f,
+            3.1250000002E-02f, 2.6278012978E-02f, 2.2097086913E-02f, 1.8581361173E-02f, 1.5625000001E-02f,
+            1.3139006489E-02f, 1.1048543457E-02f, 9.2906805866E-03f, 7.8125000006E-03f, 6.5695032447E-03f,
+            5.5242717285E-03f, 4.6453402934E-03f },
+        { 1.0000000000E+00f, 7.0710678119E-01f, 5.0000000000E-01f, 3.5355339060E-01f, 2.5000000000E-01f,
+            1.7677669530E-01f, 1.2500000000E-01f, 8.8388347650E-02f, 6.2500000001E-02f, 4.4194173825E-02f,
+            3.1250000001E-02f, 2.2097086913E-02f, 1.5625000000E-02f, 1.1048543456E-02f, 7.8125000002E-03f,
+            5.5242717282E-03f, 3.9062500001E-03f, 2.7621358641E-03f, 1.9531250001E-03f, 1.3810679321E-03f,
+            9.7656250004E-04f, 6.9053396603E-04f, 4.8828125002E-04f, 3.4526698302E-04f, 2.4414062501E-04f,
+            1.7263349151E-04f, 1.2207031251E-04f, 8.6316745755E-05f, 6.1035156254E-05f, 4.3158372878E-05f,
+            3.0517578127E-05f, 2.1579186439E-05f } };
+    public static final float[] TAN12 = { 0.0f, 0.26794919f, 0.57735027f, 1.0f, 1.73205081f, 3.73205081f, 9.9999999e10f,
+        -3.73205081f, -1.73205081f, -1.0f, -0.57735027f, -0.26794919f, 0.0f, 0.26794919f, 0.57735027f, 1.0f };
 
-    public static final float[][] win =
-            {
-                    {-1.6141214951E-02f, -5.3603178919E-02f, -1.0070713296E-01f, -1.6280817573E-01f,
-                            -4.9999999679E-01f, -3.8388735032E-01f, -6.2061144372E-01f, -1.1659756083E+00f,
-                            -3.8720752656E+00f, -4.2256286556E+00f, -1.5195289984E+00f, -9.7416483388E-01f,
-                            -7.3744074053E-01f, -1.2071067773E+00f, -5.1636156596E-01f, -4.5426052317E-01f,
-                            -4.0715656898E-01f, -3.6969460527E-01f, -3.3876269197E-01f, -3.1242222492E-01f,
-                            -2.8939587111E-01f, -2.6880081906E-01f, -5.0000000266E-01f, -2.3251417468E-01f,
-                            -2.1596714708E-01f, -2.0004979098E-01f, -1.8449493497E-01f, -1.6905846094E-01f,
-                            -1.5350360518E-01f, -1.3758624925E-01f, -1.2103922149E-01f, -2.0710679058E-01f,
-                            -8.4752577594E-02f, -6.4157525656E-02f, -4.1131172614E-02f, -1.4790705759E-02f},
+    public static final float[][] win = {
+        { -1.6141214951E-02f, -5.3603178919E-02f, -1.0070713296E-01f, -1.6280817573E-01f, -4.9999999679E-01f,
+            -3.8388735032E-01f, -6.2061144372E-01f, -1.1659756083E+00f, -3.8720752656E+00f, -4.2256286556E+00f,
+            -1.5195289984E+00f, -9.7416483388E-01f, -7.3744074053E-01f, -1.2071067773E+00f, -5.1636156596E-01f,
+            -4.5426052317E-01f, -4.0715656898E-01f, -3.6969460527E-01f, -3.3876269197E-01f, -3.1242222492E-01f,
+            -2.8939587111E-01f, -2.6880081906E-01f, -5.0000000266E-01f, -2.3251417468E-01f, -2.1596714708E-01f,
+            -2.0004979098E-01f, -1.8449493497E-01f, -1.6905846094E-01f, -1.5350360518E-01f, -1.3758624925E-01f,
+            -1.2103922149E-01f, -2.0710679058E-01f, -8.4752577594E-02f, -6.4157525656E-02f, -4.1131172614E-02f,
+            -1.4790705759E-02f },
 
-                    {-1.6141214951E-02f, -5.3603178919E-02f, -1.0070713296E-01f, -1.6280817573E-01f,
-                            -4.9999999679E-01f, -3.8388735032E-01f, -6.2061144372E-01f, -1.1659756083E+00f,
-                            -3.8720752656E+00f, -4.2256286556E+00f, -1.5195289984E+00f, -9.7416483388E-01f,
-                            -7.3744074053E-01f, -1.2071067773E+00f, -5.1636156596E-01f, -4.5426052317E-01f,
-                            -4.0715656898E-01f, -3.6969460527E-01f, -3.3908542600E-01f, -3.1511810350E-01f,
-                            -2.9642226150E-01f, -2.8184548650E-01f, -5.4119610000E-01f, -2.6213228100E-01f,
-                            -2.5387916537E-01f, -2.3296291359E-01f, -1.9852728987E-01f, -1.5233534808E-01f,
-                            -9.6496400054E-02f, -3.3423828516E-02f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f},
+        { -1.6141214951E-02f, -5.3603178919E-02f, -1.0070713296E-01f, -1.6280817573E-01f, -4.9999999679E-01f,
+            -3.8388735032E-01f, -6.2061144372E-01f, -1.1659756083E+00f, -3.8720752656E+00f, -4.2256286556E+00f,
+            -1.5195289984E+00f, -9.7416483388E-01f, -7.3744074053E-01f, -1.2071067773E+00f, -5.1636156596E-01f,
+            -4.5426052317E-01f, -4.0715656898E-01f, -3.6969460527E-01f, -3.3908542600E-01f, -3.1511810350E-01f,
+            -2.9642226150E-01f, -2.8184548650E-01f, -5.4119610000E-01f, -2.6213228100E-01f, -2.5387916537E-01f,
+            -2.3296291359E-01f, -1.9852728987E-01f, -1.5233534808E-01f, -9.6496400054E-02f, -3.3423828516E-02f,
+            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f },
 
-                    {-4.8300800645E-02f, -1.5715656932E-01f, -2.8325045177E-01f, -4.2953747763E-01f,
-                            -1.2071067795E+00f, -8.2426483178E-01f, -1.1451749106E+00f, -1.7695290101E+00f,
-                            -4.5470225061E+00f, -3.4890531002E+00f, -7.3296292804E-01f, -1.5076514758E-01f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f},
+        { -4.8300800645E-02f, -1.5715656932E-01f, -2.8325045177E-01f, -4.2953747763E-01f, -1.2071067795E+00f,
+            -8.2426483178E-01f, -1.1451749106E+00f, -1.7695290101E+00f, -4.5470225061E+00f, -3.4890531002E+00f,
+            -7.3296292804E-01f, -1.5076514758E-01f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f },
 
-                    {0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
-                            0.0000000000E+00f, 0.0000000000E+00f, -1.5076513660E-01f, -7.3296291107E-01f,
-                            -3.4890530566E+00f, -4.5470224727E+00f, -1.7695290031E+00f, -1.1451749092E+00f,
-                            -8.3137738100E-01f, -1.3065629650E+00f, -5.4142014250E-01f, -4.6528974900E-01f,
-                            -4.1066990750E-01f, -3.7004680800E-01f, -3.3876269197E-01f, -3.1242222492E-01f,
-                            -2.8939587111E-01f, -2.6880081906E-01f, -5.0000000266E-01f, -2.3251417468E-01f,
-                            -2.1596714708E-01f, -2.0004979098E-01f, -1.8449493497E-01f, -1.6905846094E-01f,
-                            -1.5350360518E-01f, -1.3758624925E-01f, -1.2103922149E-01f, -2.0710679058E-01f,
-                            -8.4752577594E-02f, -6.4157525656E-02f, -4.1131172614E-02f, -1.4790705759E-02f}
-            };
-    public static final int[][][] nr_of_sfb_block =
-            {{{6, 5, 5, 5}, {9, 9, 9, 9}, {6, 9, 9, 9}},
-                    {{6, 5, 7, 3}, {9, 9, 12, 6}, {6, 9, 12, 6}},
-                    {{11, 10, 0, 0}, {18, 18, 0, 0}, {15, 18, 0, 0}},
-                    {{7, 7, 7, 0}, {12, 12, 12, 0}, {6, 15, 12, 0}},
-                    {{6, 6, 6, 3}, {12, 9, 9, 6}, {6, 12, 9, 6}},
-                    {{8, 8, 5, 0}, {15, 12, 9, 0}, {6, 18, 9, 0}}};
+        { 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f, 0.0000000000E+00f,
+            0.0000000000E+00f, -1.5076513660E-01f, -7.3296291107E-01f, -3.4890530566E+00f, -4.5470224727E+00f,
+            -1.7695290031E+00f, -1.1451749092E+00f, -8.3137738100E-01f, -1.3065629650E+00f, -5.4142014250E-01f,
+            -4.6528974900E-01f, -4.1066990750E-01f, -3.7004680800E-01f, -3.3876269197E-01f, -3.1242222492E-01f,
+            -2.8939587111E-01f, -2.6880081906E-01f, -5.0000000266E-01f, -2.3251417468E-01f, -2.1596714708E-01f,
+            -2.0004979098E-01f, -1.8449493497E-01f, -1.6905846094E-01f, -1.5350360518E-01f, -1.3758624925E-01f,
+            -1.2103922149E-01f, -2.0710679058E-01f, -8.4752577594E-02f, -6.4157525656E-02f, -4.1131172614E-02f,
+            -1.4790705759E-02f } };
+    public static final int[][][] nr_of_sfb_block = { { { 6, 5, 5, 5 }, { 9, 9, 9, 9 }, { 6, 9, 9, 9 } },
+        { { 6, 5, 7, 3 }, { 9, 9, 12, 6 }, { 6, 9, 12, 6 } }, { { 11, 10, 0, 0 }, { 18, 18, 0, 0 }, { 15, 18, 0, 0 } },
+        { { 7, 7, 7, 0 }, { 12, 12, 12, 0 }, { 6, 15, 12, 0 } }, { { 6, 6, 6, 3 }, { 12, 9, 9, 6 }, { 6, 12, 9, 6 } },
+        { { 8, 8, 5, 0 }, { 15, 12, 9, 0 }, { 6, 18, 9, 0 } } };
     private static final int SSLIMIT = 18;
     private static final int SBLIMIT = 32;
-    private static final int[][] slen =
-            {
-                    {0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4},
-                    {0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3}
-            };
-    private static final float[] cs =
-            {
-                    0.857492925712f, 0.881741997318f, 0.949628649103f, 0.983314592492f,
-                    0.995517816065f, 0.999160558175f, 0.999899195243f, 0.999993155067f
-            };
-    private static final float[] ca =
-            {
-                    -0.5144957554270f, -0.4717319685650f, -0.3133774542040f, -0.1819131996110f,
-                    -0.0945741925262f, -0.0409655828852f, -0.0141985685725f, -0.00369997467375f
-            };
+    private static final int[][] slen = { { 0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 },
+        { 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3 } };
+    private static final float[] cs = { 0.857492925712f, 0.881741997318f, 0.949628649103f, 0.983314592492f,
+        0.995517816065f, 0.999160558175f, 0.999899195243f, 0.999993155067f };
+    private static final float[] ca = { -0.5144957554270f, -0.4717319685650f, -0.3133774542040f, -0.1819131996110f,
+        -0.0945741925262f, -0.0409655828852f, -0.0141985685725f, -0.00369997467375f };
 
-    private static /*final*/ int[][] reorder_table/* = loadReorderTable()*/;    // SZD: will be generated on demand
+    private static /* final */ int[][] reorder_table/* = loadReorderTable() */; // SZD: will be generated on demand
     final double d43 = (4.0 / 3.0);
     /**
      *
@@ -197,10 +161,10 @@ final class LayerIIIDecoder implements FrameDecoder {
     /**
      *
      */
-    int[] x = {0};
-    int[] y = {0};
-    int[] v = {0};
-    int[] w = {0};
+    int[] x = { 0 };
+    int[] y = { 0 };
+    int[] v = { 0 };
+    int[] w = { 0 };
     /**
      *
      */
@@ -225,9 +189,8 @@ final class LayerIIIDecoder implements FrameDecoder {
      */
     // REVIEW: these constructor arguments should be moved to the
     // decodeFrame() method, where possible, so that one
-    public LayerIIIDecoder(Bitstream stream0, Header header0,
-                           SynthesisFilter filtera, SynthesisFilter filterb,
-                           Obuffer buffer0, int which_ch0) {
+    public LayerIIIDecoder(Bitstream stream0, Header header0, SynthesisFilter filtera, SynthesisFilter filterb,
+        Obuffer buffer0, int which_ch0) {
         huffcodetab.inithuff();
         is_1d = new int[SBLIMIT * SSLIMIT + 4];
         ro = new float[2][SBLIMIT][SSLIMIT];
@@ -237,34 +200,41 @@ final class LayerIIIDecoder implements FrameDecoder {
         k = new float[2][SBLIMIT * SSLIMIT];
         nonzero = new int[2];
 
-        //III_scalefact_t
+        // III_scalefact_t
         temporaire2[] III_scalefac_t = new temporaire2[2];
         III_scalefac_t[0] = new temporaire2();
         III_scalefac_t[1] = new temporaire2();
         scalefac = III_scalefac_t;
         // L3TABLE INIT
 
-        sfBandIndex = new SBI[9];    // SZD: MPEG2.5 +3 indices
-        int[] l0 = {0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522, 576};
-        int[] s0 = {0, 4, 8, 12, 18, 24, 32, 42, 56, 74, 100, 132, 174, 192};
-        int[] l1 = {0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 114, 136, 162, 194, 232, 278, 330, 394, 464, 540, 576};
-        int[] s1 = {0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 136, 180, 192};
-        int[] l2 = {0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522, 576};
-        int[] s2 = {0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 134, 174, 192};
+        sfBandIndex = new SBI[9]; // SZD: MPEG2.5 +3 indices
+        int[] l0 = { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522,
+            576 };
+        int[] s0 = { 0, 4, 8, 12, 18, 24, 32, 42, 56, 74, 100, 132, 174, 192 };
+        int[] l1 = { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 114, 136, 162, 194, 232, 278, 330, 394, 464, 540,
+            576 };
+        int[] s1 = { 0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 136, 180, 192 };
+        int[] l2 = { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522,
+            576 };
+        int[] s2 = { 0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 134, 174, 192 };
 
-        int[] l3 = {0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 52, 62, 74, 90, 110, 134, 162, 196, 238, 288, 342, 418, 576};
-        int[] s3 = {0, 4, 8, 12, 16, 22, 30, 40, 52, 66, 84, 106, 136, 192};
-        int[] l4 = {0, 4, 8, 12, 16, 20, 24, 30, 36, 42, 50, 60, 72, 88, 106, 128, 156, 190, 230, 276, 330, 384, 576};
-        int[] s4 = {0, 4, 8, 12, 16, 22, 28, 38, 50, 64, 80, 100, 126, 192};
-        int[] l5 = {0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 54, 66, 82, 102, 126, 156, 194, 240, 296, 364, 448, 550, 576};
-        int[] s5 = {0, 4, 8, 12, 16, 22, 30, 42, 58, 78, 104, 138, 180, 192};
+        int[] l3 = { 0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 52, 62, 74, 90, 110, 134, 162, 196, 238, 288, 342, 418, 576 };
+        int[] s3 = { 0, 4, 8, 12, 16, 22, 30, 40, 52, 66, 84, 106, 136, 192 };
+        int[] l4 = { 0, 4, 8, 12, 16, 20, 24, 30, 36, 42, 50, 60, 72, 88, 106, 128, 156, 190, 230, 276, 330, 384, 576 };
+        int[] s4 = { 0, 4, 8, 12, 16, 22, 28, 38, 50, 64, 80, 100, 126, 192 };
+        int[] l5 = { 0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 54, 66, 82, 102, 126, 156, 194, 240, 296, 364, 448, 550,
+            576 };
+        int[] s5 = { 0, 4, 8, 12, 16, 22, 30, 42, 58, 78, 104, 138, 180, 192 };
         // SZD: MPEG2.5
-        int[] l6 = {0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522, 576};
-        int[] s6 = {0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 134, 174, 192};
-        int[] l7 = {0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522, 576};
-        int[] s7 = {0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 134, 174, 192};
-        int[] l8 = {0, 12, 24, 36, 48, 60, 72, 88, 108, 132, 160, 192, 232, 280, 336, 400, 476, 566, 568, 570, 572, 574, 576};
-        int[] s8 = {0, 8, 16, 24, 36, 52, 72, 96, 124, 160, 162, 164, 166, 192};
+        int[] l6 = { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522,
+            576 };
+        int[] s6 = { 0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 134, 174, 192 };
+        int[] l7 = { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522,
+            576 };
+        int[] s7 = { 0, 4, 8, 12, 18, 26, 36, 48, 62, 80, 104, 134, 174, 192 };
+        int[] l8 = { 0, 12, 24, 36, 48, 60, 72, 88, 108, 132, 160, 192, 232, 280, 336, 400, 476, 566, 568, 570, 572,
+            574, 576 };
+        int[] s8 = { 0, 8, 16, 24, 36, 52, 72, 96, 124, 160, 162, 164, 166, 192 };
 
         sfBandIndex[0] = new SBI(l0, s0);
         sfBandIndex[1] = new SBI(l1, s1);
@@ -273,21 +243,20 @@ final class LayerIIIDecoder implements FrameDecoder {
         sfBandIndex[3] = new SBI(l3, s3);
         sfBandIndex[4] = new SBI(l4, s4);
         sfBandIndex[5] = new SBI(l5, s5);
-        //SZD: MPEG2.5
+        // SZD: MPEG2.5
         sfBandIndex[6] = new SBI(l6, s6);
         sfBandIndex[7] = new SBI(l7, s7);
         sfBandIndex[8] = new SBI(l8, s8);
         // END OF L3TABLE INIT
 
-        if (reorder_table == null) {    // SZD: generate LUT
+        if (reorder_table == null) { // SZD: generate LUT
             reorder_table = new int[9][];
-            for (int i = 0; i < 9; i++)
-                reorder_table[i] = reorder(sfBandIndex[i].s);
+            for (int i = 0; i < 9; i++) reorder_table[i] = reorder(sfBandIndex[i].s);
         }
 
         // Sftable
-        int[] ll0 = {0, 6, 11, 16, 21};
-        int[] ss0 = {0, 6, 12};
+        int[] ll0 = { 0, 6, 11, 16, 21 };
+        int[] ss0 = { 0, 6, 12 };
         sftable = new Sftable(ll0, ss0);
         // END OF Sftable
 
@@ -306,9 +275,8 @@ final class LayerIIIDecoder implements FrameDecoder {
         channels = (header.mode() == Header.SINGLE_CHANNEL) ? 1 : 2;
         max_gr = (header.version() == Header.MPEG1) ? 2 : 1;
 
-        sfreq = header.sample_frequency() +
-                ((header.version() == Header.MPEG1) ? 3 :
-                        (header.version() == Header.MPEG25_LSF) ? 6 : 0);    // SZD
+        sfreq = header.sample_frequency()
+            + ((header.version() == Header.MPEG1) ? 3 : (header.version() == Header.MPEG25_LSF) ? 6 : 0); // SZD
 
         if (channels == 2) {
             switch (which_channels) {
@@ -331,9 +299,7 @@ final class LayerIIIDecoder implements FrameDecoder {
             first_channel = last_channel = 0;
         }
 
-        for (int ch = 0; ch < 2; ch++)
-            for (int j = 0; j < 576; j++)
-                prevblck[ch][j] = 0.0f;
+        for (int ch = 0; ch < 2; ch++) for (int j = 0; j < 576; j++) prevblck[ch][j] = 0.0f;
 
         nonzero[0] = nonzero[1] = 576;
 
@@ -351,15 +317,13 @@ final class LayerIIIDecoder implements FrameDecoder {
         return t43;
     }
 
-    static int[] reorder(int[] scalefac_band) {    // SZD: converted from LAME
+    static int[] reorder(int[] scalefac_band) { // SZD: converted from LAME
         int j = 0;
         int[] ix = new int[576];
         for (int sfb = 0; sfb < 13; sfb++) {
             int start = scalefac_band[sfb];
             int end = scalefac_band[sfb + 1];
-            for (int window = 0; window < 3; window++)
-                for (int i = start; i < end; i++)
-                    ix[3 * i + window] = j++;
+            for (int window = 0; window < 3; window++) for (int i = start; i < end; i++) ix[3 * i + window] = j++;
         }
         return ix;
     }
@@ -381,8 +345,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 
         get_side_info();
 
-        for (i = 0; i < nSlots; i++)
-            br.hputbuf(stream.get_bits(8));
+        for (i = 0; i < nSlots; i++) br.hputbuf(stream.get_bits(8));
 
         main_data_end = br.hsstell() >>> 3; // of previous frame
 
@@ -391,30 +354,26 @@ final class LayerIIIDecoder implements FrameDecoder {
             main_data_end++;
         }
 
-        bytes_to_discard = frame_start - main_data_end
-                - si.main_data_begin;
+        bytes_to_discard = frame_start - main_data_end - si.main_data_begin;
 
         frame_start += nSlots;
 
-        if (bytes_to_discard < 0)
-            return;
+        if (bytes_to_discard < 0) return;
 
         if (main_data_end > 4096) {
             frame_start -= 4096;
             br.rewindNbytes(4096);
         }
 
-        for (; bytes_to_discard > 0; bytes_to_discard--)
-            br.hgetbits(8);
+        for (; bytes_to_discard > 0; bytes_to_discard--) br.hgetbits(8);
 
         for (gr = 0; gr < max_gr; gr++) {
 
             for (ch = 0; ch < channels; ch++) {
                 part2_start = br.hsstell();
 
-                if (header.version() == Header.MPEG1)
-                    get_scale_factors(ch, gr);
-                else  // MPEG-2 LSF, SZD: MPEG-2.5 LSF
+                if (header.version() == Header.MPEG1) get_scale_factors(ch, gr);
+                else // MPEG-2 LSF, SZD: MPEG-2.5 LSF
                     get_LSF_scale_factors(ch, gr);
 
                 huffman_decode(ch, gr);
@@ -423,8 +382,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 
             stereo(gr);
 
-            if ((which_channels == OutputChannels.DOWNMIX_CHANNELS) && (channels > 1))
-                do_downmix();
+            if ((which_channels == OutputChannels.DOWNMIX_CHANNELS) && (channels > 1)) do_downmix();
 
             for (ch = first_channel; ch <= last_channel; ch++) {
 
@@ -434,8 +392,7 @@ final class LayerIIIDecoder implements FrameDecoder {
                 hybrid(ch, gr);
 
                 for (sb18 = 18; sb18 < 576; sb18 += 36) // Frequency inversion
-                    for (ss = 1; ss < SSLIMIT; ss += 2)
-                        out_1d[sb18 + ss] = -out_1d[sb18 + ss];
+                    for (ss = 1; ss < SSLIMIT; ss += 2) out_1d[sb18 + ss] = -out_1d[sb18 + ss];
 
                 if ((ch == 0) || (which_channels == OutputChannels.RIGHT_CHANNEL)) {
                     for (ss = 0; ss < SSLIMIT; ss++) { // Polyphase synthesis
@@ -466,7 +423,7 @@ final class LayerIIIDecoder implements FrameDecoder {
     /**
      * Reads the side info from the stream, assuming the entire.
      * frame has been read already.
-     * Mono   : 136 bits (= 17 bytes)
+     * Mono : 136 bits (= 17 bytes)
      * Stereo : 256 bits (= 32 bytes)
      */
     private void get_side_info() {
@@ -474,8 +431,7 @@ final class LayerIIIDecoder implements FrameDecoder {
         if (header.version() == Header.MPEG1) {
 
             si.main_data_begin = stream.get_bits(9);
-            if (channels == 1)
-                si.private_bits = stream.get_bits(5);
+            if (channels == 1) si.private_bits = stream.get_bits(5);
             else si.private_bits = stream.get_bits(3);
 
             for (ch = 0; ch < channels; ch++) {
@@ -506,16 +462,14 @@ final class LayerIIIDecoder implements FrameDecoder {
                         // Set region_count parameters since they are implicit in this case.
 
                         if (si.ch[ch].gr[gr].block_type == 0) {
-                            //	 Side info bad: block_type == 0 in split block
+                            // Side info bad: block_type == 0 in split block
                             return;
-                        } else if (si.ch[ch].gr[gr].block_type == 2
-                                && si.ch[ch].gr[gr].mixed_block_flag == 0) {
+                        } else if (si.ch[ch].gr[gr].block_type == 2 && si.ch[ch].gr[gr].mixed_block_flag == 0) {
                             si.ch[ch].gr[gr].region0_count = 8;
                         } else {
                             si.ch[ch].gr[gr].region0_count = 7;
                         }
-                        si.ch[ch].gr[gr].region1_count = 20 -
-                                si.ch[ch].gr[gr].region0_count;
+                        si.ch[ch].gr[gr].region1_count = 20 - si.ch[ch].gr[gr].region0_count;
                     } else {
                         si.ch[ch].gr[gr].table_select[0] = stream.get_bits(5);
                         si.ch[ch].gr[gr].table_select[1] = stream.get_bits(5);
@@ -530,11 +484,10 @@ final class LayerIIIDecoder implements FrameDecoder {
                 }
             }
 
-        } else {    // MPEG-2 LSF, SZD: MPEG-2.5 LSF
+        } else { // MPEG-2 LSF, SZD: MPEG-2.5 LSF
 
             si.main_data_begin = stream.get_bits(8);
-            if (channels == 1)
-                si.private_bits = stream.get_bits(1);
+            if (channels == 1) si.private_bits = stream.get_bits(1);
             else si.private_bits = stream.get_bits(2);
 
             for (ch = 0; ch < channels; ch++) {
@@ -561,13 +514,11 @@ final class LayerIIIDecoder implements FrameDecoder {
                     if (si.ch[ch].gr[0].block_type == 0) {
                         // Side info bad: block_type == 0 in split block
                         return;
-                    } else if (si.ch[ch].gr[0].block_type == 2
-                            && si.ch[ch].gr[0].mixed_block_flag == 0) {
+                    } else if (si.ch[ch].gr[0].block_type == 2 && si.ch[ch].gr[0].mixed_block_flag == 0) {
                         si.ch[ch].gr[0].region0_count = 8;
                     } else {
                         si.ch[ch].gr[0].region0_count = 7;
-                        si.ch[ch].gr[0].region1_count = 20 -
-                                si.ch[ch].gr[0].region0_count;
+                        si.ch[ch].gr[0].region1_count = 20 - si.ch[ch].gr[0].region0_count;
                     }
 
                 } else {
@@ -597,21 +548,14 @@ final class LayerIIIDecoder implements FrameDecoder {
 
         if ((gr_info.window_switching_flag != 0) && (gr_info.block_type == 2)) {
             if ((gr_info.mixed_block_flag) != 0) { // MIXED
-                for (sfb = 0; sfb < 8; sfb++)
-                    scalefac[ch].l[sfb] = br.hgetbits(
-                            slen[0][gr_info.scalefac_compress]);
-                for (sfb = 3; sfb < 6; sfb++)
-                    for (window = 0; window < 3; window++)
-                        scalefac[ch].s[window][sfb] = br.hgetbits(
-                                slen[0][gr_info.scalefac_compress]);
-                for (sfb = 6; sfb < 12; sfb++)
-                    for (window = 0; window < 3; window++)
-                        scalefac[ch].s[window][sfb] = br.hgetbits(
-                                slen[1][gr_info.scalefac_compress]);
-                for (sfb = 12, window = 0; window < 3; window++)
-                    scalefac[ch].s[window][sfb] = 0;
+                for (sfb = 0; sfb < 8; sfb++) scalefac[ch].l[sfb] = br.hgetbits(slen[0][gr_info.scalefac_compress]);
+                for (sfb = 3; sfb < 6; sfb++) for (window = 0; window < 3; window++)
+                    scalefac[ch].s[window][sfb] = br.hgetbits(slen[0][gr_info.scalefac_compress]);
+                for (sfb = 6; sfb < 12; sfb++) for (window = 0; window < 3; window++)
+                    scalefac[ch].s[window][sfb] = br.hgetbits(slen[1][gr_info.scalefac_compress]);
+                for (sfb = 12, window = 0; window < 3; window++) scalefac[ch].s[window][sfb] = 0;
 
-            } else {  // SHORT
+            } else { // SHORT
 
                 scalefac[ch].s[0][0] = br.hgetbits(length0);
                 scalefac[ch].s[1][0] = br.hgetbits(length0);
@@ -654,7 +598,7 @@ final class LayerIIIDecoder implements FrameDecoder {
                 scalefac[ch].s[2][12] = 0;
             } // SHORT
 
-        } else {   // LONG types 0,1,3
+        } else { // LONG types 0,1,3
 
             if ((si.ch[ch].scfsi[0] == 0) || (gr == 0)) {
                 scalefac[ch].l[0] = br.hgetbits(length0);
@@ -704,12 +648,9 @@ final class LayerIIIDecoder implements FrameDecoder {
         scalefac_comp = gr_info.scalefac_compress;
 
         if (gr_info.block_type == 2) {
-            if (gr_info.mixed_block_flag == 0)
-                blocktypenumber = 1;
-            else if (gr_info.mixed_block_flag == 1)
-                blocktypenumber = 2;
-            else
-                blocktypenumber = 0;
+            if (gr_info.mixed_block_flag == 0) blocktypenumber = 1;
+            else if (gr_info.mixed_block_flag == 1) blocktypenumber = 2;
+            else blocktypenumber = 0;
         } else {
             blocktypenumber = 0;
         }
@@ -777,10 +718,8 @@ final class LayerIIIDecoder implements FrameDecoder {
 
         m = 0;
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < nr_of_sfb_block[blocknumber][blocktypenumber][i];
-                 j++) {
-                scalefac_buffer[m] = (new_slen[i] == 0) ? 0 :
-                        br.hgetbits(new_slen[i]);
+            for (int j = 0; j < nr_of_sfb_block[blocknumber][blocktypenumber][i]; j++) {
+                scalefac_buffer[m] = (new_slen[i] == 0) ? 0 : br.hgetbits(new_slen[i]);
                 m++;
 
             } // for (unint32 j ...
@@ -798,7 +737,7 @@ final class LayerIIIDecoder implements FrameDecoder {
         get_LSF_scale_data(ch, gr);
 
         if ((gr_info.window_switching_flag != 0) && (gr_info.block_type == 2)) {
-            if (gr_info.mixed_block_flag != 0) {    // MIXED
+            if (gr_info.mixed_block_flag != 0) { // MIXED
                 for (sfb = 0; sfb < 8; sfb++) {
                     scalefac[ch].l[sfb] = scalefac_buffer[m];
                     m++;
@@ -817,9 +756,8 @@ final class LayerIIIDecoder implements FrameDecoder {
                     }
                 }
             }
-            for (window = 0; window < 3; window++)
-                scalefac[ch].s[window][12] = 0;
-        } else {   // LONG types 0,1,3
+            for (window = 0; window < 3; window++) scalefac[ch].s[window][12] = 0;
+        } else { // LONG types 0,1,3
             for (sfb = 0; sfb < 21; sfb++) {
                 scalefac[ch].l[sfb] = scalefac_buffer[m];
                 m++;
@@ -847,15 +785,14 @@ final class LayerIIIDecoder implements FrameDecoder {
 
         // Find region boundary for short block case
 
-        if (((si.ch[ch].gr[gr].window_switching_flag) != 0) &&
-                (si.ch[ch].gr[gr].block_type == 2)) {
+        if (((si.ch[ch].gr[gr].window_switching_flag) != 0) && (si.ch[ch].gr[gr].block_type == 2)) {
 
             // Region2.
-            //MS: Extrahandling for 8KHZ
-            region1Start = (sfreq == 8) ? 72 : 36;  // sfb[9/3]*3=36 or in case 8KHZ = 72
+            // MS: Extrahandling for 8KHZ
+            region1Start = (sfreq == 8) ? 72 : 36; // sfb[9/3]*3=36 or in case 8KHZ = 72
             region2Start = 576; // No Region2 for short block case
 
-        } else {          // Find region boundary for long block case
+        } else { // Find region boundary for long block case
 
             buf = si.ch[ch].gr[gr].region0_count + 1;
             buf1 = buf + si.ch[ch].gr[gr].region1_count + 1;
@@ -905,8 +842,7 @@ final class LayerIIIDecoder implements FrameDecoder {
         num_bits = br.hsstell();
 
         // Dismiss stuffing bits
-        if (num_bits < part2_3_end)
-            br.hgetbits(part2_3_end - num_bits);
+        if (num_bits < part2_3_end) br.hgetbits(part2_3_end - num_bits);
 
         // Zero out rest
 
@@ -915,8 +851,7 @@ final class LayerIIIDecoder implements FrameDecoder {
         if (index < 0) index = 0;
 
         // may not be necessary
-        for (; index < 576; index++)
-            is_1d[index] = 0;
+        for (; index < 576; index++) is_1d[index] = 0;
     }
 
     /**
@@ -950,15 +885,14 @@ final class LayerIIIDecoder implements FrameDecoder {
         // choose correct scalefactor band per block type, initalize boundary
 
         if ((gr_info.window_switching_flag != 0) && (gr_info.block_type == 2)) {
-            if (gr_info.mixed_block_flag != 0)
-                next_cb_boundary = sfBandIndex[sfreq].l[1];  // LONG blocks: 0,1,3
+            if (gr_info.mixed_block_flag != 0) next_cb_boundary = sfBandIndex[sfreq].l[1]; // LONG blocks: 0,1,3
             else {
                 cb_width = sfBandIndex[sfreq].s[1];
                 next_cb_boundary = (cb_width << 2) - cb_width;
                 cb_begin = 0;
             }
         } else {
-            next_cb_boundary = sfBandIndex[sfreq].l[1];  // LONG blocks: 0,1,3
+            next_cb_boundary = sfBandIndex[sfreq].l[1]; // LONG blocks: 0,1,3
         }
 
         // Compute overall (global) scaling.
@@ -998,11 +932,9 @@ final class LayerIIIDecoder implements FrameDecoder {
 
                         if (index == sfBandIndex[sfreq].l[8]) {
                             next_cb_boundary = sfBandIndex[sfreq].s[4];
-                            next_cb_boundary = (next_cb_boundary << 2) -
-                                    next_cb_boundary;
+                            next_cb_boundary = (next_cb_boundary << 2) - next_cb_boundary;
                             cb = 3;
-                            cb_width = sfBandIndex[sfreq].s[4] -
-                                    sfBandIndex[sfreq].s[3];
+                            cb_width = sfBandIndex[sfreq].s[4] - sfBandIndex[sfreq].s[3];
 
                             cb_begin = sfBandIndex[sfreq].s[3];
                             cb_begin = (cb_begin << 2) - cb_begin;
@@ -1014,24 +946,20 @@ final class LayerIIIDecoder implements FrameDecoder {
                         } else {
 
                             next_cb_boundary = sfBandIndex[sfreq].s[(++cb) + 1];
-                            next_cb_boundary = (next_cb_boundary << 2) -
-                                    next_cb_boundary;
+                            next_cb_boundary = (next_cb_boundary << 2) - next_cb_boundary;
 
                             cb_begin = sfBandIndex[sfreq].s[cb];
-                            cb_width = sfBandIndex[sfreq].s[cb + 1] -
-                                    cb_begin;
+                            cb_width = sfBandIndex[sfreq].s[cb + 1] - cb_begin;
                             cb_begin = (cb_begin << 2) - cb_begin;
                         }
 
                     } else {
 
                         next_cb_boundary = sfBandIndex[sfreq].s[(++cb) + 1];
-                        next_cb_boundary = (next_cb_boundary << 2) -
-                                next_cb_boundary;
+                        next_cb_boundary = (next_cb_boundary << 2) - next_cb_boundary;
 
                         cb_begin = sfBandIndex[sfreq].s[cb];
-                        cb_width = sfBandIndex[sfreq].s[cb + 1] -
-                                cb_begin;
+                        cb_width = sfBandIndex[sfreq].s[cb + 1] - cb_begin;
                         cb_begin = (cb_begin << 2) - cb_begin;
                     }
 
@@ -1044,12 +972,11 @@ final class LayerIIIDecoder implements FrameDecoder {
 
             // Do long/short dependent scaling operations
 
-            if (gr_info.window_switching_flag != 0 && (gr_info.block_type == 2
-                    && gr_info.mixed_block_flag == 0 || gr_info.block_type == 2 && j >= 36)) {
+            if (gr_info.window_switching_flag != 0
+                && (gr_info.block_type == 2 && gr_info.mixed_block_flag == 0 || gr_info.block_type == 2 && j >= 36)) {
 
                 t_index = (index - cb_begin) / cb_width;
-                int idx = scalefac[ch].s[t_index][cb]
-                        << gr_info.scalefac_scale;
+                int idx = scalefac[ch].s[t_index][cb] << gr_info.scalefac_scale;
                 idx += (gr_info.subblock_gain[t_index] << 2);
 
                 xr[quotien][reste] *= two_to_negative_half_pow[idx];
@@ -1057,8 +984,7 @@ final class LayerIIIDecoder implements FrameDecoder {
             } else {
                 int idx = scalefac[ch].l[cb];
 
-                if (gr_info.preflag != 0)
-                    idx += pretab[cb];
+                if (gr_info.preflag != 0) idx += pretab[cb];
 
                 idx = idx << gr_info.scalefac_scale;
                 xr[quotien][reste] *= two_to_negative_half_pow[idx];
@@ -1088,8 +1014,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 
         if ((gr_info.window_switching_flag != 0) && (gr_info.block_type == 2)) {
 
-            for (index = 0; index < 576; index++)
-                out_1d[index] = 0.0f;
+            for (index = 0; index < 576; index++) out_1d[index] = 0.0f;
 
             if (gr_info.mixed_block_flag != 0) {
                 // NO REORDER FOR LOW 2 SUBBANDS
@@ -1105,8 +1030,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 
                     int sfb_start3 = (sfb_start << 2) - sfb_start;
 
-                    for (freq = 0, freq3 = 0; freq < sfb_lines;
-                         freq++, freq3 += 3) {
+                    for (freq = 0, freq3 = 0; freq < sfb_lines; freq++, freq3 += 3) {
 
                         src_line = sfb_start3 + freq;
                         des_line = sfb_start3 + freq3;
@@ -1132,7 +1056,7 @@ final class LayerIIIDecoder implements FrameDecoder {
                     }
                 }
 
-            } else {  // pure short
+            } else { // pure short
                 for (index = 0; index < 576; index++) {
                     int j = reorder_table[sfreq][index];
                     int reste = j % SSLIMIT;
@@ -1140,7 +1064,7 @@ final class LayerIIIDecoder implements FrameDecoder {
                     out_1d[index] = xr[quotien][reste];
                 }
             }
-        } else {   // long blocks
+        } else { // long blocks
             for (index = 0; index < 576; index++) {
                 // Modif E.B 02/22/99
                 int reste = index % SSLIMIT;
@@ -1155,12 +1079,11 @@ final class LayerIIIDecoder implements FrameDecoder {
 
         if (channels == 1) {
 
-            for (sb = 0; sb < SBLIMIT; sb++)
-                for (ss = 0; ss < SSLIMIT; ss += 3) {
-                    lr[0][sb][ss] = ro[0][sb][ss];
-                    lr[0][sb][ss + 1] = ro[0][sb][ss + 1];
-                    lr[0][sb][ss + 2] = ro[0][sb][ss + 2];
-                }
+            for (sb = 0; sb < SBLIMIT; sb++) for (ss = 0; ss < SSLIMIT; ss += 3) {
+                lr[0][sb][ss] = ro[0][sb][ss];
+                lr[0][sb][ss + 1] = ro[0][sb][ss + 1];
+                lr[0][sb][ss + 2] = ro[0][sb][ss + 2];
+            }
 
         } else {
 
@@ -1172,7 +1095,7 @@ final class LayerIIIDecoder implements FrameDecoder {
 
             boolean ms_stereo = ((header.mode() == Header.JOINT_STEREO) && ((mode_ext & 0x2) != 0));
             boolean i_stereo = ((header.mode() == Header.JOINT_STEREO) && ((mode_ext & 0x1) != 0));
-            boolean lsf = ((header.version() == Header.MPEG2_LSF || header.version() == Header.MPEG25_LSF));    // SZD
+            boolean lsf = ((header.version() == Header.MPEG2_LSF || header.version() == Header.MPEG25_LSF)); // SZD
 
             int io_type = (gr_info.scalefac_compress & 1);
 
@@ -1210,8 +1133,7 @@ final class LayerIIIDecoder implements FrameDecoder {
                             }
                             sfb = sfbcnt + 1;
 
-                            if (sfb > max_sfb)
-                                max_sfb = sfb;
+                            if (sfb > max_sfb) max_sfb = sfb;
 
                             while (sfb < 12) {
                                 temp = sfBandIndex[sfreq].s[sfb];
@@ -1220,11 +1142,8 @@ final class LayerIIIDecoder implements FrameDecoder {
 
                                 for (; sb > 0; sb--) {
                                     is_pos[i] = scalefac[1].s[j][sfb];
-                                    if (is_pos[i] != 7)
-                                        if (lsf)
-                                            i_stereo_k_values(is_pos[i], io_type, i);
-                                        else
-                                            is_ratio[i] = TAN12[is_pos[i]];
+                                    if (is_pos[i] != 7) if (lsf) i_stereo_k_values(is_pos[i], io_type, i);
+                                    else is_ratio[i] = TAN12[is_pos[i]];
                                     i++;
                                 }
                                 sfb++;
@@ -1265,19 +1184,15 @@ final class LayerIIIDecoder implements FrameDecoder {
                                 } // if (ro ...
                             } // while (i>=0)
                             i = 0;
-                            while (sfBandIndex[sfreq].l[i] <= sb)
-                                i++;
+                            while (sfBandIndex[sfreq].l[i] <= sb) i++;
                             sfb = i;
                             i = sfBandIndex[sfreq].l[i];
                             for (; sfb < 8; sfb++) {
                                 sb = sfBandIndex[sfreq].l[sfb + 1] - sfBandIndex[sfreq].l[sfb];
                                 for (; sb > 0; sb--) {
                                     is_pos[i] = scalefac[1].l[sfb];
-                                    if (is_pos[i] != 7)
-                                        if (lsf)
-                                            i_stereo_k_values(is_pos[i], io_type, i);
-                                        else
-                                            is_ratio[i] = TAN12[is_pos[i]];
+                                    if (is_pos[i] != 7) if (lsf) i_stereo_k_values(is_pos[i], io_type, i);
+                                    else is_ratio[i] = TAN12[is_pos[i]];
                                     i++;
                                 }
                             }
@@ -1309,11 +1224,8 @@ final class LayerIIIDecoder implements FrameDecoder {
                                 i = (temp << 2) - temp + j * sb;
                                 for (; sb > 0; sb--) {
                                     is_pos[i] = scalefac[1].s[j][sfb];
-                                    if (is_pos[i] != 7)
-                                        if (lsf)
-                                            i_stereo_k_values(is_pos[i], io_type, i);
-                                        else
-                                            is_ratio[i] = TAN12[is_pos[i]];
+                                    if (is_pos[i] != 7) if (lsf) i_stereo_k_values(is_pos[i], io_type, i);
+                                    else is_ratio[i] = TAN12[is_pos[i]];
                                     i++;
                                 } // for (; sb>0 ...
                                 sfb++;
@@ -1356,8 +1268,7 @@ final class LayerIIIDecoder implements FrameDecoder {
                         }
                     }
                     i = 0;
-                    while (sfBandIndex[sfreq].l[i] <= sb)
-                        i++;
+                    while (sfBandIndex[sfreq].l[i] <= sb) i++;
 
                     sfb = i;
                     i = sfBandIndex[sfreq].l[i];
@@ -1365,11 +1276,8 @@ final class LayerIIIDecoder implements FrameDecoder {
                         sb = sfBandIndex[sfreq].l[sfb + 1] - sfBandIndex[sfreq].l[sfb];
                         for (; sb > 0; sb--) {
                             is_pos[i] = scalefac[1].l[sfb];
-                            if (is_pos[i] != 7)
-                                if (lsf)
-                                    i_stereo_k_values(is_pos[i], io_type, i);
-                                else
-                                    is_ratio[i] = TAN12[is_pos[i]];
+                            if (is_pos[i] != 7) if (lsf) i_stereo_k_values(is_pos[i], io_type, i);
+                            else is_ratio[i] = TAN12[is_pos[i]];
                             i++;
                         }
                     }
@@ -1389,31 +1297,32 @@ final class LayerIIIDecoder implements FrameDecoder {
             } // if (i_stereo)
 
             i = 0;
-            for (sb = 0; sb < SBLIMIT; sb++)
-                for (ss = 0; ss < SSLIMIT; ss++) {
-                    if (is_pos[i] == 7) {
-                        if (ms_stereo) {
-                            lr[0][sb][ss] = (ro[0][sb][ss] + ro[1][sb][ss]) * 0.707106781f;
-                            lr[1][sb][ss] = (ro[0][sb][ss] - ro[1][sb][ss]) * 0.707106781f;
-                        } else {
-                            lr[0][sb][ss] = ro[0][sb][ss];
-                            lr[1][sb][ss] = ro[1][sb][ss];
-                        }
-                    } else if (i_stereo) {
-
-                        if (lsf) {
-                            lr[0][sb][ss] = ro[0][sb][ss] * k[0][i];
-                            lr[1][sb][ss] = ro[0][sb][ss] * k[1][i];
-                        } else {
-                            lr[1][sb][ss] = ro[0][sb][ss] / (1 + is_ratio[i]);
-                            lr[0][sb][ss] = lr[1][sb][ss] * is_ratio[i];
-                        }
+            for (sb = 0; sb < SBLIMIT; sb++) for (ss = 0; ss < SSLIMIT; ss++) {
+                if (is_pos[i] == 7) {
+                    if (ms_stereo) {
+                        lr[0][sb][ss] = (ro[0][sb][ss] + ro[1][sb][ss]) * 0.707106781f;
+                        lr[1][sb][ss] = (ro[0][sb][ss] - ro[1][sb][ss]) * 0.707106781f;
+                    } else {
+                        lr[0][sb][ss] = ro[0][sb][ss];
+                        lr[1][sb][ss] = ro[1][sb][ss];
                     }
-	/*				else {
-						System.out.println("Error in stereo processing\n");
-					} */
-                    i++;
+                } else if (i_stereo) {
+
+                    if (lsf) {
+                        lr[0][sb][ss] = ro[0][sb][ss] * k[0][i];
+                        lr[1][sb][ss] = ro[0][sb][ss] * k[1][i];
+                    } else {
+                        lr[1][sb][ss] = ro[0][sb][ss] / (1 + is_ratio[i]);
+                        lr[0][sb][ss] = lr[1][sb][ss] * is_ratio[i];
+                    }
                 }
+                /*
+                 * else {
+                 * System.out.println("Error in stereo processing\n");
+                 * }
+                 */
+                i++;
+            }
 
         } // channels == 2
 
@@ -1428,12 +1337,9 @@ final class LayerIIIDecoder implements FrameDecoder {
         // 31 alias-reduction operations between each pair of sub-bands
         // with 8 butterflies between each pair
 
-        if ((gr_info.window_switching_flag != 0) && (gr_info.block_type == 2) &&
-                gr_info.mixed_block_flag == 0)
-            return;
+        if ((gr_info.window_switching_flag != 0) && (gr_info.block_type == 2) && gr_info.mixed_block_flag == 0) return;
 
-        if ((gr_info.window_switching_flag != 0) && (gr_info.mixed_block_flag != 0) &&
-                (gr_info.block_type == 2)) {
+        if ((gr_info.window_switching_flag != 0) && (gr_info.mixed_block_flag != 0) && (gr_info.block_type == 2)) {
             sb18lim = 18;
         } else {
             sb18lim = 558;
@@ -1460,15 +1366,14 @@ final class LayerIIIDecoder implements FrameDecoder {
         float[][] prvblk;
 
         for (sb18 = 0; sb18 < 576; sb18 += 18) {
-            bt = ((gr_info.window_switching_flag != 0) && (gr_info.mixed_block_flag != 0) &&
-                    (sb18 < 36)) ? 0 : gr_info.block_type;
+            bt = ((gr_info.window_switching_flag != 0) && (gr_info.mixed_block_flag != 0) && (sb18 < 36)) ? 0
+                : gr_info.block_type;
 
             tsOut = out_1d;
             // Modif E.B 02/22/99
             System.arraycopy(tsOut, sb18, tsOutCopy, 0, 18);
 
             inv_mdct(tsOutCopy, rawout, bt);
-
 
             System.arraycopy(tsOutCopy, 0, tsOut, sb18, 18);
             // Fin Modif
@@ -1711,12 +1616,12 @@ final class LayerIIIDecoder implements FrameDecoder {
 
             // Fast 9 Point Inverse Discrete Cosine Transform
             //
-            // By  Francois-Raymond Boyer
-            //         mailto:boyerf@iro.umontreal.ca
-            //         http://www.iro.umontreal.ca/~boyerf
+            // By Francois-Raymond Boyer
+            // mailto:boyerf@iro.umontreal.ca
+            // http://www.iro.umontreal.ca/~boyerf
             //
             // The code has been optimized for Intel processors
-            //  (takes a lot of time to convert float to and from iternal FPU representation)
+            // (takes a lot of time to convert float to and from iternal FPU representation)
             //
             // It is a simple "factorization" of the IDCT matrix.
 
@@ -1733,7 +1638,7 @@ final class LayerIIIDecoder implements FrameDecoder {
             tmp4 = in[0] - in[4] + in[8] - in[12] + in[16];
 
             // 4 points on even indices
-            float i66_ = in[6] * 1.732050808f;        // Sqrt[3]
+            float i66_ = in[6] * 1.732050808f; // Sqrt[3]
 
             tmp0_ = in[2] * 1.9696155060244f + i66_ + in[10] * 1.2855752193731f + in[14] * 0.68404028665134f;
             tmp1_ = (in[2] - in[10] - in[14]) * 1.732050808f;
@@ -1752,12 +1657,18 @@ final class LayerIIIDecoder implements FrameDecoder {
             tmp4o = (in[1] - in[4 + 1] + in[8 + 1] - in[12 + 1] + in[16 + 1]) * 0.707106781f; // Twiddled
 
             // 4 points on even indices
-            float i6_ = in[6 + 1] * 1.732050808f;        // Sqrt[3]
+            float i6_ = in[6 + 1] * 1.732050808f; // Sqrt[3]
 
-            tmp0_o = in[2 + 1] * 1.9696155060244f + i6_ + in[10 + 1] * 1.2855752193731f + in[14 + 1] * 0.68404028665134f;
+            tmp0_o = in[2 + 1] * 1.9696155060244f + i6_
+                + in[10 + 1] * 1.2855752193731f
+                + in[14 + 1] * 0.68404028665134f;
             tmp1_o = (in[2 + 1] - in[10 + 1] - in[14 + 1]) * 1.732050808f;
-            tmp2_o = in[2 + 1] * 1.2855752193731f - i6_ - in[10 + 1] * 0.68404028665134f + in[14 + 1] * 1.9696155060244f;
-            tmp3_o = in[2 + 1] * 0.68404028665134f - i6_ + in[10 + 1] * 1.9696155060244f - in[14 + 1] * 1.2855752193731f;
+            tmp2_o = in[2 + 1] * 1.2855752193731f - i6_
+                - in[10 + 1] * 0.68404028665134f
+                + in[14 + 1] * 1.9696155060244f;
+            tmp3_o = in[2 + 1] * 0.68404028665134f - i6_
+                + in[10 + 1] * 1.9696155060244f
+                - in[14 + 1] * 1.2855752193731f;
 
             // Twiddle factors on odd indices
             // and
@@ -1845,6 +1756,7 @@ final class LayerIIIDecoder implements FrameDecoder {
     }
 
     static class SBI {
+
         public int[] l;
         public int[] s;
 
@@ -1855,6 +1767,7 @@ final class LayerIIIDecoder implements FrameDecoder {
     }
 
     static class gr_info_s {
+
         public int part2_3_length = 0;
         public int big_values = 0;
         public int global_gain = 0;
@@ -1880,6 +1793,7 @@ final class LayerIIIDecoder implements FrameDecoder {
     }
 
     static class temporaire {
+
         public int[] scfsi;
         public gr_info_s[] gr;
 
@@ -1911,8 +1825,9 @@ final class LayerIIIDecoder implements FrameDecoder {
     }
 
     static class temporaire2 {
-        public int[] l;         /* [cb] */
-        public int[][] s;         /* [window][cb] */
+
+        public int[] l; /* [cb] */
+        public int[][] s; /* [window][cb] */
 
         /**
          * Dummy Constructor
@@ -1926,6 +1841,7 @@ final class LayerIIIDecoder implements FrameDecoder {
     /***************************************************************/
 
     static class Sftable {
+
         public int[] l;
         public int[] s;
 

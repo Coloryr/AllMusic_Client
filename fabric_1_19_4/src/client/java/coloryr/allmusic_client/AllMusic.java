@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 public class AllMusic implements ModInitializer {
     public static final Identifier ID = new Identifier("allmusic", "channel");
     public static APlayer nowPlaying;
-    public static boolean isPlay = false;
     public static HudUtils hudUtils;
     private static int ang = 0;
     private static int count = 0;

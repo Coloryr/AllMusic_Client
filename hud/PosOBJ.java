@@ -1,6 +1,7 @@
 package coloryr.allmusic_client.hud;
 
 public class PosOBJ {
+
     public int x;
     public int y;
 

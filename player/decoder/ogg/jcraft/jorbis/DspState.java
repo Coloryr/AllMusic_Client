@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,6 +23,7 @@
 package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
 
 public class DspState {
+
     static final float M_PI = 3.1415926539f;
     static final int VI_TRANSFORMB = 1;
     static final int VI_WINDOWB = 1;
@@ -66,7 +63,7 @@ public class DspState {
     // backend lookups are tied to the mode, not the backend or naked mapping
     Object[] mode;
 
-    // local storage, only used on the encoding side.  This way the
+    // local storage, only used on the encoding side. This way the
     // application does not need to worry about freeing some packets'
     // memory and not others'; packet storage is always tracked.
     // Cleared next call to a _dsp_ function
@@ -97,7 +94,7 @@ public class DspState {
         float[] ret = new float[window];
         switch (type) {
             case 0:
-                // The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*2pi)
+            // The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*2pi)
             {
                 int leftbegin = window / 4 - left / 2;
                 int rightbegin = window - window / 4 - right / 2;
@@ -124,15 +121,15 @@ public class DspState {
                     ret[i + rightbegin] = x;
                 }
             }
-            break;
+                break;
             default:
-                //free(ret);
+                // free(ret);
                 return (null);
         }
         return (ret);
     }
 
-    // Analysis side code, but directly related to blocking.  Thus it's
+    // Analysis side code, but directly related to blocking. Thus it's
     // here and not in analysis.c (which is for analysis transforms only).
     // The init is here because some of it is shared
 
@@ -160,16 +157,11 @@ public class DspState {
         window[1][1][1] = new float[VI_WINDOWB][];
 
         for (int i = 0; i < VI_WINDOWB; i++) {
-            window[0][0][0][i] = window(i, vi.blocksizes[0], vi.blocksizes[0] / 2,
-                    vi.blocksizes[0] / 2);
-            window[1][0][0][i] = window(i, vi.blocksizes[1], vi.blocksizes[0] / 2,
-                    vi.blocksizes[0] / 2);
-            window[1][0][1][i] = window(i, vi.blocksizes[1], vi.blocksizes[0] / 2,
-                    vi.blocksizes[1] / 2);
-            window[1][1][0][i] = window(i, vi.blocksizes[1], vi.blocksizes[1] / 2,
-                    vi.blocksizes[0] / 2);
-            window[1][1][1][i] = window(i, vi.blocksizes[1], vi.blocksizes[1] / 2,
-                    vi.blocksizes[1] / 2);
+            window[0][0][0][i] = window(i, vi.blocksizes[0], vi.blocksizes[0] / 2, vi.blocksizes[0] / 2);
+            window[1][0][0][i] = window(i, vi.blocksizes[1], vi.blocksizes[0] / 2, vi.blocksizes[0] / 2);
+            window[1][0][1][i] = window(i, vi.blocksizes[1], vi.blocksizes[0] / 2, vi.blocksizes[1] / 2);
+            window[1][1][0][i] = window(i, vi.blocksizes[1], vi.blocksizes[1] / 2, vi.blocksizes[0] / 2);
+            window[1][1][1][i] = window(i, vi.blocksizes[1], vi.blocksizes[1] / 2, vi.blocksizes[1] / 2);
         }
 
         fullbooks = new CodeBook[vi.books];
@@ -206,8 +198,7 @@ public class DspState {
         for (int i = 0; i < vi.modes; i++) {
             int mapnum = vi.mode_param[i].mapping;
             int maptype = vi.map_type[mapnum];
-            mode[i] = FuncMapping.mapping_P[maptype].look(this, vi.mode_param[i],
-                    vi.map_param[mapnum]);
+            mode[i] = FuncMapping.mapping_P[maptype].look(this, vi.mode_param[i], vi.map_param[mapnum]);
         }
         return (0);
     }
@@ -233,7 +224,7 @@ public class DspState {
     }
 
     // Unike in analysis, the window is only partially applied for each
-    // block.  The time domain envelope is not yet handled at the point of
+    // block. The time domain envelope is not yet handled at the point of
     // calling (as it relies on the previous block).
 
     public int synthesis_blockin(Block vb) {
@@ -265,8 +256,7 @@ public class DspState {
         floor_bits += vb.floor_bits;
         res_bits += vb.res_bits;
 
-        if (sequence + 1 != vb.sequence)
-            granulepos = -1; // out of sequence; lose count
+        if (sequence + 1 != vb.sequence) granulepos = -1; // out of sequence; lose count
 
         sequence = vb.sequence;
 
@@ -315,14 +305,14 @@ public class DspState {
             }
 
             // track the frame number... This is for convenience, but also
-            // making sure our last packet doesn't end with added padding.  If
+            // making sure our last packet doesn't end with added padding. If
             // the last packet is partial, the number of samples we'll have to
             // return will be past the vb->granulepos.
             //
-            // This is not foolproof!  It will be confused if we begin
-            // decoding at the last page after a seek or hole.  In that case,
+            // This is not foolproof! It will be confused if we begin
+            // decoding at the last page after a seek or hole. In that case,
             // we don't have a starting point to judge where the last frame
-            // is.  For this reason, vorbisfile will always try to make sure
+            // is. For this reason, vorbisfile will always try to make sure
             // it reads the last two marked pages in proper sequence
 
             if (granulepos == -1) {
@@ -331,10 +321,10 @@ public class DspState {
                 granulepos += (_centerW - centerW);
                 if (vb.granulepos != -1 && granulepos != vb.granulepos) {
                     if (granulepos > vb.granulepos && vb.eofflag != 0) {
-                        // partial last frame.  Strip the padding off
+                        // partial last frame. Strip the padding off
                         _centerW -= (granulepos - vb.granulepos);
-                    }// else{ Shouldn't happen *unless* the bitstream is out of
-                    // spec.  Either way, believe the bitstream }
+                    } // else{ Shouldn't happen *unless* the bitstream is out of
+                      // spec. Either way, believe the bitstream }
                     granulepos = vb.granulepos;
                 }
             }
@@ -343,8 +333,7 @@ public class DspState {
 
             centerW = _centerW;
             pcm_current = endW;
-            if (vb.eofflag != 0)
-                eofflag = 1;
+            if (vb.eofflag != 0) eofflag = 1;
         }
         return (0);
     }
@@ -364,12 +353,10 @@ public class DspState {
     }
 
     public int synthesis_read(int bytes) {
-        if (bytes != 0 && pcm_returned + bytes > centerW)
-            return (-1);
+        if (bytes != 0 && pcm_returned + bytes > centerW) return (-1);
         pcm_returned += bytes;
         return (0);
     }
 
-    public void clear() {
-    }
+    public void clear() {}
 }

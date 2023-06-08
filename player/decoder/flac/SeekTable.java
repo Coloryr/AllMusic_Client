@@ -1,19 +1,15 @@
 /*
  * FLAC library (Java)
- *
  * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/flac-library-java
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program (see COPYING.txt and COPYING.LESSER.txt).
  * If not, see <http://www.gnu.org/licenses/>.
@@ -28,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 
 /**
  * Represents precisely all the fields of a seek table metadata block. Mutable structure,
@@ -47,8 +42,6 @@ public final class SeekTable {
      */
     public List<SeekPoint> points;
 
-
-
     /*---- Constructors ----*/
 
     /**
@@ -59,13 +52,14 @@ public final class SeekTable {
         points = new ArrayList<>();
     }
 
-
     /**
      * Constructs a seek table by parsing the given byte array representing the metadata block.
      * (The array must contain only the metadata payload, without the type or length fields.)
-     * <p>This constructor does not check the validity of the seek points, namely the ordering
+     * <p>
+     * This constructor does not check the validity of the seek points, namely the ordering
      * of seek point offsets, so calling {@link#checkValues()} on the freshly constructed object
-     * can fail. However, this does guarantee that every point's frameSamples field is a uint16.</p>
+     * can fail. However, this does guarantee that every point's frameSamples field is a uint16.
+     * </p>
      *
      * @param b the metadata block's payload data to parse (not {@code null})
      * @throws NullPointerException     if the array is {@code null}
@@ -75,8 +69,7 @@ public final class SeekTable {
     public SeekTable(byte[] b) {
         this();
         Objects.requireNonNull(b);
-        if (b.length % 18 != 0)
-            throw new IllegalArgumentException("Data contains a partial seek point");
+        if (b.length % 18 != 0) throw new IllegalArgumentException("Data contains a partial seek point");
         try {
             DataInput in = new DataInputStream(new ByteArrayInputStream(b));
             for (int i = 0; i < b.length; i += 18) {
@@ -92,18 +85,16 @@ public final class SeekTable {
         }
     }
 
-
-
     /*---- Methods ----*/
 
     /**
      * Checks the state of this object and returns silently if all these criteria pass:
      * <ul>
-     * 	 <li>No object is {@code null}</li>
-     *   <li>The frameSamples field of each point is a uint16 value</li>
-     *   <li>All points with sampleOffset = &minus;1 (i.e. 0xFFF...FFF) are at the end of the list</li>
-     *   <li>All points with sampleOffset &ne; &minus;1 have strictly increasing
-     *   values of sampleOffset and non-decreasing values of fileOffset</li>
+     * <li>No object is {@code null}</li>
+     * <li>The frameSamples field of each point is a uint16 value</li>
+     * <li>All points with sampleOffset = &minus;1 (i.e. 0xFFF...FFF) are at the end of the list</li>
+     * <li>All points with sampleOffset &ne; &minus;1 have strictly increasing
+     * values of sampleOffset and non-decreasing values of fileOffset</li>
      * </ul>
      *
      * @throws NullPointerException  if the list or an element is {@code null}
@@ -123,10 +114,8 @@ public final class SeekTable {
             SeekPoint p = points.get(i);
             if (p.sampleOffset != -1) {
                 SeekPoint q = points.get(i - 1);
-                if (p.sampleOffset <= q.sampleOffset)
-                    throw new IllegalStateException("Sample offsets out of order");
-                if (p.fileOffset < q.fileOffset)
-                    throw new IllegalStateException("File offsets out of order");
+                if (p.sampleOffset <= q.sampleOffset) throw new IllegalStateException("Sample offsets out of order");
+                if (p.fileOffset < q.fileOffset) throw new IllegalStateException("File offsets out of order");
             }
         }
     }
@@ -136,7 +125,8 @@ public final class SeekTable {
     /**
      * Represents a seek point entry in a seek table. Mutable structure, not thread-safe.
      * This class itself does not check the correctness of data, but other classes might.
-     * <p>A seek point with data (sampleOffset = x, fileOffset = y, frameSamples = z) means
+     * <p>
+     * A seek point with data (sampleOffset = x, fileOffset = y, frameSamples = z) means
      * that at byte position (y + (byte offset of foremost audio frame)) in the file,
      * a FLAC frame begins (with the sync sequence), that frame has sample offset x
      * (where sample 0 is defined as the start of the audio stream),

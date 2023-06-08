@@ -1,10 +1,10 @@
 [
   {
-    "modid": "allmusic",
-    "name": "AllMusic",
+    "modid": "allmusic_client",
+    "name": "AllMusic_Client",
     "description": "allmusic mod",
-    "version": "${version}",
-    "mcversion": "${mcversion}",
+    "version": "2.6.8",
+    "mcversion": "1.7.10",
     "url": "https://github.com/Coloryr/AllMusic_Client",
     "updateUrl": "",
     "authorList": [

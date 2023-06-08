@@ -1,16 +1,5 @@
 package coloryr.allmusic_client.hud;
 
-import coloryr.allmusic_client.AllMusic;
-import com.google.gson.Gson;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
-
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -20,7 +9,22 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Semaphore;
 
+import javax.imageio.ImageIO;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+
+import com.google.gson.Gson;
+
+import coloryr.allmusic_client.AllMusic;
+
 public class HudUtils {
+
     public String Info = "";
     public String List = "";
     public String Lyric = "";
@@ -40,7 +44,9 @@ public class HudUtils {
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
-        client = HttpClientBuilder.create().useSystemProperties().build();
+        client = HttpClientBuilder.create()
+            .useSystemProperties()
+            .build();
     }
 
     public void close() {
@@ -76,26 +82,26 @@ public class HudUtils {
             byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
 
             int width = image.getWidth();
-            if(save.EnablePicRotate) {
+            if (save.EnablePicRotate) {
                 // 透明底的图片
                 BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics2D graphics = formatAvatarImage.createGraphics();
-                //把图片切成一个园
+                // 把图片切成一个园
                 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                //留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
+                // 留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
                 int border = (int) (width * 0.11);
-                //图片是一个圆型
+                // 图片是一个圆型
                 Ellipse2D.Double shape = new Ellipse2D.Double(border, border, width - border * 2, width - border * 2);
-                //需要保留的区域
+                // 需要保留的区域
                 graphics.setClip(shape);
                 graphics.drawImage(image, border, border, width - border * 2, width - border * 2, null);
                 graphics.dispose();
-                //在圆图外面再画一个圆
-                //新创建一个graphics，这样画的圆不会有锯齿
+                // 在圆图外面再画一个圆
+                // 新创建一个graphics，这样画的圆不会有锯齿
                 graphics = formatAvatarImage.createGraphics();
                 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                //画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
-                //使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
+                // 画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
+                // 使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
                 int border1;
 
                 border1 = (int) (width * 0.08);
@@ -105,7 +111,7 @@ public class HudUtils {
                 graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
 
                 border1 = (int) (width * 0.05);
-                float si =(float) (border1 / 6);
+                float si = (float) (border1 / 6);
                 s = new BasicStroke(si, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 graphics.setStroke(s);
                 graphics.setColor(Color.decode("#181818"));
@@ -122,12 +128,17 @@ public class HudUtils {
 
                 graphics.dispose();
 
-                formatAvatarImage.getRGB(0, 0, formatAvatarImage.getWidth(), formatAvatarImage.getHeight(), pixels, 0, formatAvatarImage.getWidth());
+                formatAvatarImage.getRGB(
+                    0,
+                    0,
+                    formatAvatarImage.getWidth(),
+                    formatAvatarImage.getHeight(),
+                    pixels,
+                    0,
+                    formatAvatarImage.getWidth());
                 getClose();
                 thisRoute = true;
-            }
-            else
-            {
+            } else {
                 image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
                 getClose();
                 thisRoute = false;
@@ -151,7 +162,16 @@ public class HudUtils {
                     textureID = GL11.glGenTextures();
                 }
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+                GL11.glTexImage2D(
+                    GL11.GL_TEXTURE_2D,
+                    0,
+                    GL11.GL_RGBA8,
+                    image.getWidth(),
+                    image.getHeight(),
+                    0,
+                    GL11.GL_RGBA,
+                    GL11.GL_UNSIGNED_BYTE,
+                    byteBuffer);
 
                 GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
@@ -192,8 +212,7 @@ public class HudUtils {
     }
 
     public void update() {
-        if (save == null)
-            return;
+        if (save == null) return;
         synchronized (lock) {
             if (save.EnableInfo && !Info.isEmpty()) {
                 int offset = 0;

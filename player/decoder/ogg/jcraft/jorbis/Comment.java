@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -32,6 +28,7 @@ import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Packet;
 // the comments are not part of vorbis_info so that vorbis_info can be
 // static storage
 public class Comment {
+
     private static byte[] _vorbis = "vorbis".getBytes();
     private static byte[] _vendor = "Xiphophorus libVorbis I 20000508".getBytes();
 
@@ -75,8 +72,7 @@ public class Comment {
     }
 
     public void add_tag(String tag, String contents) {
-        if (contents == null)
-            contents = "";
+        if (contents == null) contents = "";
         add(tag + "=" + contents);
     }
 
@@ -86,10 +82,8 @@ public class Comment {
         while (c < n) {
             u1 = s1[c];
             u2 = s2[c];
-            if ('Z' >= u1 && u1 >= 'A')
-                u1 = (byte) (u1 - 'A' + 'a');
-            if ('Z' >= u2 && u2 >= 'A')
-                u2 = (byte) (u2 - 'A' + 'a');
+            if ('Z' >= u1 && u1 >= 'A') u1 = (byte) (u1 - 'A' + 'a');
+            if ('Z' >= u2 && u2 >= 'A') u2 = (byte) (u2 - 'A' + 'a');
             if (u1 != u2) {
                 return false;
             }
@@ -104,8 +98,7 @@ public class Comment {
 
     public String query(String tag, int count) {
         int foo = query(tag.getBytes(), count);
-        if (foo == -1)
-            return null;
+        if (foo == -1) return null;
         byte[] comment = user_comments[foo];
         for (int i = 0; i < comment_lengths[foo]; i++) {
             if (comment[i] == '=') {
@@ -127,7 +120,7 @@ public class Comment {
             if (tagcompare(user_comments[i], fulltag, fulltaglen)) {
                 if (count == found) {
                     // We return a pointer to the data, not a copy
-                    //return user_comments[i] + taglen + 1;
+                    // return user_comments[i] + taglen + 1;
                     return i;
                 } else {
                     found++;
@@ -200,8 +193,7 @@ public class Comment {
         Buffer opb = new Buffer();
         opb.writeinit();
 
-        if (pack(opb) != 0)
-            return OV_EIMPL;
+        if (pack(opb) != 0) return OV_EIMPL;
 
         op.packet_base = new byte[opb.bytes()];
         op.packet = 0;
@@ -214,8 +206,7 @@ public class Comment {
     }
 
     void clear() {
-        for (int i = 0; i < comments; i++)
-            user_comments[i] = null;
+        for (int i = 0; i < comments; i++) user_comments[i] = null;
         user_comments = null;
         vendor = null;
     }
@@ -225,16 +216,14 @@ public class Comment {
     }
 
     public String getComment(int i) {
-        if (comments <= i)
-            return null;
+        if (comments <= i) return null;
         return new String(user_comments[i], 0, user_comments[i].length - 1);
     }
 
     public String toString() {
         String foo = "Vendor: " + new String(vendor, 0, vendor.length - 1);
         for (int i = 0; i < comments; i++) {
-            foo = foo + "\nComment: "
-                    + new String(user_comments[i], 0, user_comments[i].length - 1);
+            foo = foo + "\nComment: " + new String(user_comments[i], 0, user_comments[i].length - 1);
         }
         foo = foo + "\n";
         return foo;

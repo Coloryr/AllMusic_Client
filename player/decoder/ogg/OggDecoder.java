@@ -1,5 +1,10 @@
 package coloryr.allmusic_client.player.decoder.ogg;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.util.concurrent.Semaphore;
+
 import coloryr.allmusic_client.AllMusic;
 import coloryr.allmusic_client.player.APlayer;
 import coloryr.allmusic_client.player.decoder.BuffPack;
@@ -14,11 +19,6 @@ import coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis.DspState;
 import coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis.Info;
 import coloryr.allmusic_client.player.decoder.ogg.jcraft.oggdecoder.OggData;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteOrder;
-import java.util.concurrent.Semaphore;
-
 /**
  * Decode an OGG file to PCM data. This class is based on the example
  * code that accompanies the Java OGG libraries (hence the lack of detailed)
@@ -27,6 +27,7 @@ import java.util.concurrent.Semaphore;
  * @author Kevin Glass
  */
 public class OggDecoder implements IDecoder {
+
     private final APlayer player;
     /**
      * The conversion buffer size
@@ -39,7 +40,7 @@ public class OggDecoder implements IDecoder {
 
     private final SyncState oy = new SyncState(); // sync and verify incoming physical bitstream
     private final StreamState os = new StreamState(); // take physical pages, weld into a logical stream of packets
-    private final Page og = new Page(); // one Ogg bitstream page.  Vorbis packets are inside
+    private final Page og = new Page(); // one Ogg bitstream page. Vorbis packets are inside
     private final Packet op = new Packet(); // one raw packet of data for decode
 
     private final Info vi = new Info(); // struct that stores all the static vorbis bitstream settings
@@ -80,7 +81,8 @@ public class OggDecoder implements IDecoder {
         byte[] buffer;
         int bytes;
 
-        boolean bigEndian = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN);
+        boolean bigEndian = ByteOrder.nativeOrder()
+            .equals(ByteOrder.BIG_ENDIAN);
         // Decode setup
 
         oy.init(); // Now we can read pages
@@ -88,7 +90,7 @@ public class OggDecoder implements IDecoder {
         while (true) { // we repeat if the bitstream is chained
             int eos = 0;
 
-            // grab some data at the head of the stream.  We want the first page
+            // grab some data at the head of the stream. We want the first page
             // (which is guaranteed to be small and only contain the Vorbis
             // stream initial header) We need the first page to get the stream
             // serialno.
@@ -105,11 +107,10 @@ public class OggDecoder implements IDecoder {
 
             // Get the first page.
             if (oy.pageout(og) != 1) {
-                // have we simply run out of data?  If so, we're done.
-                if (bytes < 4096)
-                    break;
+                // have we simply run out of data? If so, we're done.
+                if (bytes < 4096) break;
 
-                // error case.  Must not be Vorbis data
+                // error case. Must not be Vorbis data
                 throw new IOException("Input does not appear to be an Ogg bitstream.");
             }
 
@@ -147,14 +148,14 @@ public class OggDecoder implements IDecoder {
             isOK = true;
             get1.release();
 
-            // At this point, we're sure we're Vorbis.  We've set up the logical
-            // (Ogg) bitstream decoder.  Get the comment and codebook headers and
+            // At this point, we're sure we're Vorbis. We've set up the logical
+            // (Ogg) bitstream decoder. Get the comment and codebook headers and
             // set up the Vorbis decoder
 
             // The next two packets in order are the comment and codebook headers.
-            // They're likely large and may span multiple pages.  Thus we reead
+            // They're likely large and may span multiple pages. Thus we reead
             // and submit data until we get our two pacakets, watching that no
-            // pages are missing.  If a page is missing, error out; losing a
+            // pages are missing. If a page is missing, error out; losing a
             // header page is the only place where missing data is fatal. */
 
             int i = 0;
@@ -162,9 +163,8 @@ public class OggDecoder implements IDecoder {
                 while (i < 2) {
 
                     int result = oy.pageout(og);
-                    if (result == 0)
-                        break; // Need more data
-                    // Don't complain about missing or corrupt data yet.  We'll
+                    if (result == 0) break; // Need more data
+                    // Don't complain about missing or corrupt data yet. We'll
                     // catch it at the packet output phase
 
                     if (result == 1) {
@@ -173,11 +173,10 @@ public class OggDecoder implements IDecoder {
                         // at packetout
                         while (i < 2) {
                             result = os.packetout(op);
-                            if (result == 0)
-                                break;
+                            if (result == 0) break;
                             if (result == -1) {
                                 // Uh oh; data at some point was corrupted or missing!
-                                // We can't tolerate that in a header.  Die.
+                                // We can't tolerate that in a header. Die.
                                 throw new IOException("Corrupt secondary header.  Exiting.");
                             }
                             vi.synthesis_headerin(vc, op);
@@ -202,11 +201,11 @@ public class OggDecoder implements IDecoder {
             convsize = 4096 / vi.channels;
 
             // OK, got and parsed all three headers. Initialize the Vorbis
-            //  packet->PCM decoder.
+            // packet->PCM decoder.
             vd.synthesis_init(vi); // central decode state
             vb.init(vd); // local state for most of the decode
             // so multiple block decodes can
-            // proceed in parallel.  We could init
+            // proceed in parallel. We could init
             // multiple vorbis_block structures
             // for vd here
 
@@ -217,8 +216,7 @@ public class OggDecoder implements IDecoder {
                 while (eos == 0) {
 
                     int result = oy.pageout(og);
-                    if (result == 0)
-                        break; // need more data
+                    if (result == 0) break; // need more data
                     if (result == -1) { // missing or corrupt data at this page position
                         System.err.println("Corrupt or missing data in bitstream; continuing...");
                     } else {
@@ -227,24 +225,22 @@ public class OggDecoder implements IDecoder {
                         while (true) {
                             result = os.packetout(op);
 
-                            if (result == 0)
-                                break; // need more data
+                            if (result == 0) break; // need more data
                             if (result == -1) { // missing or corrupt data at this page position
                                 // no reason to complain; already complained above
                             } else {
-                                // we have a packet.  Decode it
+                                // we have a packet. Decode it
                                 int samples;
                                 if (vb.synthesis(op) == 0) { // test for success!
                                     vd.synthesis_blockin(vb);
                                 }
 
-                                // **pcm is a multichannel float vector.  In stereo, for
-                                // example, pcm[0] is left, and pcm[1] is right.  samples is
-                                // the size of each channel.  Convert the float values
+                                // **pcm is a multichannel float vector. In stereo, for
+                                // example, pcm[0] is left, and pcm[1] is right. samples is
+                                // the size of each channel. Convert the float values
                                 // (-1.<=range<=1.) to whatever PCM format and write it out
 
-                                while ((samples = vd.synthesis_pcmout(_pcm,
-                                        _index)) > 0) {
+                                while ((samples = vd.synthesis_pcmout(_pcm, _index)) > 0) {
                                     float[][] pcm = _pcm[0];
                                     int bout = Math.min(samples, convsize);
 
@@ -252,12 +248,12 @@ public class OggDecoder implements IDecoder {
                                     // interleave
                                     for (i = 0; i < vi.channels; i++) {
                                         int ptr = i * 2;
-                                        //int ptr=i;
+                                        // int ptr=i;
                                         int mono = _index[i];
                                         for (int j = 0; j < bout; j++) {
                                             int val = (int) (pcm[i][mono + j] * 32767.);
-                                            //                            short val=(short)(pcm[i][mono+j]*32767.);
-                                            //                            int val=(int)Math.round(pcm[i][mono+j]*32767.);
+                                            // short val=(short)(pcm[i][mono+j]*32767.);
+                                            // int val=(int)Math.round(pcm[i][mono+j]*32767.);
                                             // might as well guard against clipping
                                             if (val > 32767) {
                                                 val = 32767;
@@ -265,8 +261,7 @@ public class OggDecoder implements IDecoder {
                                             if (val < -32768) {
                                                 val = -32768;
                                             }
-                                            if (val < 0)
-                                                val = val | 0x8000;
+                                            if (val < 0) val = val | 0x8000;
 
                                             if (bigEndian) {
                                                 convbuffer[ptr] = (byte) (val >>> 8);
@@ -281,16 +276,14 @@ public class OggDecoder implements IDecoder {
                                     get1.acquire();
                                     size = 2 * vi.channels * bout;
                                     get2.release();
-                                    if (isClose)
-                                        return;
+                                    if (isClose) return;
                                     vd.synthesis_read(bout); // tell libvorbis how
                                     // many samples we
                                     // actually consumed
                                 }
                             }
                         }
-                        if (og.eos() != 0)
-                            eos = 1;
+                        if (og.eos() != 0) eos = 1;
                     }
                 }
                 if (eos == 0) {
@@ -302,8 +295,7 @@ public class OggDecoder implements IDecoder {
                         throw new IOException(e.getMessage());
                     }
                     oy.wrote(bytes);
-                    if (bytes == 0)
-                        eos = 1;
+                    if (bytes == 0) eos = 1;
                 }
             }
 
@@ -313,7 +305,7 @@ public class OggDecoder implements IDecoder {
             os.clear();
 
             // ogg_page and ogg_packet structs always point to storage in
-            // libvorbis.  They're never freed or manipulated directly
+            // libvorbis. They're never freed or manipulated directly
 
             vb.clear();
             vd.clear();
@@ -330,8 +322,7 @@ public class OggDecoder implements IDecoder {
     public BuffPack decodeFrame() throws Exception {
         get1.release();
         get2.acquire();
-        if (isDone || isClose)
-            return null;
+        if (isDone || isClose) return null;
         buff.buff = convbuffer;
         buff.len = size;
 

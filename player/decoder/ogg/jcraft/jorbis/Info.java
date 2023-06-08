@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -30,14 +26,15 @@ import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Buffer;
 import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Packet;
 
 public class Info {
+
     private static final int OV_EBADPACKET = -136;
     private static final int OV_ENOTAUDIO = -135;
 
     private static byte[] _vorbis = "vorbis".getBytes();
     private static final int VI_TIMEB = 1;
-    //  private static final int VI_FLOORB=1;
+    // private static final int VI_FLOORB=1;
     private static final int VI_FLOORB = 2;
-    //  private static final int VI_RESB=1;
+    // private static final int VI_RESB=1;
     private static final int VI_RESB = 3;
     private static final int VI_MAPB = 1;
     private static final int VI_WINDOWB = 1;
@@ -52,13 +49,13 @@ public class Info {
     // all three set to the same value:
     // implies a fixed rate bitstream
     // only nominal set:
-    // implies a VBR stream that averages the nominal bitrate.  No hard
+    // implies a VBR stream that averages the nominal bitrate. No hard
     // upper/lower limit
     // upper and or lower set:
     // implies a VBR bitstream that obeys the bitrate limits. nominal
     // may also be set to give a nominal rate.
     // none set:
-    //  the coder does not care to speculate.
+    // the coder does not care to speculate.
 
     int bitrate_upper;
     int bitrate_nominal;
@@ -71,7 +68,7 @@ public class Info {
 
     // modes are the primary means of supporting on-the-fly different
     // blocksizes, different channel mappings (LR or mid-side),
-    // different residue backends, etc.  Each mode consists of a
+    // different residue backends, etc. Each mode consists of a
     // blocksize flag and a mapping (along with the mapping setup
 
     int modes;
@@ -147,7 +144,7 @@ public class Info {
                 book_param[i] = null;
             }
         }
-        //if(vi->book_param)free(vi->book_param);
+        // if(vi->book_param)free(vi->book_param);
         book_param = null;
 
         for (int i = 0; i < psys; i++) {
@@ -159,8 +156,7 @@ public class Info {
     // Header packing/unpacking
     int unpack_info(Buffer opb) {
         version = opb.read(32);
-        if (version != 0)
-            return (-1);
+        if (version != 0) return (-1);
 
         channels = opb.read(8);
         rate = opb.read(32);
@@ -172,22 +168,23 @@ public class Info {
         blocksizes[0] = 1 << opb.read(4);
         blocksizes[1] = 1 << opb.read(4);
 
-        if ((rate < 1) || (channels < 1) || (blocksizes[0] < 8) || (blocksizes[1] < blocksizes[0])
-                || (opb.read(1) != 1)) {
+        if ((rate < 1) || (channels < 1)
+            || (blocksizes[0] < 8)
+            || (blocksizes[1] < blocksizes[0])
+            || (opb.read(1) != 1)) {
             clear();
             return (-1);
         }
         return (0);
     }
 
-    // all of the real encoding details are here.  The modes, books,
+    // all of the real encoding details are here. The modes, books,
     // everything
     int unpack_books(Buffer opb) {
 
         books = opb.read(8) + 1;
 
-        if (book_param == null || book_param.length != books)
-            book_param = new StaticCodeBook[books];
+        if (book_param == null || book_param.length != books) book_param = new StaticCodeBook[books];
         for (int i = 0; i < books; i++) {
             book_param[i] = new StaticCodeBook();
             if (book_param[i].unpack(opb) != 0) {
@@ -198,10 +195,8 @@ public class Info {
 
         // time backend settings
         times = opb.read(6) + 1;
-        if (time_type == null || time_type.length != times)
-            time_type = new int[times];
-        if (time_param == null || time_param.length != times)
-            time_param = new Object[times];
+        if (time_type == null || time_type.length != times) time_type = new int[times];
+        if (time_param == null || time_param.length != times) time_param = new Object[times];
         for (int i = 0; i < times; i++) {
             time_type[i] = opb.read(16);
             if (time_type[i] < 0 || time_type[i] >= VI_TIMEB) {
@@ -217,10 +212,8 @@ public class Info {
 
         // floor backend settings
         floors = opb.read(6) + 1;
-        if (floor_type == null || floor_type.length != floors)
-            floor_type = new int[floors];
-        if (floor_param == null || floor_param.length != floors)
-            floor_param = new Object[floors];
+        if (floor_type == null || floor_type.length != floors) floor_type = new int[floors];
+        if (floor_param == null || floor_param.length != floors) floor_param = new Object[floors];
 
         for (int i = 0; i < floors; i++) {
             floor_type[i] = opb.read(16);
@@ -239,11 +232,9 @@ public class Info {
         // residue backend settings
         residues = opb.read(6) + 1;
 
-        if (residue_type == null || residue_type.length != residues)
-            residue_type = new int[residues];
+        if (residue_type == null || residue_type.length != residues) residue_type = new int[residues];
 
-        if (residue_param == null || residue_param.length != residues)
-            residue_param = new Object[residues];
+        if (residue_param == null || residue_param.length != residues) residue_param = new Object[residues];
 
         for (int i = 0; i < residues; i++) {
             residue_type[i] = opb.read(16);
@@ -260,10 +251,8 @@ public class Info {
 
         // map backend settings
         maps = opb.read(6) + 1;
-        if (map_type == null || map_type.length != maps)
-            map_type = new int[maps];
-        if (map_param == null || map_param.length != maps)
-            map_param = new Object[maps];
+        if (map_type == null || map_type.length != maps) map_type = new int[maps];
+        if (map_param == null || map_param.length != maps) map_param = new Object[maps];
         for (int i = 0; i < maps; i++) {
             map_type[i] = opb.read(16);
             if (map_type[i] < 0 || map_type[i] >= VI_MAPB) {
@@ -279,8 +268,7 @@ public class Info {
 
         // mode settings
         modes = opb.read(6) + 1;
-        if (mode_param == null || mode_param.length != modes)
-            mode_param = new InfoMode[modes];
+        if (mode_param == null || mode_param.length != modes) mode_param = new InfoMode[modes];
         for (int i = 0; i < modes; i++) {
             mode_param[i] = new InfoMode();
             mode_param[i].blockflag = opb.read(1);
@@ -288,9 +276,8 @@ public class Info {
             mode_param[i].transformtype = opb.read(16);
             mode_param[i].mapping = opb.read(8);
 
-            if ((mode_param[i].windowtype >= VI_WINDOWB)
-                    || (mode_param[i].transformtype >= VI_WINDOWB)
-                    || (mode_param[i].mapping >= maps)) {
+            if ((mode_param[i].windowtype >= VI_WINDOWB) || (mode_param[i].transformtype >= VI_WINDOWB)
+                || (mode_param[i].mapping >= maps)) {
                 clear();
                 return (-1);
             }
@@ -321,8 +308,11 @@ public class Info {
                 byte[] buffer = new byte[6];
                 int packtype = opb.read(8);
                 opb.read(buffer, 6);
-                if (buffer[0] != 'v' || buffer[1] != 'o' || buffer[2] != 'r' || buffer[3] != 'b'
-                        || buffer[4] != 'i' || buffer[5] != 's') {
+                if (buffer[0] != 'v' || buffer[1] != 'o'
+                    || buffer[2] != 'r'
+                    || buffer[3] != 'b'
+                    || buffer[4] != 'i'
+                    || buffer[5] != 's') {
                     // not a vorbis header
                     return (-1);
                 }
@@ -351,7 +341,7 @@ public class Info {
                         return (unpack_books(opb));
                     default:
                         // Not a valid vorbis header type
-                        //return(-1);
+                        // return(-1);
                         break;
                 }
             }
@@ -388,7 +378,7 @@ public class Info {
         opb.write(books - 1, 8);
         for (int i = 0; i < books; i++) {
             if (book_param[i].pack(opb) != 0) {
-                //goto err_out;
+                // goto err_out;
                 return (-1);
             }
         }
@@ -434,7 +424,7 @@ public class Info {
     }
 
     public int blocksize(Packet op) {
-        //codec_setup_info
+        // codec_setup_info
         Buffer opb = new Buffer();
 
         int mode;
@@ -443,7 +433,7 @@ public class Info {
 
         /* Check the packet type */
         if (opb.read(1) != 0) {
-            /* Oops.  This is not an audio data packet */
+            /* Oops. This is not an audio data packet */
             return (OV_ENOTAUDIO);
         }
         {
@@ -457,8 +447,7 @@ public class Info {
             /* read our mode and pre/post windowsize */
             mode = opb.read(modebits);
         }
-        if (mode == -1)
-            return (OV_EBADPACKET);
+        if (mode == -1) return (OV_EBADPACKET);
         return (blocksizes[mode_param[mode].blockflag]);
     }
 }

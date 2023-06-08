@@ -1,19 +1,15 @@
 /*
  * FLAC library (Java)
- *
  * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/flac-library-java
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program (see COPYING.txt and COPYING.LESSER.txt).
  * If not, see <http://www.gnu.org/licenses/>.
@@ -21,18 +17,19 @@
 
 package coloryr.allmusic_client.player.decoder.flac;
 
+import java.io.IOException;
+
 import coloryr.allmusic_client.AllMusic;
 import coloryr.allmusic_client.player.APlayer;
 import coloryr.allmusic_client.player.decoder.BuffPack;
 import coloryr.allmusic_client.player.decoder.IDecoder;
 
-import java.io.IOException;
-
-
 /**
  * Handles high-level decoding and seeking in FLAC files. Also returns metadata blocks.
  * Every object is stateful, not thread-safe, and needs to be closed. Sample usage:
- * <pre>// Create a decoder
+ * 
+ * <pre>
+ * // Create a decoder
  * FlacDecoder dec = new FlacDecoder(...);
  *
  * &#x2F;/ Make the decoder process all metadata blocks internally.
@@ -52,7 +49,8 @@ import java.io.IOException;
  * dec.readAudioBlock(samples, ...);
  *
  * &#x2F;/ Close underlying file stream
- * dec.close();</pre>
+ * dec.close();
+ * </pre>
  *
  * @see FrameDecoder
  * @see FlacLowLevelInput
@@ -88,8 +86,7 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
     // of this object to reflect the new data seen, and throws exceptions for situations such as
     // not starting with a stream info metadata block or encountering duplicates of certain blocks.
     public Object[] readAndHandleMetadataBlock() throws IOException {
-        if (metadataEndPos != -1)
-            return null;  // All metadata already consumed
+        if (metadataEndPos != -1) return null; // All metadata already consumed
 
         // Read entire block
         boolean last = input.readUint(1) != 0;
@@ -100,15 +97,12 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
         // Handle recognized block
         if (type == 0) {
-            if (streamInfo != null)
-                throw new DataFormatException("Duplicate stream info metadata block");
+            if (streamInfo != null) throw new DataFormatException("Duplicate stream info metadata block");
             streamInfo = new StreamInfo(data);
         } else {
-            if (streamInfo == null)
-                throw new DataFormatException("Expected stream info metadata block");
+            if (streamInfo == null) throw new DataFormatException("Expected stream info metadata block");
             if (type == 3) {
-                if (seekTable != null)
-                    throw new DataFormatException("Duplicate seek table metadata block");
+                if (seekTable != null) throw new DataFormatException("Duplicate seek table metadata block");
                 seekTable = new SeekTable(data);
             }
         }
@@ -117,23 +111,20 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
             metadataEndPos = input.getPosition();
             frameDec = new FrameDecoder(input, streamInfo.sampleDepth);
         }
-        return new Object[]{type, data};
+        return new Object[] { type, data };
     }
-
 
     // Reads and decodes the next block of audio samples into the given buffer,
     // returning the number of samples in the block. The return value is 0 if the read
     // started at the end of stream, or a number in the range [1, 65536] for a valid block.
     // All metadata blocks must be read before starting to read audio blocks.
     public int readAudioBlock(int[][] samples, int off) throws IOException {
-        if (frameDec == null)
-            throw new IllegalStateException("Metadata blocks not fully consumed yet");
+        if (frameDec == null) throw new IllegalStateException("Metadata blocks not fully consumed yet");
 
         FrameInfo frame = frameDec.readFrame(samples, off);
-        if (frame == null)
-            return 0;
+        if (frame == null) return 0;
         else {
-            return frame.blockSize;  // In the range [1, 65536]
+            return frame.blockSize; // In the range [1, 65536]
         }
     }
 
@@ -155,8 +146,7 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
                     float temp = val / 1099511627776f;
                     val = (int) (temp * 0x7FFF);
                 }
-                for (int j = 0; j < 2; j++, sampleBytesLen++)
-                    sampleBytes[sampleBytesLen] = (byte) (val >>> (j << 3));
+                for (int j = 0; j < 2; j++, sampleBytesLen++) sampleBytes[sampleBytesLen] = (byte) (val >>> (j << 3));
             }
         }
         pack.len = sampleBytesLen;
@@ -181,7 +171,7 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
         input = new SeekableFileFlacInput(player);
 
         // Read basic header
-        if (input.readUint(32) != 0x664C6143)  // Magic string "fLaC"
+        if (input.readUint(32) != 0x664C6143) // Magic string "fLaC"
         {
             return false;
         }

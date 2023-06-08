@@ -15,7 +15,7 @@ plugins {
 }
 apply plugin: 'net.minecraftforge.gradle'
 
-version = '2.6.6'
+version = '2.6.8'
 group = 'com.coloryr.AllMusic' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = '[forge-1.18.2]AllMusic'
 

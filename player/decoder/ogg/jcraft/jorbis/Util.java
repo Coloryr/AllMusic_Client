@@ -1,6 +1,7 @@
 package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
 
 class Util {
+
     static int ilog(int v) {
         int ret = 0;
         while (v != 0) {

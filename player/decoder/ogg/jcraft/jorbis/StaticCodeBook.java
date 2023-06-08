@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -29,6 +25,7 @@ package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
 import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class StaticCodeBook {
+
     int dim; // codebook dimensions (elements per vector)
     int entries; // codebook entries
     int[] lengthlist; // codeword lengths in bits
@@ -45,7 +42,7 @@ class StaticCodeBook {
     int q_sequencep; // bitflag
 
     // additional information for log (dB) mapping; the linear mapping
-    // is assumed to actually be values in dB.  encodebias is used to
+    // is assumed to actually be values in dB. encodebias is used to
     // assign an error weight to 0 dB. We have two additional flags:
     // zeroflag indicates if entry zero is to represent -Inf dB; negflag
     // indicates if we're to represent negative linear values in a
@@ -54,8 +51,7 @@ class StaticCodeBook {
     int[] quantlist; // map == 1: (int)(entries/dim) element column map
     // map == 2: list of dim*entries quantized entry vals
 
-    StaticCodeBook() {
-    }
+    StaticCodeBook() {}
 
     int pack(Buffer opb) {
         int i;
@@ -65,19 +61,17 @@ class StaticCodeBook {
         opb.write(dim, 16);
         opb.write(entries, 24);
 
-        // pack the codewords.  There are two packings; length ordered and
-        // length random.  Decide between the two now.
+        // pack the codewords. There are two packings; length ordered and
+        // length random. Decide between the two now.
 
         for (i = 1; i < entries; i++) {
-            if (lengthlist[i] < lengthlist[i - 1])
-                break;
+            if (lengthlist[i] < lengthlist[i - 1]) break;
         }
-        if (i == entries)
-            ordered = true;
+        if (i == entries) ordered = true;
 
         if (ordered) {
-            // length ordered.  We only need to say how many codewords of
-            // each length.  The actual codewords are generated
+            // length ordered. We only need to say how many codewords of
+            // each length. The actual codewords are generated
             // deterministically
 
             int count = 0;
@@ -96,16 +90,15 @@ class StaticCodeBook {
             }
             opb.write(i - count, Util.ilog(entries - count));
         } else {
-            // length random.  Again, we don't code the codeword itself, just
-            // the length.  This time, though, we have to encode each length
+            // length random. Again, we don't code the codeword itself, just
+            // the length. This time, though, we have to encode each length
             opb.write(0, 1); // unordered
 
             // algortihmic mapping has use for 'unused entries', which we tag
-            // here.  The algorithmic mapping happens as usual, but the unused
+            // here. The algorithmic mapping happens as usual, but the unused
             // entry has no codeword.
             for (i = 0; i < entries; i++) {
-                if (lengthlist[i] == 0)
-                    break;
+                if (lengthlist[i] == 0) break;
             }
 
             if (i == entries) {
@@ -138,7 +131,7 @@ class StaticCodeBook {
                 // implicitly populated value mapping
                 // explicitly populated value mapping
                 if (quantlist == null) {
-                    // no quantlist?  error
+                    // no quantlist? error
                     return (-1);
                 }
 
@@ -167,7 +160,7 @@ class StaticCodeBook {
                     opb.write(Math.abs(quantlist[i]), q_quant);
                 }
             }
-            break;
+                break;
             default:
                 // error case; we don't have any other map types now
                 return (-1);
@@ -179,11 +172,11 @@ class StaticCodeBook {
     // readies the codebook auxiliary structures for decode
     int unpack(Buffer opb) {
         int i;
-        //memset(s,0,sizeof(static_codebook));
+        // memset(s,0,sizeof(static_codebook));
 
         // make sure alignment is correct
         if (opb.read(24) != 0x564342) {
-            //    goto _eofout;
+            // goto _eofout;
             clear();
             return (-1);
         }
@@ -192,7 +185,7 @@ class StaticCodeBook {
         dim = opb.read(16);
         entries = opb.read(24);
         if (entries == -1) {
-            //    goto _eofout;
+            // goto _eofout;
             clear();
             return (-1);
         }
@@ -211,7 +204,7 @@ class StaticCodeBook {
                         if (opb.read(1) != 0) {
                             int num = opb.read(5);
                             if (num == -1) {
-                                //            goto _eofout;
+                                // goto _eofout;
                                 clear();
                                 return (-1);
                             }
@@ -225,7 +218,7 @@ class StaticCodeBook {
                     for (i = 0; i < entries; i++) {
                         int num = opb.read(5);
                         if (num == -1) {
-                            //          goto _eofout;
+                            // goto _eofout;
                             clear();
                             return (-1);
                         }
@@ -234,15 +227,15 @@ class StaticCodeBook {
                 }
                 break;
             case 1:
-                // ordered
+            // ordered
             {
                 int length = opb.read(5) + 1;
                 lengthlist = new int[entries];
 
-                for (i = 0; i < entries; ) {
+                for (i = 0; i < entries;) {
                     int num = opb.read(Util.ilog(entries - i));
                     if (num == -1) {
-                        //          goto _eofout;
+                        // goto _eofout;
                         clear();
                         return (-1);
                     }
@@ -252,7 +245,7 @@ class StaticCodeBook {
                     length++;
                 }
             }
-            break;
+                break;
             default:
                 // EOF
                 return (-1);
@@ -289,28 +282,28 @@ class StaticCodeBook {
                     quantlist[i] = opb.read(q_quant);
                 }
                 if (quantlist[quantvals - 1] == -1) {
-                    //        goto _eofout;
+                    // goto _eofout;
                     clear();
                     return (-1);
                 }
             }
-            break;
+                break;
             default:
-                //    goto _eofout;
+                // goto _eofout;
                 clear();
                 return (-1);
         }
         // all set
         return (0);
-        //    _errout:
-        //    _eofout:
-        //    vorbis_staticbook_clear(s);
-        //    return(-1);
+        // _errout:
+        // _eofout:
+        // vorbis_staticbook_clear(s);
+        // return(-1);
     }
 
     // there might be a straightforward one-line way to do the below
     // that's portable and totally safe against roundoff, but I haven't
-    // thought of it.  Therefore, we opt on the side of caution
+    // thought of it. Therefore, we opt on the side of caution
     private int maptype1_quantvals() {
         int vals = (int) (Math.floor(Math.pow(entries, 1. / dim)));
 
@@ -338,14 +331,13 @@ class StaticCodeBook {
         }
     }
 
-    void clear() {
-    }
+    void clear() {}
 
     // unpack the quantized list of values for encode/decode
     // we need to deal with two map types: in map type 1, the values are
     // generated algorithmically (each column of the vector counts through
     // the values in the quant vector). in map type 2, all the values came
-    // in in an explicit list.  Both value lists must be unpacked
+    // in in an explicit list. Both value lists must be unpacked
     float[] unquantize() {
 
         if (maptype == 1 || maptype == 2) {
@@ -359,11 +351,11 @@ class StaticCodeBook {
             switch (maptype) {
                 case 1:
                     // most of the time, entries%dimensions == 0, but we need to be
-                    // well defined.  We define that the possible vales at each
-                    // scalar is values == entries/dim.  If entries%dim != 0, we'll
+                    // well defined. We define that the possible vales at each
+                    // scalar is values == entries/dim. If entries%dim != 0, we'll
                     // have 'too few' values (values*dim<entries), which means that
                     // we'll have 'left over' entries; left over entries use zeroed
-                    // values (and are wasted).  So don't generate codebooks like that
+                    // values (and are wasted). So don't generate codebooks like that
                     quantvals = maptype1_quantvals();
                     for (int j = 0; j < entries; j++) {
                         float last = 0.f;
@@ -372,8 +364,7 @@ class StaticCodeBook {
                             int index = (j / indexdiv) % quantvals;
                             float val = quantlist[index];
                             val = Math.abs(val) * delta + mindel + last;
-                            if (q_sequencep != 0)
-                                last = val;
+                            if (q_sequencep != 0) last = val;
                             r[j * dim + k] = val;
                             indexdiv *= quantvals;
                         }
@@ -384,15 +375,14 @@ class StaticCodeBook {
                         float last = 0.f;
                         for (int k = 0; k < dim; k++) {
                             float val = quantlist[j * dim + k];
-                            //if((j*dim+k)==0){System.err.println(" | 0 -> "+val+" | ");}
+                            // if((j*dim+k)==0){System.err.println(" | 0 -> "+val+" | ");}
                             val = Math.abs(val) * delta + mindel + last;
-                            if (q_sequencep != 0)
-                                last = val;
+                            if (q_sequencep != 0) last = val;
                             r[j * dim + k] = val;
-                            //if((j*dim+k)==0){System.err.println(" $ r[0] -> "+r[0]+" | ");}
+                            // if((j*dim+k)==0){System.err.println(" $ r[0] -> "+r[0]+" | ");}
                         }
                     }
-                    //System.err.println("\nr[0]="+r[0]);
+                    // System.err.println("\nr[0]="+r[0]);
             }
             return (r);
         }
@@ -401,7 +391,7 @@ class StaticCodeBook {
 
     // 32 bit float (not IEEE; nonnormalized mantissa +
     // biased exponent) : neeeeeee eeemmmmm mmmmmmmm mmmmmmmm
-    // Why not IEEE?  It's just not that important here.
+    // Why not IEEE? It's just not that important here.
 
     static final int VQ_FEXP = 10;
     static final int VQ_FMAN = 21;
@@ -425,8 +415,7 @@ class StaticCodeBook {
     static float float32_unpack(int val) {
         float mant = val & 0x1fffff;
         float exp = (val & 0x7fe00000) >>> VQ_FMAN;
-        if ((val & 0x80000000) != 0)
-            mant = -mant;
+        if ((val & 0x80000000) != 0) mant = -mant;
         return (ldexp(mant, ((int) exp) - (VQ_FMAN - 1) - VQ_FEXP_BIAS));
     }
 

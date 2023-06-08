@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -66,22 +62,18 @@ class Mdct {
             int msb = 1 << (log2n - 2);
             for (int i = 0; i < n / 8; i++) {
                 int acc = 0;
-                for (int j = 0; msb >>> j != 0; j++)
-                    if (((msb >>> j) & i) != 0)
-                        acc |= 1 << j;
+                for (int j = 0; msb >>> j != 0; j++) if (((msb >>> j) & i) != 0) acc |= 1 << j;
                 bitrev[i * 2] = ((~acc) & mask);
-                //	bitrev[i*2]=((~acc)&mask)-1;
+                // bitrev[i*2]=((~acc)&mask)-1;
                 bitrev[i * 2 + 1] = acc;
             }
         }
         scale = 4.f / n;
     }
 
-    void clear() {
-    }
+    void clear() {}
 
-    void forward(float[] in, float[] out) {
-    }
+    void forward(float[] in, float[] out) {}
 
     float[] _x = new float[1024];
     float[] _w = new float[1024];
@@ -152,8 +144,7 @@ class Mdct {
         }
     }
 
-    private float[] mdct_kernel(float[] x, float[] w, int n, int n2, int n4,
-                                int n8) {
+    private float[] mdct_kernel(float[] x, float[] w, int n, int n2, int n4, int n8) {
         // step 2
 
         int xA = n4;
@@ -161,7 +152,7 @@ class Mdct {
         int w2 = n4;
         int A = n2;
 
-        for (int i = 0; i < n4; ) {
+        for (int i = 0; i < n4;) {
             float x0 = x[xA] - x[xB];
             float x1;
             w[w2 + i] = x[xA++] + x[xB++];

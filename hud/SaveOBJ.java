@@ -1,6 +1,7 @@
 package coloryr.allmusic_client.hud;
 
 public class SaveOBJ {
+
     public PosOBJ List;
     public PosOBJ Lyric;
     public PosOBJ Info;

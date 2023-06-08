@@ -1,47 +1,38 @@
 /*
- * 11/19/04  1.0 moved to LGPL.
- *
- * 11/17/04	 Uncomplete frames discarded. E.B, javalayer@javazoom.net
- *
- * 12/05/03	 ID3v2 tag returned. E.B, javalayer@javazoom.net
- *
- * 12/12/99	 Based on Ibitstream. Exceptions thrown on errors,
- *			 Temporary removed seek functionality. mdm@techie.com
- *
+ * 11/19/04 1.0 moved to LGPL.
+ * 11/17/04 Uncomplete frames discarded. E.B, javalayer@javazoom.net
+ * 12/05/03 ID3v2 tag returned. E.B, javalayer@javazoom.net
+ * 12/12/99 Based on Ibitstream. Exceptions thrown on errors,
+ * Temporary removed seek functionality. mdm@techie.com
  * 02/12/99 : Java Conversion by E.B , javalayer@javazoom.net
- *
  * 04/14/97 : Added function prototypes for new syncing and seeking
  * mechanisms. Also made this file portable. Changes made by Jeff Tsay
- *
- *  @(#) ibitstream.h 1.5, last edit: 6/15/94 16:55:34
- *  @(#) Copyright (C) 1993, 1994 Tobias Bading (bading@cs.tu-berlin.de)
- *  @(#) Berlin University of Technology
- *-----------------------------------------------------------------------
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU Library General Public License as published
- *   by the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Library General Public License for more details.
- *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the Free Software
- *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *----------------------------------------------------------------------
+ * @(#) ibitstream.h 1.5, last edit: 6/15/94 16:55:34
+ * @(#) Copyright (C) 1993, 1994 Tobias Bading (bading@cs.tu-berlin.de)
+ * @(#) Berlin University of Technology
+ * -----------------------------------------------------------------------
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Library General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Library General Public License for more details.
+ * You should have received a copy of the GNU Library General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * ----------------------------------------------------------------------
  */
 
 package coloryr.allmusic_client.player.decoder.mp3;
-
-import coloryr.allmusic_client.player.APlayer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 
+import coloryr.allmusic_client.player.APlayer;
 
 /**
  * The <code>Bistream</code> class is responsible for parsing
@@ -52,6 +43,7 @@ import java.io.PushbackInputStream;
  * inner classes.
  */
 public final class Bitstream implements BitstreamErrors {
+
     /**
      * Maximum size of the frame buffer.
      */
@@ -72,12 +64,9 @@ public final class Bitstream implements BitstreamErrors {
      * The frame buffer that holds the data for the current frame.
      */
     private final int[] framebuffer = new int[BUFFER_INT_SIZE];
-    private final int[] bitmask = {0,    // dummy
-            0x00000001, 0x00000003, 0x00000007, 0x0000000F,
-            0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF,
-            0x000001FF, 0x000003FF, 0x000007FF, 0x00000FFF,
-            0x00001FFF, 0x00003FFF, 0x00007FFF, 0x0000FFFF,
-            0x0001FFFF};
+    private final int[] bitmask = { 0, // dummy
+        0x00000001, 0x00000003, 0x00000007, 0x0000000F, 0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF, 0x000001FF,
+        0x000003FF, 0x000007FF, 0x00000FFF, 0x00001FFF, 0x00003FFF, 0x00007FFF, 0x0000FFFF, 0x0001FFFF };
     private final Header header = new Header();
     private final byte[] syncbuf = new byte[4];
     /**
@@ -86,8 +75,8 @@ public final class Bitstream implements BitstreamErrors {
     private final byte[] frame_bytes = new byte[BUFFER_INT_SIZE * 4];
     private final Crc16[] crc = new Crc16[1];
     private PushbackInputStream source;
-    //private int 			current_frame_number;
-    //private int				last_frame_number;
+    // private int current_frame_number;
+    // private int last_frame_number;
     public long local = 0;
     /**
      * Number of valid bytes in the frame buffer.
@@ -143,16 +132,14 @@ public final class Bitstream implements BitstreamErrors {
             local += 10;
             size = readID3v2Header(in);
             /*
-              Audio header position in stream.
+             * Audio header position in stream.
              */
             int header_pos = size;
-        } catch (IOException ignored) {
-        } finally {
+        } catch (IOException ignored) {} finally {
             try {
                 // Unread ID3v2 header (10 bytes).
                 in.reset();
-            } catch (IOException ignored) {
-            }
+            } catch (IOException ignored) {}
         }
         // Load ID3v2 tags.
         try {
@@ -161,8 +148,7 @@ public final class Bitstream implements BitstreamErrors {
                 in.read(rawid3v2, 0, rawid3v2.length);
                 local += rawid3v2.length;
             }
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
     }
 
     /**
@@ -215,7 +201,7 @@ public final class Bitstream implements BitstreamErrors {
      * Reads and parses the next frame from the input source.
      *
      * @return the Header describing details of the frame read,
-     * or null if the end of the stream has been reached.
+     *         or null if the end of the stream has been reached.
      */
     public Header readFrame() throws Exception {
         Header result = null;
@@ -229,7 +215,7 @@ public final class Bitstream implements BitstreamErrors {
         } catch (BitstreamException ex) {
             if ((ex.getErrorCode() == INVALIDFRAME)) {
                 // Try to skip this frame.
-                //System.out.println("INVALIDFRAME");
+                // System.out.println("INVALIDFRAME");
                 try {
                     closeFrame();
                     result = readNextFrame();
@@ -259,7 +245,6 @@ public final class Bitstream implements BitstreamErrors {
         }
         return header;
     }
-
 
     /**
      * Read next MP3 frame.
@@ -303,13 +288,14 @@ public final class Bitstream implements BitstreamErrors {
      */
     public boolean isSyncCurrentPosition(int syncmode) throws Exception {
         int read = readBytes(syncbuf, 0, 4);
-        int headerstring = ((syncbuf[0] << 24) & 0xFF000000) | ((syncbuf[1] << 16) & 0x00FF0000) | ((syncbuf[2] << 8) & 0x0000FF00) | ((syncbuf[3]) & 0x000000FF);
+        int headerstring = ((syncbuf[0] << 24) & 0xFF000000) | ((syncbuf[1] << 16) & 0x00FF0000)
+            | ((syncbuf[2] << 8) & 0x0000FF00)
+            | ((syncbuf[3]) & 0x000000FF);
 
         try {
             source.unread(syncbuf, 0, read);
             local -= read;
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
 
         boolean sync = false;
         switch (read) {
@@ -347,19 +333,18 @@ public final class Bitstream implements BitstreamErrors {
 
         if (bytesRead != 3) throw newBitstreamException(STREAM_EOF, null);
 
-        headerstring = ((syncbuf[0] << 16) & 0x00FF0000) | ((syncbuf[1] << 8) & 0x0000FF00) | ((syncbuf[2]) & 0x000000FF);
+        headerstring = ((syncbuf[0] << 16) & 0x00FF0000) | ((syncbuf[1] << 8) & 0x0000FF00)
+            | ((syncbuf[2]) & 0x000000FF);
 
         do {
             headerstring <<= 8;
 
-            if (readBytes(syncbuf, 3, 1) != 1)
-                throw newBitstreamException(STREAM_EOF, null);
+            if (readBytes(syncbuf, 3, 1) != 1) throw newBitstreamException(STREAM_EOF, null);
 
             headerstring |= (syncbuf[3] & 0x000000FF);
 
             sync = isSyncMark(headerstring, syncmode, syncword);
-        }
-        while (!sync);
+        } while (!sync);
 
         return headerstring;
     }
@@ -368,21 +353,18 @@ public final class Bitstream implements BitstreamErrors {
         boolean sync;
 
         if (syncmode == INITIAL_SYNC) {
-            sync = ((headerstring & 0xFFE00000) == 0xFFE00000);    // SZD: MPEG 2.5
+            sync = ((headerstring & 0xFFE00000) == 0xFFE00000); // SZD: MPEG 2.5
         } else {
-            sync = ((headerstring & 0xFFF80C00) == word) &&
-                    (((headerstring & 0x000000C0) == 0x000000C0) == single_ch_mode);
+            sync = ((headerstring & 0xFFF80C00) == word)
+                && (((headerstring & 0x000000C0) == 0x000000C0) == single_ch_mode);
         }
 
         // filter out invalid sample rate
-        if (sync)
-            sync = (((headerstring >>> 10) & 3) != 3);
+        if (sync) sync = (((headerstring >>> 10) & 3) != 3);
         // filter out invalid layer
-        if (sync)
-            sync = (((headerstring >>> 17) & 3) != 0);
+        if (sync) sync = (((headerstring >>> 17) & 3) != 0);
         // filter out invalid version
-        if (sync)
-            sync = (((headerstring >>> 19) & 3) != 1);
+        if (sync) sync = (((headerstring >>> 19) & 3) != 1);
 
         return sync;
     }
@@ -417,7 +399,9 @@ public final class Bitstream implements BitstreamErrors {
             if (k + 1 < bytesize) b1 = byteread[k + 1];
             if (k + 2 < bytesize) b2 = byteread[k + 2];
             if (k + 3 < bytesize) b3 = byteread[k + 3];
-            framebuffer[b++] = ((b0 << 24) & 0xFF000000) | ((b1 << 16) & 0x00FF0000) | ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
+            framebuffer[b++] = ((b0 << 24) & 0xFF000000) | ((b1 << 16) & 0x00FF0000)
+                | ((b2 << 8) & 0x0000FF00)
+                | (b3 & 0x000000FF);
         }
         wordpointer = 0;
         bitindex = 0;
@@ -453,7 +437,7 @@ public final class Bitstream implements BitstreamErrors {
         int Left = (framebuffer[wordpointer] & 0xFFFF0000);
         returnvalue = ((Right << 16) & 0xFFFF0000) | ((Left >>> 16) & 0x0000FFFF);
 
-        returnvalue >>>= 48 - sum;    // returnvalue >>= 16 - (number_of_bits - (32 - bitindex))
+        returnvalue >>>= 48 - sum; // returnvalue >>= 16 - (number_of_bits - (32 - bitindex))
         returnvalue &= bitmask[number_of_bits];
         bitindex = sum - 32;
         return returnvalue;
@@ -480,8 +464,7 @@ public final class Bitstream implements BitstreamErrors {
      * @throws BitstreamException is thrown if the specified
      *                            number of bytes could not be read from the stream.
      */
-    private int readFully(byte[] b, int offs, int len)
-            throws Exception {
+    private int readFully(byte[] b, int offs, int len) throws Exception {
         int nRead = 0;
         while (len > 0) {
             int bytesread = source.read(b, offs, len);
@@ -503,8 +486,7 @@ public final class Bitstream implements BitstreamErrors {
      * Simlar to readFully, but doesn't throw exception when
      * EOF is reached.
      */
-    private int readBytes(byte[] b, int offs, int len)
-            throws Exception {
+    private int readBytes(byte[] b, int offs, int len) throws Exception {
         int totalBytesRead = 0;
         while (len > 0) {
             int bytesread = source.read(b, offs, len);

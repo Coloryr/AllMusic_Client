@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -30,7 +26,8 @@ import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Buffer;
 import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Packet;
 
 public class Block {
-    ///necessary stream state for linking to the framing abstraction
+
+    /// necessary stream state for linking to the framing abstraction
     float[][] pcm = new float[0][]; // this is a pointer into local storage
     Buffer opb = new Buffer();
 
@@ -74,27 +71,25 @@ public class Block {
     public int synthesis(Packet op) {
         Info vi = vd.vi;
 
-        // first things first.  Make sure decode is ready
+        // first things first. Make sure decode is ready
         opb.readinit(op.packet_base, op.packet, op.bytes);
 
         // Check the packet type
         if (opb.read(1) != 0) {
-            // Oops.  This is not an audio data packet
+            // Oops. This is not an audio data packet
             return (-1);
         }
 
         // read our mode and pre/post windowsize
         int _mode = opb.read(vd.modebits);
-        if (_mode == -1)
-            return (-1);
+        if (_mode == -1) return (-1);
 
         mode = _mode;
         W = vi.mode_param[mode].blockflag;
         if (W != 0) {
             lW = opb.read(1);
             nW = opb.read(1);
-            if (nW == -1)
-                return (-1);
+            if (nW == -1) return (-1);
         } else {
             lW = 0;
             nW = 0;

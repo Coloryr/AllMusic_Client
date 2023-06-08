@@ -1,19 +1,15 @@
 /*
  * FLAC library (Java)
- *
  * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/flac-library-java
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program (see COPYING.txt and COPYING.LESSER.txt).
  * If not, see <http://www.gnu.org/licenses/>.
@@ -25,7 +21,6 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
-
 
 /**
  * Represents precisely all the fields of a stream info metadata block. Mutable structure,
@@ -63,7 +58,6 @@ public final class StreamInfo {
      */
     public int maxFrameSize;
 
-
     /*---- Fields about stream properties ----*/
 
     /**
@@ -96,8 +90,6 @@ public final class StreamInfo {
      */
     public byte[] md5Hash;
 
-
-
     /*---- Constructors ----*/
 
     /**
@@ -116,7 +108,6 @@ public final class StreamInfo {
         sampleRate = 0;
     }
 
-
     /**
      * Constructs a stream info structure by parsing the specified 34-byte metadata block.
      * (The array must contain only the metadata payload, without the type or length fields.)
@@ -128,28 +119,24 @@ public final class StreamInfo {
      */
     public StreamInfo(byte[] b) {
         Objects.requireNonNull(b);
-        if (b.length != 34)
-            throw new IllegalArgumentException("Invalid data length");
+        if (b.length != 34) throw new IllegalArgumentException("Invalid data length");
         try {
             FlacLowLevelInput in = new ByteArrayFlacInput(b);
             minBlockSize = in.readUint(16);
             maxBlockSize = in.readUint(16);
             minFrameSize = in.readUint(24);
             maxFrameSize = in.readUint(24);
-            if (minBlockSize < 16)
-                throw new DataFormatException("Minimum block size less than 16");
-            if (maxBlockSize > 65535)
-                throw new DataFormatException("Maximum block size greater than 65535");
+            if (minBlockSize < 16) throw new DataFormatException("Minimum block size less than 16");
+            if (maxBlockSize > 65535) throw new DataFormatException("Maximum block size greater than 65535");
             if (maxBlockSize < minBlockSize)
                 throw new DataFormatException("Maximum block size less than minimum block size");
             if (minFrameSize != 0 && maxFrameSize != 0 && maxFrameSize < minFrameSize)
                 throw new DataFormatException("Maximum frame size less than minimum frame size");
             sampleRate = in.readUint(20);
-            if (sampleRate == 0 || sampleRate > 655350)
-                throw new DataFormatException("Invalid sample rate");
+            if (sampleRate == 0 || sampleRate > 655350) throw new DataFormatException("Invalid sample rate");
             numChannels = in.readUint(3) + 1;
             sampleDepth = in.readUint(5) + 1;
-            numSamples = (long) in.readUint(18) << 18 | in.readUint(18);  // uint36
+            numSamples = (long) in.readUint(18) << 18 | in.readUint(18); // uint36
             md5Hash = new byte[16];
             in.readFully(md5Hash);
             // Skip closing the in-memory stream
@@ -157,8 +144,6 @@ public final class StreamInfo {
             throw new AssertionError(e);
         }
     }
-
-
 
     /*---- Methods ----*/
 
@@ -169,27 +154,17 @@ public final class StreamInfo {
      * @throws IllegalStateException if any field has an invalid value
      */
     public void checkValues() {
-        if ((minBlockSize >>> 16) != 0)
-            throw new IllegalStateException("Invalid minimum block size");
-        if ((maxBlockSize >>> 16) != 0)
-            throw new IllegalStateException("Invalid maximum block size");
-        if ((minFrameSize >>> 24) != 0)
-            throw new IllegalStateException("Invalid minimum frame size");
-        if ((maxFrameSize >>> 24) != 0)
-            throw new IllegalStateException("Invalid maximum frame size");
-        if (sampleRate == 0 || (sampleRate >>> 20) != 0)
-            throw new IllegalStateException("Invalid sample rate");
-        if (numChannels < 1 || numChannels > 8)
-            throw new IllegalStateException("Invalid number of channels");
-        if (sampleDepth < 4 || sampleDepth > 32)
-            throw new IllegalStateException("Invalid sample depth");
-        if ((numSamples >>> 36) != 0)
-            throw new IllegalStateException("Invalid number of samples");
+        if ((minBlockSize >>> 16) != 0) throw new IllegalStateException("Invalid minimum block size");
+        if ((maxBlockSize >>> 16) != 0) throw new IllegalStateException("Invalid maximum block size");
+        if ((minFrameSize >>> 24) != 0) throw new IllegalStateException("Invalid minimum frame size");
+        if ((maxFrameSize >>> 24) != 0) throw new IllegalStateException("Invalid maximum frame size");
+        if (sampleRate == 0 || (sampleRate >>> 20) != 0) throw new IllegalStateException("Invalid sample rate");
+        if (numChannels < 1 || numChannels > 8) throw new IllegalStateException("Invalid number of channels");
+        if (sampleDepth < 4 || sampleDepth > 32) throw new IllegalStateException("Invalid sample depth");
+        if ((numSamples >>> 36) != 0) throw new IllegalStateException("Invalid number of samples");
         Objects.requireNonNull(md5Hash);
-        if (md5Hash.length != 16)
-            throw new IllegalStateException("Invalid MD5 hash length");
+        if (md5Hash.length != 16) throw new IllegalStateException("Invalid MD5 hash length");
     }
-
 
     /**
      * Checks whether the specified frame information is consistent with values in
@@ -200,8 +175,7 @@ public final class StreamInfo {
      * @throws DataFormatException  if the frame info contains bad values
      */
     public void checkFrame(FrameInfo meta) {
-        if (meta.numChannels != numChannels)
-            throw new DataFormatException("Channel count mismatch");
+        if (meta.numChannels != numChannels) throw new DataFormatException("Channel count mismatch");
         if (meta.sampleRate != -1 && meta.sampleRate != sampleRate)
             throw new DataFormatException("Sample rate mismatch");
         if (meta.sampleDepth != -1 && meta.sampleDepth != sampleDepth)
@@ -209,8 +183,7 @@ public final class StreamInfo {
         if (numSamples != 0 && meta.blockSize > numSamples)
             throw new DataFormatException("Block size exceeds total number of samples");
 
-        if (meta.blockSize > maxBlockSize)
-            throw new DataFormatException("Block size exceeds maximum");
+        if (meta.blockSize > maxBlockSize) throw new DataFormatException("Block size exceeds maximum");
         // Note: If minBlockSize == maxBlockSize, then the final block
         // in the stream is allowed to be smaller than minBlockSize
 
@@ -238,14 +211,12 @@ public final class StreamInfo {
     public static byte[] getMd5Hash(int[][] samples, int depth) {
         // Check arguments
         Objects.requireNonNull(samples);
-        for (int[] chanSamples : samples)
-            Objects.requireNonNull(chanSamples);
-        if (depth < 0 || depth > 32 || depth % 8 != 0)
-            throw new IllegalArgumentException("Unsupported bit depth");
+        for (int[] chanSamples : samples) Objects.requireNonNull(chanSamples);
+        if (depth < 0 || depth > 32 || depth % 8 != 0) throw new IllegalArgumentException("Unsupported bit depth");
 
         // Create hasher
         MessageDigest hasher;
-        try {  // Guaranteed available by the Java Cryptography Architecture
+        try { // Guaranteed available by the Java Cryptography Architecture
             hasher = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
@@ -259,8 +230,7 @@ public final class StreamInfo {
         for (int i = 0, l = 0; i < numSamples; i++) {
             for (int j = 0; j < numChannels; j++) {
                 int val = samples[j][i];
-                for (int k = 0; k < numBytes; k++, l++)
-                    buf[l] = (byte) (val >>> (k << 3));
+                for (int k = 0; k < numBytes; k++, l++) buf[l] = (byte) (val >>> (k << 3));
             }
             if (l == buf.length || i == numSamples - 1) {
                 hasher.update(buf, 0, l);

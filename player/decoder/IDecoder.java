@@ -1,6 +1,7 @@
 package coloryr.allmusic_client.player.decoder;
 
 public interface IDecoder {
+
     BuffPack decodeFrame() throws Exception;
 
     void close() throws Exception;

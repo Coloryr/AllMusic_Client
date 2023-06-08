@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,6 +23,7 @@
 package coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg;
 
 public class Page {
+
     private static int[] crc_lookup = new int[256];
 
     static {
@@ -39,10 +36,12 @@ public class Page {
         int r = index << 24;
         for (int i = 0; i < 8; i++) {
             if ((r & 0x80000000) != 0) {
-                r = (r << 1) ^ 0x04c11db7; /* The same as the ethernet generator
-               		          polynomial, although we use an
-               			  unreflected alg and an init/final
-               			  of 0, not 0xffffffff */
+                r = (r << 1) ^ 0x04c11db7; /*
+                                            * The same as the ethernet generator
+                                            * polynomial, although we use an
+                                            * unreflected alg and an init/final
+                                            * of 0, not 0xffffffff
+                                            */
             } else {
                 r <<= 1;
             }
@@ -87,26 +86,24 @@ public class Page {
 
     public int serialno() {
         return (header_base[header + 14] & 0xff) | ((header_base[header + 15] & 0xff) << 8)
-                | ((header_base[header + 16] & 0xff) << 16)
-                | ((header_base[header + 17] & 0xff) << 24);
+            | ((header_base[header + 16] & 0xff) << 16)
+            | ((header_base[header + 17] & 0xff) << 24);
     }
 
     int pageno() {
         return (header_base[header + 18] & 0xff) | ((header_base[header + 19] & 0xff) << 8)
-                | ((header_base[header + 20] & 0xff) << 16)
-                | ((header_base[header + 21] & 0xff) << 24);
+            | ((header_base[header + 20] & 0xff) << 16)
+            | ((header_base[header + 21] & 0xff) << 24);
     }
 
     void checksum() {
         int crc_reg = 0;
 
         for (int i = 0; i < header_len; i++) {
-            crc_reg = (crc_reg << 8)
-                    ^ crc_lookup[((crc_reg >>> 24) & 0xff) ^ (header_base[header + i] & 0xff)];
+            crc_reg = (crc_reg << 8) ^ crc_lookup[((crc_reg >>> 24) & 0xff) ^ (header_base[header + i] & 0xff)];
         }
         for (int i = 0; i < body_len; i++) {
-            crc_reg = (crc_reg << 8)
-                    ^ crc_lookup[((crc_reg >>> 24) & 0xff) ^ (body_base[body + i] & 0xff)];
+            crc_reg = (crc_reg << 8) ^ crc_lookup[((crc_reg >>> 24) & 0xff) ^ (body_base[body + i] & 0xff)];
         }
         header_base[header + 22] = (byte) crc_reg;
         header_base[header + 23] = (byte) (crc_reg >>> 8);

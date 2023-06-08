@@ -1,24 +1,20 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
-/* JOrbis
+/*
+ * JOrbis
  * Copyright (C) 2000 ymnk, JCraft,Inc.
- *
  * Written by: 2000 ymnk<ymnk@jcraft.com>
- *
  * Many thanks to
- *   Monty <monty@xiph.org> and
- *   The XIPHOPHORUS Company http://www.xiph.org/ .
+ * Monty <monty@xiph.org> and
+ * The XIPHOPHORUS Company http://www.xiph.org/ .
  * JOrbis has been based on their awesome works, Vorbis codec.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License
  * as published by the Free Software Foundation; either version 2 of
  * the License, or (at your option) any later version.
-
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Library General Public License for more details.
- *
  * You should have received a copy of the GNU Library General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -29,20 +25,25 @@ package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
 import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class Residue0 extends FuncResidue {
+
     void pack(Object vr, Buffer opb) {
         InfoResidue0 info = (InfoResidue0) vr;
         int acc = 0;
         opb.write(info.begin, 24);
         opb.write(info.end, 24);
 
-        opb.write(info.grouping - 1, 24); /* residue vectors to group and
-          			     code with a partitioned book */
+        opb.write(info.grouping - 1, 24); /*
+                                           * residue vectors to group and
+                                           * code with a partitioned book
+                                           */
         opb.write(info.partitions - 1, 6); /* possible partition choices */
         opb.write(info.groupbook, 8); /* group huffman book */
 
-    /* secondstages is a bitmask; as encoding progresses pass by pass, a
-       bitmask of one indicates this partition class has bits to write
-       this pass */
+        /*
+         * secondstages is a bitmask; as encoding progresses pass by pass, a
+         * bitmask of one indicates this partition class has bits to write
+         * this pass
+         */
         for (int j = 0; j < info.partitions; j++) {
             int i = info.secondstages[j];
             if (Util.ilog(i) > 3) {
@@ -117,8 +118,7 @@ class Residue0 extends FuncResidue {
             int i = info.secondstages[j];
             int stages = Util.ilog(i);
             if (stages != 0) {
-                if (stages > maxstage)
-                    maxstage = stages;
+                if (stages > maxstage) maxstage = stages;
                 look.partbooks[j] = new int[stages];
                 for (int k = 0; k < stages; k++) {
                     if ((i & (1 << k)) != 0) {
@@ -146,17 +146,14 @@ class Residue0 extends FuncResidue {
         return (look);
     }
 
-    void free_info(Object i) {
-    }
+    void free_info(Object i) {}
 
-    void free_look(Object i) {
-    }
+    void free_look(Object i) {}
 
     private static int[][][] _01inverse_partword = new int[2][][]; // _01inverse is synchronized for
 
     // re-using partword
-    synchronized static int _01inverse(Block vb, Object vl, float[][] in, int ch,
-                                       int decodepart) {
+    synchronized static int _01inverse(Block vb, Object vl, float[][] in, int ch, int decodepart) {
         int i, j, k, l, s;
         LookResidue0 look = (LookResidue0) vl;
         InfoResidue0 info = look.info;
@@ -198,27 +195,24 @@ class Residue0 extends FuncResidue {
                 }
 
                 // now we decode residual values for the partitions
-                for (k = 0; k < partitions_per_word && i < partvals; k++, i++)
-                    for (j = 0; j < ch; j++) {
-                        int offset = info.begin + i * samples_per_partition;
-                        int index = _01inverse_partword[j][l][k];
-                        if ((info.secondstages[index] & (1 << s)) != 0) {
-                            CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
-                            if (stagebook != null) {
-                                if (decodepart == 0) {
-                                    if (stagebook.decodevs_add(in[j], offset, vb.opb,
-                                            samples_per_partition) == -1) {
-                                        return (0);
-                                    }
-                                } else if (decodepart == 1) {
-                                    if (stagebook.decodev_add(in[j], offset, vb.opb,
-                                            samples_per_partition) == -1) {
-                                        return (0);
-                                    }
+                for (k = 0; k < partitions_per_word && i < partvals; k++, i++) for (j = 0; j < ch; j++) {
+                    int offset = info.begin + i * samples_per_partition;
+                    int index = _01inverse_partword[j][l][k];
+                    if ((info.secondstages[index] & (1 << s)) != 0) {
+                        CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
+                        if (stagebook != null) {
+                            if (decodepart == 0) {
+                                if (stagebook.decodevs_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
+                                    return (0);
+                                }
+                            } else if (decodepart == 1) {
+                                if (stagebook.decodev_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
+                                    return (0);
                                 }
                             }
                         }
                     }
+                }
             }
         }
         return (0);
@@ -263,8 +257,7 @@ class Residue0 extends FuncResidue {
                     if ((info.secondstages[index] & (1 << s)) != 0) {
                         CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
                         if (stagebook != null) {
-                            if (stagebook.decodevv_add(in, offset, ch, vb.opb,
-                                    samples_per_partition) == -1) {
+                            if (stagebook.decodevv_add(in, offset, ch, vb.opb, samples_per_partition) == -1) {
                                 return (0);
                             }
                         }
@@ -282,13 +275,12 @@ class Residue0 extends FuncResidue {
                 in[used++] = in[i];
             }
         }
-        if (used != 0)
-            return (_01inverse(vb, vl, in, used, 0));
-        else
-            return (0);
+        if (used != 0) return (_01inverse(vb, vl, in, used, 0));
+        else return (0);
     }
 
     class LookResidue0 {
+
         InfoResidue0 info;
         int map;
 
@@ -307,6 +299,7 @@ class Residue0 extends FuncResidue {
     }
 
     class InfoResidue0 {
+
         // block-partitioned VQ coded straight residue
         int begin;
         int end;

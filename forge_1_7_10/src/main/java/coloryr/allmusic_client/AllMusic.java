@@ -1,5 +1,20 @@
 package coloryr.allmusic_client;
 
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundCategory;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiIngame;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.sound.PlaySoundEvent17;
+import net.minecraftforge.common.MinecraftForge;
+
+import org.lwjgl.opengl.GL11;
+
 import coloryr.allmusic_client.hud.HudUtils;
 import coloryr.allmusic_client.player.APlayer;
 import cpw.mods.fml.client.FMLClientHandler;
@@ -14,22 +29,10 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundCategory;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiIngame;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.sound.PlaySoundEvent17;
-import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.opengl.GL11;
 
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-@Mod(modid = "allmusic", version = "2.6.6")
+@Mod(modid = "allmusic_client", version = "2.6.8", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
 public class AllMusic {
+
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private String url;
@@ -39,9 +42,14 @@ public class AllMusic {
     private static ScheduledExecutorService service;
 
     public static void sendMessage(String data) {
-        FMLClientHandler.instance().getClient().func_152344_a(() -> {
-            FMLClientHandler.instance().getClient().ingameGUI.getChatGUI().addToSentMessages(data);
-        });
+        FMLClientHandler.instance()
+            .getClient()
+            .func_152344_a(
+                () -> {
+                    FMLClientHandler.instance()
+                        .getClient().ingameGUI.getChatGUI()
+                            .addToSentMessages(data);
+                });
     }
 
     @Mod.EventHandler
@@ -56,29 +64,30 @@ public class AllMusic {
     @Mod.EventHandler
     public void preload(final FMLPreInitializationEvent evt) {
         MinecraftForge.EVENT_BUS.register(this);
-        FMLCommonHandler.instance().bus().register(this);
-        NetworkRegistry.INSTANCE.newEventDrivenChannel("allmusic:channel").register(this);
+        FMLCommonHandler.instance()
+            .bus()
+            .register(this);
+        NetworkRegistry.INSTANCE.newEventDrivenChannel("allmusic:channel")
+            .register(this);
     }
 
     @SubscribeEvent
     public void onSound(final PlaySoundEvent17 e) {
-        if (!nowPlaying.isPlay())
-            return;
+        if (!nowPlaying.isPlay()) return;
         SoundCategory data = e.category;
-        if (data == null)
-            return;
+        if (data == null) return;
         switch (data) {
             case MUSIC:
             case RECORDS:
-                new Thread(()->{
+                new Thread(() -> {
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
-                    FMLClientHandler.instance().getClient().func_152344_a(()->{
-                        e.manager.stopSound(e.sound);
-                    });
+                    FMLClientHandler.instance()
+                        .getClient()
+                        .func_152344_a(() -> { e.manager.stopSound(e.sound); });
                 }).start();
         }
     }
@@ -106,8 +115,12 @@ public class AllMusic {
             if (message.equals("[Stop]")) {
                 stopPlaying();
             } else if (message.startsWith("[Play]")) {
-                Minecraft.getMinecraft().getSoundHandler().stopSounds();
-                Minecraft.getMinecraft().getSoundHandler().stopSounds();
+                Minecraft.getMinecraft()
+                    .getSoundHandler()
+                    .stopSounds();
+                Minecraft.getMinecraft()
+                    .getSoundHandler()
+                    .stopSounds();
                 stopPlaying();
                 url = message.replace("[Play]", "");
                 nowPlaying.setMusic(url);
@@ -143,8 +156,7 @@ public class AllMusic {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void onTick(final TickEvent.ClientTickEvent event) {
-        if(event.phase == TickEvent.Phase.END)
-            nowPlaying.tick();
+        if (event.phase == TickEvent.Phase.END) nowPlaying.tick();
     }
 
     public static float getVolume() {
@@ -154,13 +166,13 @@ public class AllMusic {
     public static void drawPic(int textureID, int size, int x, int y) {
         int a = size / 2;
 
-        GL11.glBindTexture(3553,textureID);
+        GL11.glBindTexture(3553, textureID);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        //GL11.glEnable(GL11.GL_ALPHA);
+        // GL11.glEnable(GL11.GL_ALPHA);
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x + a, (float) y + a, 0.0f);
 
-        if(hudUtils.save.EnablePicRotate && hudUtils.thisRoute) {
+        if (hudUtils.save.EnablePicRotate && hudUtils.thisRoute) {
             GL11.glRotatef(ang, 0, 0, 1f);
         }
 
@@ -190,8 +202,7 @@ public class AllMusic {
     }
 
     private static void time1() {
-        if (hudUtils.save == null)
-            return;
+        if (hudUtils.save == null) return;
         if (count < hudUtils.save.PicRotateSpeed) {
             count++;
             return;
@@ -206,7 +217,9 @@ public class AllMusic {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable){
-        FMLClientHandler.instance().getClient().func_152344_a(runnable);
+    public static void runMain(Runnable runnable) {
+        FMLClientHandler.instance()
+            .getClient()
+            .func_152344_a(runnable);
     }
 }

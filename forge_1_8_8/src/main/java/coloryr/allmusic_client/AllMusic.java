@@ -27,12 +27,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Mod(modid = "allmusic", version = "2.6.6", acceptedMinecraftVersions = "[1.8,)")
+@Mod(modid = "allmusic", version = "2.6.8", acceptedMinecraftVersions = "[1.8,)")
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private String url;
-
     private static int ang = 0;
     private static int count = 0;
 

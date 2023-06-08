@@ -1,19 +1,15 @@
 /*
  * FLAC library (Java)
- *
  * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/flac-library-java
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program (see COPYING.txt and COPYING.LESSER.txt).
  * If not, see <http://www.gnu.org/licenses/>.
@@ -22,7 +18,6 @@
 package coloryr.allmusic_client.player.decoder.flac;
 
 import java.io.IOException;
-
 
 /**
  * A low-level input stream tailored to the needs of FLAC decoding. An overview of methods includes
@@ -42,13 +37,11 @@ public interface FlacLowLevelInput extends AutoCloseable {
     // such as for a non-seekable network input stream of unknown length.
     public long getLength();
 
-
     // Returns the current byte position in the stream, a non-negative value.
     // This increments after every 8 bits read, and a partially read byte is treated as unread.
     // This value is 0 initially, is set directly by seekTo(), and potentially increases
     // after every call to a read*() method. Other methods do not affect this value.
     public long getPosition();
-
 
     // Returns the current number of consumed bits in the current byte. This starts at 0,
     // increments for each bit consumed, maxes out at 7, then resets to 0 and repeats.
@@ -60,18 +53,15 @@ public interface FlacLowLevelInput extends AutoCloseable {
     // However in the case of n = 32, the result will be a signed integer that represents a uint32.
     public int readUint(int n) throws IOException;
 
-
     // Reads the next given number of bits (0 <= n <= 32) as an signed integer (i.e. sign-extended to int32).
     public int readSignedInt(int n) throws IOException;
 
-
-    // Reads and decodes the next batch of Rice-coded signed integers. Note that any Rice-coded integer might read a large
+    // Reads and decodes the next batch of Rice-coded signed integers. Note that any Rice-coded integer might read a
+    // large
     // number of bits from the underlying stream (but not in practice because it would be a very inefficient encoding).
     // Every new value stored into the array is guaranteed to fit into a signed int53 - see FrameDecoder.restoreLpc()
     // for an explanation of why this is a necessary (but not sufficient) bound on the range of decoded values.
     public void readRiceSignedInts(int param, long[] result, int start, int end) throws IOException;
-
-
 
     /*---- Reading bytes ----*/
 
@@ -79,12 +69,9 @@ public interface FlacLowLevelInput extends AutoCloseable {
     // Must be called at a byte boundary (i.e. getBitPosition() == 0), otherwise IllegalStateException is thrown.
     public int readByte() throws IOException;
 
-
     // Discards any partial bits, then reads the given array fully or throws EOFException.
     // Must be called at a byte boundary (i.e. getBitPosition() == 0), otherwise IllegalStateException is thrown.
     public void readFully(byte[] b) throws IOException;
-
-
 
     /*---- CRC calculations ----*/
 
@@ -93,19 +80,15 @@ public interface FlacLowLevelInput extends AutoCloseable {
     // Must be called at a byte boundary (i.e. getBitPosition() == 0), otherwise IllegalStateException is thrown.
     public void resetCrcs();
 
-
     // Returns the CRC-8 hash of all the bytes read since the most recent time one of these
     // events occurred: a call to resetCrcs(), a call to seekTo(), the beginning of stream.
     // Must be called at a byte boundary (i.e. getBitPosition() == 0), otherwise IllegalStateException is thrown.
     public int getCrc8();
 
-
     // Returns the CRC-16 hash of all the bytes read since the most recent time one of these
     // events occurred: a call to resetCrcs(), a call to seekTo(), the beginning of stream.
     // Must be called at a byte boundary (i.e. getBitPosition() == 0), otherwise IllegalStateException is thrown.
     public int getCrc16();
-
-
 
     /*---- Miscellaneous ----*/
 
