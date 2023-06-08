@@ -175,12 +175,19 @@ public class APlayer extends InputStream {
                 while (true) {
                     try {
                         if (isClose) break;
-                        BuffPack output = decoder.decodeFrame();
-                        if (output == null) break;
-                        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(
-                                output.len).put(output.buff, 0, output.len);
-                        ((Buffer) byteBuffer).flip();
-                        queue.add(byteBuffer);
+                        if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < 100) {
+                            BuffPack output = decoder.decodeFrame();
+                            if (output == null) break;
+                            ByteBuffer byteBuffer = BufferUtils.createByteBuffer(
+                                    output.len).put(output.buff, 0, output.len);
+                            ((Buffer) byteBuffer).flip();
+                            queue.add(byteBuffer);
+                        }
+
+                        if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED) > 0) {
+                            int temp = AL10.alSourceUnqueueBuffers(index);
+                            AL10.alDeleteBuffers(temp);
+                        }
                     } catch (Exception e) {
                         if (!isClose) {
                             e.printStackTrace();

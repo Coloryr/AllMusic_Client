@@ -126,7 +126,7 @@ public class AllMusic {
             if (message.equals("[Stop]")) {
                 stopPlaying();
             } else if (message.startsWith("[Play]")) {
-                Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.RECORDS);
+                Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.MUSIC);
                 Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.RECORDS);
                 stopPlaying();
                 url = message.replace("[Play]", "");

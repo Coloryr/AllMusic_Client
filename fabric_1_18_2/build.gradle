@@ -1,6 +1,7 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.1-SNAPSHOT'
 	id 'maven-publish'
+	id "com.github.johnrengelman.shadow" version "8.1.0"
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -11,11 +12,8 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+	mavenLocal()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -27,8 +25,11 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
+	implementation "org.apache.httpcomponents.client5:httpclient5:5.2.1"
+	implementation "org.gagravarr:vorbis-java-core:0.8"
+	implementation "com.github.jcodec:jcodec:master-SNAPSHOT"
+	implementation "ws.schild:jave-core:3.3.1"
+	implementation "ws.schild:jave-nativebin-win64:3.3.1"
 }
 
 processResources {
@@ -47,7 +48,7 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 
 	// Minecraft 1.17 (21w19a) upwards uses Java 16.
-	it.options.release = 16
+	it.options.release = 17
 }
 
 java {
@@ -59,29 +60,24 @@ java {
 
 jar {
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+		rename { "${it}_${project.archivesBaseName}" }
 	}
 }
 
-// configure the maven publication
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
+shadowJar {
+	exclude "META-INF/*"
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+	dependencies {
+		include(dependency("org.apache.httpcomponents.core5:httpcore5"))
+		include(dependency("org.apache.httpcomponents.core5:httpcore5-h2"))
+		include(dependency("org.apache.httpcomponents.client5:httpclient5"))
+		include(dependency("org.gagravarr:vorbis-java-core"))
+		include(dependency("org.jcodec:jcodec"))
+		include(dependency("ws.schild:jave-core"))
+		include(dependency("ws.schild:jave-nativebin-win64"))
 	}
+}
+
+remapJar {
+	inputFile = shadowJar.archiveFile
 }
