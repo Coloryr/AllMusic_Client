@@ -1,7 +1,6 @@
 plugins {
 	id 'fabric-loom' version '1.1-SNAPSHOT'
 	id 'maven-publish'
-	id "com.github.johnrengelman.shadow" version "8.1.0"
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -24,12 +23,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	implementation "org.apache.httpcomponents.client5:httpclient5:5.2.1"
-	implementation "org.gagravarr:vorbis-java-core:0.8"
-	implementation "com.github.jcodec:jcodec:master-SNAPSHOT"
-	implementation "ws.schild:jave-core:3.3.1"
-	implementation "ws.schild:jave-nativebin-win64:3.3.1"
 }
 
 processResources {
@@ -62,22 +55,4 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}" }
 	}
-}
-
-shadowJar {
-	exclude "META-INF/*"
-
-	dependencies {
-		include(dependency("org.apache.httpcomponents.core5:httpcore5"))
-		include(dependency("org.apache.httpcomponents.core5:httpcore5-h2"))
-		include(dependency("org.apache.httpcomponents.client5:httpclient5"))
-		include(dependency("org.gagravarr:vorbis-java-core"))
-		include(dependency("org.jcodec:jcodec"))
-		include(dependency("ws.schild:jave-core"))
-		include(dependency("ws.schild:jave-nativebin-win64"))
-	}
-}
-
-remapJar {
-	inputFile = shadowJar.archiveFile
 }
