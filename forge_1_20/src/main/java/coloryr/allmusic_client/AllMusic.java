@@ -5,6 +5,7 @@ import coloryr.allmusic_client.player.APlayer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -36,12 +37,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-@Mod("allmusic")
+@Mod("allmusic_client")
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private static int ang = 0;
     private static int count = 0;
+    private static GuiGraphics gui;
 
     private static ScheduledExecutorService service;
 
@@ -162,15 +164,13 @@ public class AllMusic {
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
-    private static final PoseStack stack = new PoseStack();
-
     public static void drawPic(int textureID, int size, int x, int y) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, textureID);
 
         PoseStack stack = new PoseStack();
-        Matrix4f matrix = stack.last().m_252922_();
+        Matrix4f matrix = stack.last().pose();
 
         int a = size / 2;
 
@@ -194,10 +194,10 @@ public class AllMusic {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.m_252986_(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
-        bufferBuilder.m_252986_(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
-        bufferBuilder.m_252986_(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
-        bufferBuilder.m_252986_(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
 
         BufferUploader.drawWithShader(bufferBuilder.end());
 
@@ -206,12 +206,13 @@ public class AllMusic {
 
     public static void drawText(String item, float x, float y) {
         var hud = Minecraft.getInstance().font;
-        hud.draw(stack, item, x, y, 0xffffff);
+        gui.drawString(hud, item, (int) x, (int) y, 0xffffff);
     }
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGuiOverlayEvent.Post e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
+            gui = e.getGuiGraphics();
             hudUtils.update();
         }
     }
