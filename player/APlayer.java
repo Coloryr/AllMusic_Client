@@ -324,6 +324,11 @@ public class APlayer extends InputStream {
 
     @Override
     public void close() throws IOException {
+        try {
+            isClose = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         streamClose();
     }
 
