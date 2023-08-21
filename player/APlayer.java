@@ -130,6 +130,7 @@ public class APlayer extends InputStream {
                 url = urls.poll();
                 if (url == null || url.isEmpty()) continue;
                 urls.clear();
+                int timecache = System.currentTimeMillis();
                 URL nowURL = new URL(url);
                 nowURL = Get(nowURL);
                 if (nowURL == null) continue;
@@ -169,8 +170,8 @@ public class APlayer extends InputStream {
                 frequency = decoder.getOutputFrequency();
                 channels = decoder.getOutputChannels();
                 if (channels != 1 && channels != 2) continue;
-                if (time != 0) {
-                    decoder.set(time);
+                if (time != 0 || (int) (System.currentTimeMillis() - timecache) > 200) {
+                    decoder.set(time + (int) (System.currentTimeMillis() - timecache));
                 }
                 queue.clear();
                 reload = false;
