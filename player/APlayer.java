@@ -130,7 +130,7 @@ public class APlayer extends InputStream {
                 url = urls.poll();
                 if (url == null || url.isEmpty()) continue;
                 urls.clear();
-                int timecache = System.currentTimeMillis();
+                long timecache = System.currentTimeMillis();
                 URL nowURL = new URL(url);
                 nowURL = Get(nowURL);
                 if (nowURL == null) continue;
