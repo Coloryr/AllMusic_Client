@@ -148,13 +148,6 @@ public class APlayer extends InputStream {
                 if (nowURL == null)
                     continue;
                 try {
-                    // MutableText URLText = Text.literal("点击打开");
-                    // MinecraftClient.getInstance().inGameHud.getChatHud()
-                    //         .addMessage(Text.literal("[歌曲播放链接] ").append(URLText.setStyle(URLText.getStyle()
-                    //                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, nowURL.toString()))
-                    //                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    //                         Text.literal(nowURL.toString())))
-                    //                 .withColor(TextColor.parse("aqua")).withUnderline(true))));
                     local = 0;
                     connect();
                 } catch (Exception e) {
