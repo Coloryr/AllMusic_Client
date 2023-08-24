@@ -27,12 +27,6 @@ import coloryr.allmusic_client.player.decoder.IDecoder;
 import coloryr.allmusic_client.player.decoder.flac.FlacDecoder;
 import coloryr.allmusic_client.player.decoder.mp3.Mp3Decoder;
 import coloryr.allmusic_client.player.decoder.ogg.OggDecoder;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 
 public class APlayer extends InputStream {
 
@@ -154,13 +148,13 @@ public class APlayer extends InputStream {
                 if (nowURL == null)
                     continue;
                 try {
-                    MutableText URLText = Text.literal("点击打开");
-                    MinecraftClient.getInstance().inGameHud.getChatHud()
-                            .addMessage(Text.literal("[歌曲播放链接] ").append(URLText.setStyle(URLText.getStyle()
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, nowURL.toString()))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                            Text.literal(nowURL.toString())))
-                                    .withColor(TextColor.parse("aqua")).withUnderline(true))));
+                    // MutableText URLText = Text.literal("点击打开");
+                    // MinecraftClient.getInstance().inGameHud.getChatHud()
+                    //         .addMessage(Text.literal("[歌曲播放链接] ").append(URLText.setStyle(URLText.getStyle()
+                    //                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, nowURL.toString()))
+                    //                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    //                         Text.literal(nowURL.toString())))
+                    //                 .withColor(TextColor.parse("aqua")).withUnderline(true))));
                     local = 0;
                     connect();
                 } catch (Exception e) {
