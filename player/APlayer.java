@@ -2,6 +2,7 @@ package coloryr.allmusic_client.player;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.URL;
@@ -34,6 +35,7 @@ public class APlayer extends InputStream {
     private HttpGet get;
     private InputStream content;
 
+    private int TIMEDELAY = 900; // 测试过后发现这个值比较舒服
     private boolean isClose = false;
     private boolean reload = false;
     private IDecoder decoder;
@@ -53,8 +55,8 @@ public class APlayer extends InputStream {
         try {
             new Thread(this::run, "allmusic_run").start();
             client = HttpClientBuilder.create()
-                .useSystemProperties()
-                .build();
+                    .useSystemProperties()
+                    .build();
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
@@ -74,16 +76,16 @@ public class APlayer extends InputStream {
 
     public static URL Get(URL url) {
         if (url.toString()
-            .contains("https://music.163.com/song/media/outer/url?id=")
-            || url.toString()
-                .contains("http://music.163.com/song/media/outer/url?id=")) {
+                .contains("https://music.163.com/song/media/outer/url?id=")
+                || url.toString()
+                        .contains("http://music.163.com/song/media/outer/url?id=")) {
             try {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(4 * 1000);
                 connection.setRequestProperty(
-                    "User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
+                        "User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
                 connection.setRequestProperty("Host", "music.163.com");
                 connection.connect();
                 if (connection.getResponseCode() == 302) {
@@ -109,18 +111,27 @@ public class APlayer extends InputStream {
     public void set(int time) {
         closePlayer();
         this.time = time;
+
         urls.add(url);
         semaphore.release();
     }
 
-    public void connect() throws IOException {
-        getClose();
-        streamClose();
-        get = new HttpGet(url);
-        get.setHeader("Range", "bytes=" + local + "-");
-        HttpResponse response = this.client.execute(get);
-        HttpEntity entity = response.getEntity();
-        content = entity.getContent();
+    public void connect() throws Exception {
+        for (int i = 0; i < 2; i++) {
+            try {
+                getClose();
+                streamClose();
+                get = new HttpGet(url);
+
+                get.setHeader("Range", "bytes=" + local + "-");
+                HttpResponse response = this.client.execute(get);
+                HttpEntity entity = response.getEntity();
+                content = entity.getContent();
+                break;
+            } catch (ConnectException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void run() {
@@ -128,18 +139,20 @@ public class APlayer extends InputStream {
             try {
                 semaphore.acquire();
                 url = urls.poll();
-                if (url == null || url.isEmpty()) continue;
+                if (url == null || url.isEmpty())
+                    continue;
                 urls.clear();
                 long timecache = System.currentTimeMillis();
                 URL nowURL = new URL(url);
                 nowURL = Get(nowURL);
-                if (nowURL == null) continue;
+                if (nowURL == null)
+                    continue;
                 try {
                     local = 0;
                     connect();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    AllMusic.sendMessage("[AllMusic客户端]获取音乐失败");
+                    AllMusic.sendMessage("[AllMusic客户端] 获取音乐失败");
                     continue;
                 }
 
@@ -153,12 +166,11 @@ public class APlayer extends InputStream {
                         connect();
                         decoder = new Mp3Decoder(this);
                         if (!decoder.set()) {
-                            AllMusic.sendMessage("[AllMusic客户端]不支持这样的文件播放");
+                            AllMusic.sendMessage("[AllMusic客户端] 不支持这样的文件播放");
                             continue;
                         }
                     }
                 }
-
                 isPlay = true;
                 index = AL10.alGenSources();
                 int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
@@ -169,21 +181,43 @@ public class APlayer extends InputStream {
                 }
                 frequency = decoder.getOutputFrequency();
                 channels = decoder.getOutputChannels();
-                if (channels != 1 && channels != 2) continue;
-                if (time != 0 || (int) (System.currentTimeMillis() - timecache) > 200) {
-                    decoder.set(time + (int) (System.currentTimeMillis() - timecache));
+                if (channels != 1 && channels != 2)
+                    continue;
+
+                if (System.currentTimeMillis() - timecache > 5000) {
+                    AllMusic.sendMessage("[AllMusic客户端] 连接音乐播放地址时间过长。请检查您的网络是否流畅？");
+                }
+                if (time > 0) {
+                    if ((int) (System.currentTimeMillis() - timecache) > 1) {
+                        time = time + (int) (System.currentTimeMillis() - timecache - TIMEDELAY);
+                    }
+                    try {
+                        decoder.set(time);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    time = time + (int) (System.currentTimeMillis() - timecache);
+                    try {
+                        decoder.set(time);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 queue.clear();
                 reload = false;
                 isClose = false;
                 while (true) {
                     try {
-                        if (isClose) break;
+                        if (isClose)
+                            break;
                         if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < 100) {
                             BuffPack output = decoder.decodeFrame();
-                            if (output == null) break;
+                            if (output == null)
+                                break;
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
-                                .put(output.buff, 0, output.len);
+                                    .put(output.buff, 0, output.len);
                             ((Buffer) byteBuffer).flip();
                             queue.add(byteBuffer);
                         }
@@ -200,9 +234,15 @@ public class APlayer extends InputStream {
                     }
                 }
                 getClose();
-                streamClose();
+                try {
+                    streamClose();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 decodeClose();
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
+                    if (isClose)
+                        break;
                     AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
                     Thread.sleep(100);
                 }
@@ -219,6 +259,8 @@ public class APlayer extends InputStream {
                     AL10.alSourceStop(index);
                     m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
                     while (m_numqueued > 0) {
+                        if (isClose)
+                            break;
                         int temp = AL10.alSourceUnqueueBuffers(index);
                         AL10.alDeleteBuffers(temp);
                         m_numqueued--;
@@ -245,16 +287,18 @@ public class APlayer extends InputStream {
         }
         while (!queue.isEmpty()) {
             ByteBuffer byteBuffer = queue.poll();
-            if (byteBuffer == null) continue;
-            if (isClose) return;
+            if (byteBuffer == null)
+                continue;
+            if (isClose)
+                return;
             IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
             AL10.alGenBuffers(intBuffer);
 
             AL10.alBufferData(
-                intBuffer.get(0),
-                channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
-                byteBuffer,
-                frequency);
+                    intBuffer.get(0),
+                    channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
+                    byteBuffer,
+                    frequency);
             AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
 
             AL10.alSourceQueueBuffers(index, intBuffer);
@@ -284,7 +328,11 @@ public class APlayer extends InputStream {
 
     private void streamClose() throws IOException {
         if (content != null) {
-            content.close();
+            try {
+                content.close();
+            } catch (ConnectionClosedException e) {
+                e.printStackTrace();
+            }
             content = null;
         }
     }
@@ -313,7 +361,13 @@ public class APlayer extends InputStream {
             local += temp;
             return temp;
         } catch (ConnectionClosedException | SocketException ex) {
-            connect();
+            try {
+                connect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 0;
+            }
+
             return read(buf, off, len);
         }
     }
@@ -325,15 +379,10 @@ public class APlayer extends InputStream {
 
     @Override
     public void close() throws IOException {
-        try {
-            isClose = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         streamClose();
     }
 
-    public void setLocal(long local) throws IOException {
+    public void setLocal(long local) throws Exception {
         getClose();
         streamClose();
         this.local = local;
