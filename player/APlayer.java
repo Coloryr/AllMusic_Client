@@ -27,6 +27,12 @@ import coloryr.allmusic_client.player.decoder.IDecoder;
 import coloryr.allmusic_client.player.decoder.flac.FlacDecoder;
 import coloryr.allmusic_client.player.decoder.mp3.Mp3Decoder;
 import coloryr.allmusic_client.player.decoder.ogg.OggDecoder;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 
 public class APlayer extends InputStream {
 
@@ -35,7 +41,7 @@ public class APlayer extends InputStream {
     private HttpGet get;
     private InputStream content;
 
-    private int TIMEDELAY = 900; // 测试过后发现这个值比较舒服
+    private int TIMEDELAY = 900;
     private boolean isClose = false;
     private boolean reload = false;
     private IDecoder decoder;
@@ -148,11 +154,18 @@ public class APlayer extends InputStream {
                 if (nowURL == null)
                     continue;
                 try {
+                    MutableText URLText = Text.literal("点击打开");
+                    MinecraftClient.getInstance().inGameHud.getChatHud()
+                            .addMessage(Text.literal("[歌曲播放链接] ").append(URLText.setStyle(URLText.getStyle()
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, nowURL.toString()))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                            Text.literal(nowURL.toString())))
+                                    .withColor(TextColor.parse("aqua")).withUnderline(true))));
                     local = 0;
                     connect();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    AllMusic.sendMessage("[AllMusic客户端] 获取音乐失败");
+                    AllMusic.sendMessage("[AllMusic客户端]获取音乐失败");
                     continue;
                 }
 
@@ -166,7 +179,7 @@ public class APlayer extends InputStream {
                         connect();
                         decoder = new Mp3Decoder(this);
                         if (!decoder.set()) {
-                            AllMusic.sendMessage("[AllMusic客户端] 不支持这样的文件播放");
+                            AllMusic.sendMessage("[AllMusic客户端]不支持这样的文件播放");
                             continue;
                         }
                     }
@@ -241,8 +254,6 @@ public class APlayer extends InputStream {
                 }
                 decodeClose();
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
-                    if (isClose)
-                        break;
                     AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
                     Thread.sleep(100);
                 }
@@ -259,8 +270,6 @@ public class APlayer extends InputStream {
                     AL10.alSourceStop(index);
                     m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
                     while (m_numqueued > 0) {
-                        if (isClose)
-                            break;
                         int temp = AL10.alSourceUnqueueBuffers(index);
                         AL10.alDeleteBuffers(temp);
                         m_numqueued--;
