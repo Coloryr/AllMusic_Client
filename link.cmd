@@ -1,6 +1,8 @@
 mkdir "build"
 mkdir ".gradle"
 
+mkdir "forge_1_20_2/src/main/java/coloryr/allmusic_client"
+mkdir "forge_1_20_2/src/main/resources/coloryr/allmusic_client/player/decoder"
 mkdir "forge_1_20/src/main/java/coloryr/allmusic_client"
 mkdir "forge_1_20/src/main/resources/coloryr/allmusic_client/player/decoder"
 mkdir "forge_1_19_3/src/main/java/coloryr/allmusic_client"
@@ -42,6 +44,7 @@ mkdir "fabric_1_19_4/src/client/resources/coloryr/allmusic_client/player/decoder
 mkdir "fabric_1_20/src/main/java/coloryr/allmusic_client"
 mkdir "fabric_1_20/src/client/resources/coloryr/allmusic_client/player/decoder"
 
+mklink /j "forge_1_20_2/src/main/resources/coloryr/allmusic_client/player/decoder/mp3" "mp3"
 mklink /j "forge_1_20/src/main/resources/coloryr/allmusic_client/player/decoder/mp3" "mp3"
 mklink /j "forge_1_19_3/src/main/resources/coloryr/allmusic_client/player/decoder/mp3" "mp3"
 mklink /j "forge_1_19_2/src/main/resources/coloryr/allmusic_client/player/decoder/mp3" "mp3"
@@ -63,6 +66,7 @@ mklink /j "fabric_1_19_3/src/main/resources/coloryr/allmusic_client/player/decod
 mklink /j "fabric_1_19_4/src/client/resources/coloryr/allmusic_client/player/decoder/mp3" "mp3"
 mklink /j "fabric_1_20/src/client/resources/coloryr/allmusic_client/player/decoder/mp3" "mp3"
 
+mklink /j "forge_1_20_2/src/main/java/coloryr/allmusic_client/player" "player"
 mklink /j "forge_1_20/src/main/java/coloryr/allmusic_client/player" "player"
 mklink /j "forge_1_19_3/src/main/java/coloryr/allmusic_client/player" "player"
 mklink /j "forge_1_19_2/src/main/java/coloryr/allmusic_client/player" "player"
@@ -84,6 +88,7 @@ mklink /j "fabric_1_19_3/src/main/java/coloryr/allmusic_client/player" "player"
 mklink /j "fabric_1_19_4/src/client/java/coloryr/allmusic_client/player" "player"
 mklink /j "fabric_1_20/src/client/java/coloryr/allmusic_client/player" "player"
 
+mklink /j "forge_1_20_2/src/main/java/coloryr/allmusic_client/hud" "hud"
 mklink /j "forge_1_20/src/main/java/coloryr/allmusic_client/hud" "hud"
 mklink /j "forge_1_19_3/src/main/java/coloryr/allmusic_client/hud" "hud"
 mklink /j "forge_1_19_2/src/main/java/coloryr/allmusic_client/hud" "hud"
@@ -105,6 +110,7 @@ mklink /j "fabric_1_19_3/src/main/java/coloryr/allmusic_client/hud" "hud"
 mklink /j "fabric_1_19_4/src/client/java/coloryr/allmusic_client/hud" "hud"
 mklink /j "fabric_1_20/src/client/java/coloryr/allmusic_client/hud" "hud"
 
+mklink /j "forge_1_20_2/build" "build"
 mklink /j "forge_1_20/build" "build"
 mklink /j "forge_1_19_3/build" "build"
 mklink /j "forge_1_19_2/build" "build"
@@ -126,6 +132,7 @@ mklink /j "fabric_1_19_3/build" "build"
 mklink /j "fabric_1_19_4/build" "build"
 mklink /j "fabric_1_20/build" "build"
 
+mklink /j "forge_1_20_2/.gradle" ".gradle"
 mklink /j "forge_1_20/.gradle" ".gradle"
 mklink /j "forge_1_19_3/.gradle" ".gradle"
 mklink /j "forge_1_19_2/.gradle" ".gradle"
