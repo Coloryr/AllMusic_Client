@@ -3,20 +3,24 @@ package coloryr.allmusic_client.hud;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 
 import javax.imageio.ImageIO;
 
+import com.google.gson.GsonBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.google.gson.Gson;
@@ -24,10 +28,11 @@ import com.google.gson.Gson;
 import coloryr.allmusic_client.AllMusic;
 
 public class HudUtils {
+    private static ScheduledExecutorService service;
 
-    public String Info = "";
-    public String List = "";
-    public String Lyric = "";
+    public String info = "";
+    public String list = "";
+    public String lyric = "";
     public SaveOBJ save;
     private ByteBuffer byteBuffer;
     private int textureID = -1;
@@ -36,22 +41,70 @@ public class HudUtils {
     private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
     private final Semaphore semaphore = new Semaphore(0);
     private final HttpClient client;
+    public static ConfigObj config;
     private HttpGet get;
     private InputStream inputStream;
     public boolean thisRoute;
+    private int ang = 0;
+    private int count = 0;
 
-    public HudUtils() {
+    public HudUtils(Path path) {
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
         client = HttpClientBuilder.create()
             .useSystemProperties()
             .build();
+        File configFile = new File(path.toFile(), "allmusic.json");
+        if(configFile.exists()) {
+            try {
+                InputStreamReader reader = new InputStreamReader(
+                        Files.newInputStream(configFile.toPath()), StandardCharsets.UTF_8);
+                BufferedReader bf = new BufferedReader(reader);
+                config = new Gson().fromJson(bf, ConfigObj.class);
+                bf.close();
+                reader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if(config == null) {
+            config = new ConfigObj();
+            config.picSize = 500;
+            config.queueSize = 100;
+            config.exitSize = 50;
+            try {
+                String data = new GsonBuilder().setPrettyPrinting().create().toJson(config);
+                FileOutputStream out = new FileOutputStream(configFile);
+                OutputStreamWriter write = new OutputStreamWriter(
+                        out, StandardCharsets.UTF_8);
+                write.write(data);
+                write.close();
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        service = Executors.newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(this::time1, 0, 1, TimeUnit.MILLISECONDS);
+    }
+
+    private void time1() {
+        if (save == null)
+            return;
+        if (count < save.PicRotateSpeed) {
+            count++;
+            return;
+        }
+        count = 0;
+        ang++;
+        ang = ang % 360;
     }
 
     public void close() {
         haveImg = false;
-        Info = List = Lyric = "";
+        info = list = lyric = "";
         getClose();
     }
 
@@ -70,6 +123,13 @@ public class HudUtils {
         }
     }
 
+    public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
+        return outputImage;
+    }
+
     private void loadPic(String picUrl) {
         try {
             getClose();
@@ -77,11 +137,14 @@ public class HudUtils {
             HttpResponse response = client.execute(get);
             HttpEntity entity = response.getEntity();
             inputStream = entity.getContent();
-            BufferedImage image = ImageIO.read(inputStream);
+            BufferedImage image = resizeImage(ImageIO.read(inputStream), config.picSize, config.picSize);
             int[] pixels = new int[image.getWidth() * image.getHeight()];
             byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
 
             int width = image.getWidth();
+            while (save == null) {
+                Thread.sleep(200);
+            }
             if (save.EnablePicRotate) {
                 // 透明底的图片
                 BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
@@ -163,18 +226,13 @@ public class HudUtils {
                 }
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
                 GL11.glTexImage2D(
-                    GL11.GL_TEXTURE_2D,
-                    0,
-                    GL11.GL_RGBA8,
-                    image.getWidth(),
-                    image.getHeight(),
-                    0,
-                    GL11.GL_RGBA,
-                    GL11.GL_UNSIGNED_BYTE,
-                    byteBuffer);
-
+                    GL11.GL_TEXTURE_2D, 0,
+                    GL11.GL_RGBA8, image.getWidth(), image.getHeight(),
+                    0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+                GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
+                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
                 haveImg = true;
             });
         } catch (Exception e) {
@@ -214,24 +272,24 @@ public class HudUtils {
     public void update() {
         if (save == null) return;
         synchronized (lock) {
-            if (save.EnableInfo && !Info.isEmpty()) {
+            if (save.EnableInfo && !info.isEmpty()) {
                 int offset = 0;
-                String[] temp = Info.split("\n");
+                String[] temp = info.split("\n");
                 for (String item : temp) {
                     AllMusic.drawText(item, (float) save.Info.x, (float) save.Info.y + offset);
                     offset += 10;
                 }
             }
-            if (save.EnableList && !List.isEmpty()) {
-                String[] temp = List.split("\n");
+            if (save.EnableList && !list.isEmpty()) {
+                String[] temp = list.split("\n");
                 int offset = 0;
                 for (String item : temp) {
                     AllMusic.drawText(item, (float) save.List.x, (float) save.List.y + offset);
                     offset += 10;
                 }
             }
-            if (save.EnableLyric && !Lyric.isEmpty()) {
-                String[] temp = Lyric.split("\n");
+            if (save.EnableLyric && !lyric.isEmpty()) {
+                String[] temp = lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
                     AllMusic.drawText(item, (float) save.Lyric.x, (float) save.Lyric.y + offset);
@@ -239,7 +297,7 @@ public class HudUtils {
                 }
             }
             if (save.EnablePic && haveImg) {
-                AllMusic.drawPic(textureID, save.PicSize, save.Pic.x, save.Pic.y);
+                AllMusic.drawPic(textureID, save.PicSize, save.Pic.x, save.Pic.y, ang);
             }
         }
     }

@@ -11,12 +11,14 @@ import java.nio.IntBuffer;
 import java.util.Queue;
 import java.util.concurrent.*;
 
+import coloryr.allmusic_client.hud.HudUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
@@ -178,19 +180,25 @@ public class APlayer extends InputStream {
                 while (true) {
                     try {
                         if (isClose) break;
-                        if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < 100) {
+                        while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < HudUtils.config.queueSize) {
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
                                 .put(output.buff, 0, output.len);
                             ((Buffer) byteBuffer).flip();
                             queue.add(byteBuffer);
+
+                            AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
                         }
+
+                        AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
 
                         if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED) > 0) {
                             int temp = AL10.alSourceUnqueueBuffers(index);
                             AL10.alDeleteBuffers(temp);
                         }
+
+                        Thread.sleep(10);
                     } catch (Exception e) {
                         if (!isClose) {
                             e.printStackTrace();
@@ -203,7 +211,7 @@ public class APlayer extends InputStream {
                 decodeClose();
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
                     AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
-                    Thread.sleep(100);
+                    Thread.sleep(50);
                 }
                 if (!reload) {
                     wait = true;
@@ -234,6 +242,7 @@ public class APlayer extends InputStream {
     }
 
     public void tick() {
+        int count = 0;
         if (wait) {
             wait = false;
             semaphore1.release();
@@ -243,6 +252,9 @@ public class APlayer extends InputStream {
             return;
         }
         while (!queue.isEmpty()) {
+            count++;
+            if (count > HudUtils.config.exitSize)
+                break;
             ByteBuffer byteBuffer = queue.poll();
             if (byteBuffer == null) continue;
             if (isClose) return;
@@ -250,10 +262,10 @@ public class APlayer extends InputStream {
             AL10.alGenBuffers(intBuffer);
 
             AL10.alBufferData(
-                intBuffer.get(0),
-                channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
-                byteBuffer,
-                frequency);
+                    intBuffer.get(0),
+                    channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
+                    byteBuffer,
+                    frequency);
             AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
 
             AL10.alSourceQueueBuffers(index, intBuffer);
@@ -301,12 +313,12 @@ public class APlayer extends InputStream {
     }
 
     @Override
-    public int read(byte[] buf) throws IOException {
+    public int read(byte @NotNull [] buf) throws IOException {
         return content.read(buf);
     }
 
     @Override
-    public synchronized int read(byte[] buf, int off, int len) throws IOException {
+    public synchronized int read(byte @NotNull [] buf, int off, int len) throws IOException {
         try {
             int temp = content.read(buf, off, len);
             local += temp;

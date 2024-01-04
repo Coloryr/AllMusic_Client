@@ -5,6 +5,8 @@ import coloryr.allmusic_client.player.APlayer;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -23,10 +25,6 @@ public class AllMusic implements ModInitializer {
     public static APlayer nowPlaying;
     public static String url;
     public static HudUtils hudUtils;
-    private static int ang = 0;
-    private static int count = 0;
-
-    private static ScheduledExecutorService service;
 
     public static void onServerQuit() {
         try {
@@ -34,8 +32,7 @@ public class AllMusic implements ModInitializer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        hudUtils.Lyric = hudUtils.Info = hudUtils.List = "";
-        hudUtils.haveImg = false;
+        hudUtils.close();
         hudUtils.save = null;
     }
 
@@ -50,11 +47,11 @@ public class AllMusic implements ModInitializer {
                 url = message.replace("[Play]", "");
                 nowPlaying.setMusic(url);
             } else if (message.startsWith("[Lyric]")) {
-                hudUtils.Lyric = message.substring(7);
+                hudUtils.lyric = message.substring(7);
             } else if (message.startsWith("[Info]")) {
-                hudUtils.Info = message.substring(6);
+                hudUtils.info = message.substring(6);
             } else if (message.startsWith("[List]")) {
-                hudUtils.List = message.substring(6);
+                hudUtils.list = message.substring(6);
             } else if (message.startsWith("[Img]")) {
                 hudUtils.setImg(message.substring(5));
             } else if (message.startsWith("[Pos]")) {
@@ -80,7 +77,7 @@ public class AllMusic implements ModInitializer {
         textRenderer.drawWithShadow(item, x, y, 0xffffff);
     }
 
-    public static void drawPic(int textureID, int size, int x, int y) {
+    public static void drawPic(int textureID, int size, int x, int y, int ang) {
         int a = size / 2;
 
         GlStateManager.bindTexture(textureID);
@@ -129,22 +126,6 @@ public class AllMusic implements ModInitializer {
         return MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.RECORDS);
     }
 
-    public static void reload(){
-
-    }
-
-    private static void time1() {
-        if (hudUtils.save == null)
-            return;
-        if (count < hudUtils.save.PicRotateSpeed) {
-            count++;
-            return;
-        }
-        count = 0;
-        ang++;
-        ang = ang % 360;
-    }
-
     @Override
     public void onInitialize() {
         ClientPlayNetworking.registerGlobalReceiver(ID, (client, handler, buffer, responseSender) -> {
@@ -158,10 +139,7 @@ public class AllMusic implements ModInitializer {
                 e.printStackTrace();
             }
         });
+        hudUtils = new HudUtils(FabricLoader.getInstance().getConfigDir());
         nowPlaying = new APlayer();
-        hudUtils = new HudUtils();
-
-        service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(AllMusic::time1, 0, 1, TimeUnit.MILLISECONDS);
     }
 }

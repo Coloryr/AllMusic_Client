@@ -7,3 +7,5 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+rootProject.name = 'AllMusic_Client'
