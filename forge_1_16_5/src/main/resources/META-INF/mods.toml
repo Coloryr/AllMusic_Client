@@ -10,12 +10,12 @@ loaderVersion="[36,)" #mandatory (28 is current forge version)
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/Coloryr/AllMusic_Client/issues" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
-license="All rights reserved"
+license="GPL-3.0"
 [[mods]] #mandatory
 # The modid of the mod
 modId="allmusic" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-version="${file.jarVersion}" #mandatory
+version="2.6.10" #mandatory
  # A display name for the mod
 displayName="AllMusic" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>

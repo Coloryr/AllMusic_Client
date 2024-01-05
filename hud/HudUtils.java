@@ -13,21 +13,21 @@ import java.util.concurrent.*;
 
 import javax.imageio.ImageIO;
 
-import com.google.gson.GsonBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import coloryr.allmusic_client.AllMusic;
 
 public class HudUtils {
+
     private static ScheduledExecutorService service;
 
     public String info = "";
@@ -56,10 +56,11 @@ public class HudUtils {
             .useSystemProperties()
             .build();
         File configFile = new File(path.toFile(), "allmusic.json");
-        if(configFile.exists()) {
+        if (configFile.exists()) {
             try {
                 InputStreamReader reader = new InputStreamReader(
-                        Files.newInputStream(configFile.toPath()), StandardCharsets.UTF_8);
+                    Files.newInputStream(configFile.toPath()),
+                    StandardCharsets.UTF_8);
                 BufferedReader bf = new BufferedReader(reader);
                 config = new Gson().fromJson(bf, ConfigObj.class);
                 bf.close();
@@ -68,16 +69,17 @@ public class HudUtils {
                 e.printStackTrace();
             }
         }
-        if(config == null) {
+        if (config == null) {
             config = new ConfigObj();
             config.picSize = 500;
             config.queueSize = 100;
             config.exitSize = 50;
             try {
-                String data = new GsonBuilder().setPrettyPrinting().create().toJson(config);
+                String data = new GsonBuilder().setPrettyPrinting()
+                    .create()
+                    .toJson(config);
                 FileOutputStream out = new FileOutputStream(configFile);
-                OutputStreamWriter write = new OutputStreamWriter(
-                        out, StandardCharsets.UTF_8);
+                OutputStreamWriter write = new OutputStreamWriter(out, StandardCharsets.UTF_8);
                 write.write(data);
                 write.close();
                 out.close();
@@ -91,8 +93,7 @@ public class HudUtils {
     }
 
     private void time1() {
-        if (save == null)
-            return;
+        if (save == null) return;
         if (count < save.PicRotateSpeed) {
             count++;
             return;
@@ -126,7 +127,8 @@ public class HudUtils {
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
+        outputImage.getGraphics()
+            .drawImage(resultingImage, 0, 0, null);
         return outputImage;
     }
 
@@ -226,9 +228,15 @@ public class HudUtils {
                 }
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
                 GL11.glTexImage2D(
-                    GL11.GL_TEXTURE_2D, 0,
-                    GL11.GL_RGBA8, image.getWidth(), image.getHeight(),
-                    0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+                    GL11.GL_TEXTURE_2D,
+                    0,
+                    GL11.GL_RGBA8,
+                    image.getWidth(),
+                    image.getHeight(),
+                    0,
+                    GL11.GL_RGBA,
+                    GL11.GL_UNSIGNED_BYTE,
+                    byteBuffer);
                 GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);

@@ -11,18 +11,17 @@ import java.nio.IntBuffer;
 import java.util.Queue;
 import java.util.concurrent.*;
 
-import coloryr.allmusic_client.hud.HudUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
 import coloryr.allmusic_client.AllMusic;
+import coloryr.allmusic_client.hud.HudUtils;
 import coloryr.allmusic_client.player.decoder.BuffPack;
 import coloryr.allmusic_client.player.decoder.IDecoder;
 import coloryr.allmusic_client.player.decoder.flac.FlacDecoder;
@@ -253,8 +252,7 @@ public class APlayer extends InputStream {
         }
         while (!queue.isEmpty()) {
             count++;
-            if (count > HudUtils.config.exitSize)
-                break;
+            if (count > HudUtils.config.exitSize) break;
             ByteBuffer byteBuffer = queue.poll();
             if (byteBuffer == null) continue;
             if (isClose) return;
@@ -262,10 +260,10 @@ public class APlayer extends InputStream {
             AL10.alGenBuffers(intBuffer);
 
             AL10.alBufferData(
-                    intBuffer.get(0),
-                    channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
-                    byteBuffer,
-                    frequency);
+                intBuffer.get(0),
+                channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
+                byteBuffer,
+                frequency);
             AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
 
             AL10.alSourceQueueBuffers(index, intBuffer);
@@ -313,12 +311,12 @@ public class APlayer extends InputStream {
     }
 
     @Override
-    public int read(byte @NotNull [] buf) throws IOException {
+    public int read(byte[] buf) throws IOException {
         return content.read(buf);
     }
 
     @Override
-    public synchronized int read(byte @NotNull [] buf, int off, int len) throws IOException {
+    public synchronized int read(byte[] buf, int off, int len) throws IOException {
         try {
             int temp = content.read(buf, off, len);
             local += temp;

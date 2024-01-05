@@ -3,7 +3,7 @@
     "modid": "allmusic",
     "name": "AllMusic",
     "description": "allmusic",
-    "version": "2.6.8",
+    "version": "2.6.10",
     "mcversion": "1.12.2",
     "url": "https://github.com/Coloryr/AllMusic_Client",
     "updateUrl": "",

@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -40,10 +41,6 @@ import java.util.function.Supplier;
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
-    private static int ang = 0;
-    private static int count = 0;
-
-    private static ScheduledExecutorService service;
 
     public AllMusic() {
 
@@ -63,6 +60,7 @@ public class AllMusic {
     }
 
     private void setup(final FMLClientSetupEvent event) {
+        hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
         try {
             Class parcleClass = Class.forName("coloryr.allmusic.AllMusicForge");
             Field m = parcleClass.getField("channel");
@@ -79,10 +77,6 @@ public class AllMusic {
 
     private void setup1(final FMLLoadCompleteEvent event) {
         nowPlaying = new APlayer();
-        hudUtils = new HudUtils();
-
-        service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(AllMusic::time1, 0, 1, TimeUnit.MILLISECONDS);
     }
 
     private void enc(String str, FriendlyByteBuf buffer) {
@@ -122,8 +116,7 @@ public class AllMusic {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        hudUtils.Lyric = hudUtils.Info = hudUtils.List = "";
-        hudUtils.haveImg = false;
+        hudUtils.close();
         hudUtils.save = null;
     }
 
@@ -138,18 +131,17 @@ public class AllMusic {
                 String url = message.replace("[Play]", "");
                 nowPlaying.setMusic(url);
             } else if (message.startsWith("[Lyric]")) {
-                hudUtils.Lyric = message.substring(7);
+                hudUtils.lyric = message.substring(7);
             } else if (message.startsWith("[Info]")) {
-                hudUtils.Info = message.substring(6);
+                hudUtils.info = message.substring(6);
             } else if (message.startsWith("[Img]")) {
                 hudUtils.setImg(message.substring(5));
             } else if (message.startsWith("[Pos]")) {
                 nowPlaying.set(message.substring(5));
             } else if (message.startsWith("[List]")) {
-                hudUtils.List = message.substring(6);
+                hudUtils.list = message.substring(6);
             } else if (message.equalsIgnoreCase("[clear]")) {
-                hudUtils.Lyric = hudUtils.Info = hudUtils.List = "";
-                hudUtils.haveImg = false;
+                hudUtils.close();
             } else if (message.startsWith("{")) {
                 hudUtils.setPos(message);
             }
@@ -164,7 +156,7 @@ public class AllMusic {
 
     private static final PoseStack stack = new PoseStack();
 
-    public static void drawPic(int textureID, int size, int x, int y) {
+    public static void drawPic(int textureID, int size, int x, int y, int ang) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, textureID);
@@ -214,18 +206,6 @@ public class AllMusic {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
             hudUtils.update();
         }
-    }
-
-    private static void time1() {
-        if (hudUtils.save == null)
-            return;
-        if (count < hudUtils.save.PicRotateSpeed) {
-            count++;
-            return;
-        }
-        count = 0;
-        ang++;
-        ang = ang % 360;
     }
 
     @SubscribeEvent
