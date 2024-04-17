@@ -108,6 +108,9 @@ public class APlayer extends InputStream {
     }
 
     public void set(int time) {
+        if (url == null) {
+            return;
+        }
         closePlayer();
         this.time = time;
         urls.add(url);

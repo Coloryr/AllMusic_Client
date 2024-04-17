@@ -1,5 +1,6 @@
 package coloryr.allmusic_client;
 
+import coloryr.allmusic_client.hud.ComType;
 import coloryr.allmusic_client.hud.HudUtils;
 import coloryr.allmusic_client.player.APlayer;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -39,37 +41,6 @@ public class AllMusic implements ModInitializer {
         hudUtils.save = null;
     }
 
-    public static void onClientPacket(final String message) {
-        new Thread(() -> {
-            try {
-                if (message.equals("[Stop]")) {
-                    stopPlaying();
-                } else if (message.startsWith("[Play]")) {
-                    MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
-                    MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
-                    stopPlaying();
-                    nowPlaying.setMusic(message.replace("[Play]", ""));
-                } else if (message.startsWith("[Lyric]")) {
-                    hudUtils.lyric = message.substring(7);
-                } else if (message.startsWith("[Info]")) {
-                    hudUtils.info = message.substring(6);
-                } else if (message.startsWith("[List]")) {
-                    hudUtils.list = message.substring(6);
-                } else if (message.startsWith("[Img]")) {
-                    hudUtils.setImg(message.substring(5));
-                } else if (message.startsWith("[Pos]")) {
-                    nowPlaying.set(message.substring(5));
-                } else if (message.equalsIgnoreCase("[clear]")) {
-                    hudUtils.close();
-                } else if (message.startsWith("{")) {
-                    hudUtils.setPos(message);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, "allmusic").start();
-    }
-
     private static void stopPlaying() {
         try {
             nowPlaying.closePlayer();
@@ -79,9 +50,25 @@ public class AllMusic implements ModInitializer {
         }
     }
 
-    public static void drawText(String item, float x, float y) {
+    public static int getScreenWidth() {
+        return MinecraftClient.getInstance().getWindow().getScaledWidth();
+    }
+
+    public static int getScreenHeight() {
+        return MinecraftClient.getInstance().getWindow().getScaledHeight();
+    }
+
+    public static int getTextWidth(String item) {
+        return MinecraftClient.getInstance().textRenderer.getWidth(item);
+    }
+
+    public static int getFontHeight() {
+        return MinecraftClient.getInstance().textRenderer.fontHeight;
+    }
+
+    public static void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = MinecraftClient.getInstance().textRenderer;
-        context.drawText(hud, item, (int) x, (int) y, 0xffffff, false);
+        context.drawText(hud, item, x, y, color, shadow);
     }
 
     public static void drawPic(int textureID, int size, int x, int y, int ang) {
@@ -94,7 +81,7 @@ public class AllMusic implements ModInitializer {
 
         int a = size / 2;
 
-        if (hudUtils.save.EnablePicRotate && hudUtils.thisRoute) {
+        if (ang > 0) {
             matrix = matrix.translationRotate(x + a, y + a, 0,
                     new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
         } else {
@@ -144,15 +131,41 @@ public class AllMusic implements ModInitializer {
         hudUtils.update();
     }
 
+    private static ComType[] types = ComType.values();
+
+    private static String readString(PacketByteBuf buf) {
+        int size = buf.readInt();
+        byte[] temp = new byte[size];
+        buf.readBytes(temp);
+
+        return new String(temp, StandardCharsets.UTF_8);
+    }
+
     @Override
     public void onInitialize() {
         ClientPlayNetworking.registerGlobalReceiver(ID, (client, handler, buffer, responseSender) -> {
             try {
-                byte[] buff = new byte[buffer.readableBytes()];
-                buffer.readBytes(buff);
-                buff[0] = 0;
-                String data = new String(buff, StandardCharsets.UTF_8).substring(1);
-                onClientPacket(data);
+                byte type = buffer.readByte();
+                if (type >= types.length || type < 0) {
+                    return;
+                }
+                ComType type1 = ComType.values()[type];
+                switch (type1) {
+                    case lyric -> hudUtils.lyric = readString(buffer);
+                    case info -> hudUtils.info = readString(buffer);
+                    case list -> hudUtils.list = readString(buffer);
+                    case play -> {
+                        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
+                        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
+                        stopPlaying();
+                        nowPlaying.setMusic(readString(buffer));
+                    }
+                    case img -> hudUtils.setImg(readString(buffer));
+                    case stop -> stopPlaying();
+                    case clear -> hudUtils.close();
+                    case pos -> nowPlaying.set(buffer.readInt());
+                    case hud -> hudUtils.setPos(readString(buffer));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -53,14 +53,14 @@ public class HudUtils {
         thread.setName("allmusic_pic");
         thread.start();
         client = HttpClientBuilder.create()
-            .useSystemProperties()
-            .build();
+                .useSystemProperties()
+                .build();
         File configFile = new File(path.toFile(), "allmusic.json");
         if (configFile.exists()) {
             try {
                 InputStreamReader reader = new InputStreamReader(
-                    Files.newInputStream(configFile.toPath()),
-                    StandardCharsets.UTF_8);
+                        Files.newInputStream(configFile.toPath()),
+                        StandardCharsets.UTF_8);
                 BufferedReader bf = new BufferedReader(reader);
                 config = new Gson().fromJson(bf, ConfigObj.class);
                 bf.close();
@@ -76,8 +76,8 @@ public class HudUtils {
             config.exitSize = 50;
             try {
                 String data = new GsonBuilder().setPrettyPrinting()
-                    .create()
-                    .toJson(config);
+                        .create()
+                        .toJson(config);
                 FileOutputStream out = new FileOutputStream(configFile);
                 OutputStreamWriter write = new OutputStreamWriter(out, StandardCharsets.UTF_8);
                 write.write(data);
@@ -94,7 +94,7 @@ public class HudUtils {
 
     private void time1() {
         if (save == null) return;
-        if (count < save.PicRotateSpeed) {
+        if (count < save.picRotateSpeed) {
             count++;
             return;
         }
@@ -128,7 +128,7 @@ public class HudUtils {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
         outputImage.getGraphics()
-            .drawImage(resultingImage, 0, 0, null);
+                .drawImage(resultingImage, 0, 0, null);
         return outputImage;
     }
 
@@ -147,7 +147,7 @@ public class HudUtils {
             while (save == null) {
                 Thread.sleep(200);
             }
-            if (save.EnablePicRotate) {
+            if (save.pic.shadow) {
                 // 透明底的图片
                 BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics2D graphics = formatAvatarImage.createGraphics();
@@ -194,13 +194,13 @@ public class HudUtils {
                 graphics.dispose();
 
                 formatAvatarImage.getRGB(
-                    0,
-                    0,
-                    formatAvatarImage.getWidth(),
-                    formatAvatarImage.getHeight(),
-                    pixels,
-                    0,
-                    formatAvatarImage.getWidth());
+                        0,
+                        0,
+                        formatAvatarImage.getWidth(),
+                        formatAvatarImage.getHeight(),
+                        pixels,
+                        0,
+                        formatAvatarImage.getWidth());
                 getClose();
                 thisRoute = true;
             } else {
@@ -228,15 +228,15 @@ public class HudUtils {
                 }
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
                 GL11.glTexImage2D(
-                    GL11.GL_TEXTURE_2D,
-                    0,
-                    GL11.GL_RGBA8,
-                    image.getWidth(),
-                    image.getHeight(),
-                    0,
-                    GL11.GL_RGBA,
-                    GL11.GL_UNSIGNED_BYTE,
-                    byteBuffer);
+                        GL11.GL_TEXTURE_2D,
+                        0,
+                        GL11.GL_RGBA8,
+                        image.getWidth(),
+                        image.getHeight(),
+                        0,
+                        GL11.GL_RGBA,
+                        GL11.GL_UNSIGNED_BYTE,
+                        byteBuffer);
                 GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
@@ -280,33 +280,122 @@ public class HudUtils {
     public void update() {
         if (save == null) return;
         synchronized (lock) {
-            if (save.EnableInfo && !info.isEmpty()) {
+            if (save.info.enable && !info.isEmpty()) {
                 int offset = 0;
                 String[] temp = info.split("\n");
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.Info.x, (float) save.Info.y + offset);
+                    drawText(item, save.info.x, save.info.y + offset, save.info.dir, save.info.color, save.info.shadow);
                     offset += 10;
                 }
             }
-            if (save.EnableList && !list.isEmpty()) {
+            if (save.list.enable && !list.isEmpty()) {
                 String[] temp = list.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.List.x, (float) save.List.y + offset);
+                    drawText(item, save.list.x, save.list.y + offset, save.list.dir, save.list.color, save.list.shadow);
                     offset += 10;
                 }
             }
-            if (save.EnableLyric && !lyric.isEmpty()) {
+            if (save.lyric.enable && !lyric.isEmpty()) {
                 String[] temp = lyric.split("\n");
                 int offset = 0;
                 for (String item : temp) {
-                    AllMusic.drawText(item, (float) save.Lyric.x, (float) save.Lyric.y + offset);
+                    drawText(item, save.lyric.x, save.lyric.y + offset, save.lyric.dir, save.lyric.color, save.lyric.shadow);
                     offset += 10;
                 }
             }
-            if (save.EnablePic && haveImg) {
-                AllMusic.drawPic(textureID, save.PicSize, save.Pic.x, save.Pic.y, ang);
+            if (save.pic.enable && haveImg) {
+                drawPic(textureID, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
             }
         }
+    }
+
+    private void drawPic(int textureID, int size, int x, int y, HudDirType dir, int ang) {
+        if(dir == null) {
+            return;
+        }
+
+        int screenWidth = AllMusic.getScreenWidth();
+        int screenHeight = AllMusic.getScreenHeight();
+
+        int x1 = x;
+        int y1 = y;
+
+        switch (dir) {
+            case TOP_CENTER:
+                x1 = screenWidth / 2 - size / 2 + x;
+                break;
+            case TOP_RIGHT:
+                x1 = screenWidth - size - x;
+                break;
+            case LEFT:
+                y1 = screenHeight / 2 - size / 2 + y;
+                break;
+            case CENTER:
+                x1 = screenWidth / 2 - size / 2 + x;
+                y1 = screenHeight / 2 - size / 2 + y;
+                break;
+            case RIGHT:
+                x1 = screenWidth - size - x;
+                y1 = screenHeight / 2 - size / 2 + y;
+                break;
+            case BOTTOM_LEFT:
+                y1 = screenHeight - size - y;
+                break;
+            case BOTTOM_CENTER:
+                x1 = screenWidth / 2 - size / 2 + x;
+                y1 = screenHeight - size - y;
+                break;
+            case BOTTOM_RIGHT:
+                x1 = screenWidth - size - x;
+                y1 = screenHeight - size - y;
+                break;
+        }
+
+        AllMusic.drawPic(textureID, size, x1, y1, (save.pic.shadow && thisRoute) ? ang : 0);
+    }
+
+    private void drawText(String item, int x, int y, HudDirType dir, int color, boolean shadow) {
+        int width = AllMusic.getTextWidth(item);
+        int height = AllMusic.getFontHeight();
+
+        int screenWidth = AllMusic.getScreenWidth();
+        int screenHeight = AllMusic.getScreenHeight();
+
+        int x1 = x;
+        int y1 = y;
+
+        switch (dir) {
+            case TOP_CENTER:
+                x1 = screenWidth / 2 - width / 2 + x;
+                break;
+            case TOP_RIGHT:
+                x1 = screenWidth - width - x;
+                break;
+            case LEFT:
+                y1 = screenHeight / 2 - height / 2 + y;
+                break;
+            case CENTER:
+                x1 = screenWidth / 2 - width / 2 + x;
+                y1 = screenHeight / 2 - height / 2 + y;
+                break;
+            case RIGHT:
+                x1 = screenWidth - width - x;
+                y1 = screenHeight / 2 - height / 2 + y;
+                break;
+            case BOTTOM_LEFT:
+                y1 = screenHeight - height - y;
+                break;
+            case BOTTOM_CENTER:
+                x1 = screenWidth / 2 - width / 2 + x;
+                y1 = screenHeight - height - y;
+                break;
+            case BOTTOM_RIGHT:
+                x1 = screenWidth - width - x;
+                y1 = screenHeight - height - y;
+                break;
+        }
+
+        AllMusic.drawText(item, x1, y1, color, shadow);
     }
 }
