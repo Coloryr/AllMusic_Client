@@ -12,7 +12,7 @@ forge_1_20_2
 for %%a in (%list%) do (
     cd %%a
     gradlew build
-    cd ..\\
+    cd ..
 )
 
 endlocal
