@@ -10,9 +10,9 @@ forge_1_20_2
 
 :: 遍历数组
 for %%a in (%list%) do (
-    cd %%a
+    pushd %%a
     gradlew build
-    cd ..
+    popd ..
 )
 
 endlocal
