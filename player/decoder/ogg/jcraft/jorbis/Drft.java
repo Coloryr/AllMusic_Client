@@ -46,7 +46,7 @@ class Drft {
     }
 
     static int[] ntryh = { 4, 2, 3, 5 };
-    static float tpi = 6.28318530717958647692528676655900577f;
+    static float tpi = ((float) Math.PI * 2F);
     static float hsqt2 = .70710678118654752440084436210485f;
     static float taui = .86602540378443864676372317075293618f;
     static float taur = -.5f;

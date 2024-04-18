@@ -1,10 +1,12 @@
 package coloryr.allmusic_client;
 
+import coloryr.allmusic_client.hud.ComType;
 import coloryr.allmusic_client.hud.HudUtils;
 import coloryr.allmusic_client.player.APlayer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -31,6 +33,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.event.EventNetworkChannel;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 import java.lang.reflect.Field;
@@ -38,13 +41,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mod("allmusic")
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
-    private String url;
+    private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
 
     public AllMusic() {
 
@@ -62,32 +66,90 @@ public class AllMusic {
             Class parcleClass = Class.forName("coloryr.allmusic.AllMusicForge");
             Field m = parcleClass.getField("channel");
             SimpleChannel channel = (SimpleChannel) m.get(null);
-            channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
+            channel.registerMessage(1, PacketBuffer.class, this::encode, this::decode, this::handle);
         } catch (Exception e) {
-            e.printStackTrace();
-
-            SimpleChannel channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("allmusic", "channel"),
-                    () -> "1.0", s -> true, s -> true);
-            channel.registerMessage(666, String.class, this::enc, this::dec, this::proc);
+            NetworkRegistry.ChannelBuilder.named(channel)
+                    .networkProtocolVersion(() -> "1.0")
+                    .clientAcceptedVersions(((status) -> true))
+                    .serverAcceptedVersions(((status) -> true))
+                    .simpleChannel()
+                    .registerMessage(0, PacketBuffer.class, this::encode, this::decode, this::handle);
         }
+    }
+
+    public void encode(PacketBuffer msg, PacketBuffer buf) {
+
+    }
+
+    public PacketBuffer decode(PacketBuffer buf) {
+        return buf;
+    }
+
+    public void handle(PacketBuffer buffer, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            try {
+                byte type = buffer.readByte();
+                if (type >= HudUtils.types.length || type < 0) {
+                    return;
+                }
+                ComType type1 = ComType.values()[type];
+                switch (type1) {
+                    case lyric:
+                        hudUtils.lyric = readString(buffer);
+                        break;
+                    case info:
+                        hudUtils.info = readString(buffer);
+                        break;
+                    case list:
+                        hudUtils.list = readString(buffer);
+                        break;
+                    case play:
+                        Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.MUSIC);
+                        Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.RECORDS);
+                        stopPlaying();
+                        nowPlaying.setMusic(readString(buffer));
+                        break;
+                    case img:
+                        hudUtils.setImg(readString(buffer));
+                        break;
+                    case stop:
+                        stopPlaying();
+                        break;
+                    case clear:
+                        hudUtils.close();
+                        break;
+                    case pos:
+                        nowPlaying.set(buffer.readInt());
+                        break;
+                    case hud:
+                        hudUtils.setPos(readString(buffer));
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        ctx.get().setPacketHandled(true);
     }
 
     private void setup1(final FMLLoadCompleteEvent event) {
         nowPlaying = new APlayer();
     }
 
-    private void enc(String str, PacketBuffer buffer) {
-        buffer.writeBytes(str.getBytes(StandardCharsets.UTF_8));
+    public static int getScreenWidth() {
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth();
     }
 
-    private String dec(PacketBuffer buffer) {
-        return buffer.toString(StandardCharsets.UTF_8);
+    public static int getScreenHeight() {
+        return Minecraft.getInstance().getWindow().getScreenHeight();
     }
 
-    private void proc(String str, Supplier<NetworkEvent.Context> supplier) {
-        onClicentPacket(str);
-        NetworkEvent.Context context = supplier.get();
-        context.setPacketHandled(true);
+    public static int getTextWidth(String item) {
+        return Minecraft.getInstance().font.width(item);
+    }
+
+    public static int getFontHeight() {
+        return Minecraft.getInstance().font.lineHeight;
     }
 
     @SubscribeEvent
@@ -113,34 +175,12 @@ public class AllMusic {
         hudUtils.save = null;
     }
 
-    private void onClicentPacket(final String message) {
-        try {
-            if (message.equals("[Stop]")) {
-                stopPlaying();
-            } else if (message.startsWith("[Play]")) {
-                Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.MUSIC);
-                Minecraft.getInstance().getSoundManager().stop(null, SoundCategory.RECORDS);
-                stopPlaying();
-                url = message.replace("[Play]", "");
-                nowPlaying.setMusic(url);
-            } else if (message.startsWith("[Lyric]")) {
-                hudUtils.lyric = message.substring(7);
-            } else if (message.startsWith("[Info]")) {
-                hudUtils.info = message.substring(6);
-            } else if (message.startsWith("[Img]")) {
-                hudUtils.setImg(message.substring(5));
-            } else if (message.startsWith("[Pos]")) {
-                nowPlaying.set(message.substring(5));
-            } else if (message.startsWith("[List]")) {
-                hudUtils.list = message.substring(6);
-            } else if (message.equalsIgnoreCase("[clear]")) {
-                hudUtils.close();
-            } else if (message.startsWith("{")) {
-                hudUtils.setPos(message);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private static String readString(ByteBuf buf) {
+        int size = buf.readInt();
+        byte[] temp = new byte[size];
+        buf.readBytes(temp);
+
+        return new String(temp, StandardCharsets.UTF_8);
     }
 
     @SubscribeEvent
@@ -169,7 +209,7 @@ public class AllMusic {
         int a = size / 2;
 
         matrix.setTranslation(x + a, y + a, 0);
-        if(hudUtils.save.EnablePicRotate && hudUtils.thisRoute) {
+        if (ang > 0) {
             matrix.multiply(new Quaternion(0, 0, ang, true));
         }
 
@@ -196,9 +236,13 @@ public class AllMusic {
 
     private static MatrixStack stack = new MatrixStack();
 
-    public static void drawText(String item, float x, float y) {
+    public static void drawText(String item, int x, int y, int color, boolean shadow) {
         FontRenderer hud = Minecraft.getInstance().font;
-        hud.draw(stack, item, x, y, 0xffffff);
+        if (shadow) {
+            hud.drawShadow(stack, item, x, y, color);
+        } else {
+            hud.draw(stack, item, x, y, color);
+        }
     }
 
     private void stopPlaying() {

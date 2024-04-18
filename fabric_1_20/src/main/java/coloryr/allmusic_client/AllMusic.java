@@ -19,9 +19,6 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class AllMusic implements ModInitializer {
     public static final Identifier ID = new Identifier("allmusic", "channel");
@@ -87,6 +84,7 @@ public class AllMusic implements ModInitializer {
         } else {
             matrix = matrix.translation(x + a, y + a, 0);
         }
+
         int x0 = -a;
         int x1 = a;
         int y0 = -a;
@@ -131,8 +129,6 @@ public class AllMusic implements ModInitializer {
         hudUtils.update();
     }
 
-    private static ComType[] types = ComType.values();
-
     private static String readString(PacketByteBuf buf) {
         int size = buf.readInt();
         byte[] temp = new byte[size];
@@ -146,7 +142,7 @@ public class AllMusic implements ModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(ID, (client, handler, buffer, responseSender) -> {
             try {
                 byte type = buffer.readByte();
-                if (type >= types.length || type < 0) {
+                if (type >= HudUtils.types.length || type < 0) {
                     return;
                 }
                 ComType type1 = ComType.values()[type];

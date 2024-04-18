@@ -1,5 +1,6 @@
 package coloryr.allmusic_client;
 
+import coloryr.allmusic_client.hud.ComType;
 import coloryr.allmusic_client.hud.HudUtils;
 import coloryr.allmusic_client.player.APlayer;
 import io.netty.buffer.ByteBuf;
@@ -27,11 +28,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Mod(modid = "allmusic", version = "2.6.10", acceptedMinecraftVersions = "[1.12,)")
+@Mod(modid = "allmusic", version = "3.0.0", acceptedMinecraftVersions = "[1.12,)")
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
-    private String url;
+
     @Mod.EventHandler
     public void test(final FMLPostInitializationEvent event) {
         nowPlaying = new APlayer();
@@ -70,36 +71,54 @@ public class AllMusic {
         hudUtils.save = null;
     }
 
+    private static String readString(ByteBuf buf) {
+        int size = buf.readInt();
+        byte[] temp = new byte[size];
+        buf.readBytes(temp);
+
+        return new String(temp, StandardCharsets.UTF_8);
+    }
+
     @SubscribeEvent
     public void onClicentPacket(final FMLNetworkEvent.ClientCustomPacketEvent evt) {
         try {
-            final ByteBuf directBuf = evt.getPacket().payload();
-            byte[] array = new byte[directBuf.readableBytes()];
-            directBuf.getBytes(directBuf.readerIndex(), array);
-            array[0] = 0;
-            String message = new String(array, StandardCharsets.UTF_8).substring(1);
-            if (message.equals("[Stop]")) {
-                stopPlaying();
-            } else if (message.startsWith("[Play]")) {
-                Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
-                Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
-                stopPlaying();
-                url = message.replace("[Play]", "");
-                nowPlaying.setMusic(url);
-            } else if (message.startsWith("[Lyric]")) {
-                hudUtils.lyric = message.substring(7);
-            } else if (message.startsWith("[Info]")) {
-                hudUtils.info = message.substring(6);
-            } else if (message.startsWith("[Img]")) {
-                hudUtils.setImg(message.substring(5));
-            } else if (message.startsWith("[Pos]")) {
-                nowPlaying.set(message.substring(5));
-            } else if (message.startsWith("[List]")) {
-                hudUtils.list = message.substring(6);
-            } else if (message.equalsIgnoreCase("[clear]")) {
-                hudUtils.close();
-            } else if (message.startsWith("{")) {
-                hudUtils.setPos(message);
+            final ByteBuf buffer = evt.getPacket().payload();
+            byte type = buffer.readByte();
+            if (type >= HudUtils.types.length || type < 0) {
+                return;
+            }
+            ComType type1 = ComType.values()[type];
+            switch (type1) {
+                case lyric:
+                    hudUtils.lyric = readString(buffer);
+                    break;
+                case info:
+                    hudUtils.info = readString(buffer);
+                    break;
+                case list:
+                    hudUtils.list = readString(buffer);
+                    break;
+                case play:
+                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
+                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
+                    stopPlaying();
+                    nowPlaying.setMusic(readString(buffer));
+                    break;
+                case img:
+                    hudUtils.setImg(readString(buffer));
+                    break;
+                case stop:
+                    stopPlaying();
+                    break;
+                case clear:
+                    hudUtils.close();
+                    break;
+                case pos:
+                    nowPlaying.set(buffer.readInt());
+                    break;
+                case hud:
+                    hudUtils.setPos(readString(buffer));
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,6 +143,22 @@ public class AllMusic {
         hudUtils.close();
     }
 
+    public static int getScreenWidth() {
+        return Minecraft.getMinecraft().displayWidth;
+    }
+
+    public static int getScreenHeight() {
+        return Minecraft.getMinecraft().displayHeight;
+    }
+
+    public static int getTextWidth(String item) {
+        return Minecraft.getMinecraft().fontRenderer.getStringWidth(item);
+    }
+
+    public static int getFontHeight() {
+        return Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT;
+    }
+
     public static float getVolume() {
         return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS);
     }
@@ -137,7 +172,7 @@ public class AllMusic {
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x + a, (float) y + a, 0.0f);
 
-        if(hudUtils.save.EnablePicRotate && hudUtils.thisRoute) {
+        if (ang > 0) {
             GL11.glRotatef(ang, 0, 0, 1f);
         }
 
@@ -162,10 +197,9 @@ public class AllMusic {
         GlStateManager.enableAlpha();
     }
 
-    public static void drawText(String item, float x, float y) {
-        GuiIngame gui = Minecraft.getMinecraft().ingameGUI;
+    public static void drawText(String item, int x, int y, int color, boolean shadow) {
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;
-        gui.drawString(font, item, (int) x, (int) y, 0xffffff);
+        font.drawString(item, x, y, color, shadow);
     }
 
     public static void runMain(Runnable runnable){

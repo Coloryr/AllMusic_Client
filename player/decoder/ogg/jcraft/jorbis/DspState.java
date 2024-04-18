@@ -24,7 +24,7 @@ package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
 
 public class DspState {
 
-    static final float M_PI = 3.1415926539f;
+    static final float M_PI = (float) Math.PI;
     static final int VI_TRANSFORMB = 1;
     static final int VI_WINDOWB = 1;
 
