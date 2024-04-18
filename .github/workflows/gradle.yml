@@ -38,8 +38,7 @@ jobs:
       shell: cmd
       working-directory: ./
       run: |
-        link.cmd \
-        build.cmd
+        link.cmd && build.cmd
         
     - name: update
       uses: actions/upload-artifact@v4
