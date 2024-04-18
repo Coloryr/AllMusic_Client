@@ -10,14 +10,14 @@ forge_1_20_2
 
 :: 遍历数组
 for %%a in (%array%) do (
-    if exist "%%a\src\main\resources\coloryr\allmusic_client\player\decoder\mp3" (
-        rmdir "%%a\src\main\resources\coloryr\allmusic_client\player\decoder\mp3"
+    if exist "%%a\src\main\resources\com\coloryr\allmusic\client\player\decoder\mp3" (
+        rmdir "%%a\src\main\resources\com\coloryr\allmusic\client\player\decoder\mp3"
     )
-    if exist "%%a\src\main\java\coloryr\allmusic_client\player" (
-        rmdir "%%a\src\main\java\coloryr\allmusic_client\player"
+    if exist "%%a\src\main\java\com\coloryr\allmusic\client\player" (
+        rmdir "%%a\src\main\java\com\coloryr\allmusic\client\player"
     )
-    if exist "%%a\src\main\java\coloryr\allmusic_client\hud" (
-        rmdir "%%a\src\main\java\coloryr\allmusic_client\hud"
+    if exist "%%a\src\main\java\com\coloryr\allmusic\client\hud" (
+        rmdir "%%a\src\main\java\com\coloryr\allmusic\client\hud"
     )
     if exist "%%a\build" (
         rmdir /s /q "%%a\build"

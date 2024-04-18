@@ -27,7 +27,7 @@
  * ----------------------------------------------------------------------
  */
 
-package coloryr.allmusic_client.player.decoder.mp3;
+package com.coloryr.allmusic.client.player.decoder.mp3;
 
 /**
  * Class Implementing Layer 3 Decoder.

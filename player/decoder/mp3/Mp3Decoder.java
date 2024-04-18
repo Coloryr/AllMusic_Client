@@ -16,11 +16,11 @@
  * ----------------------------------------------------------------------
  */
 
-package coloryr.allmusic_client.player.decoder.mp3;
+package com.coloryr.allmusic.client.player.decoder.mp3;
 
-import coloryr.allmusic_client.player.APlayer;
-import coloryr.allmusic_client.player.decoder.BuffPack;
-import coloryr.allmusic_client.player.decoder.IDecoder;
+import com.coloryr.allmusic.client.player.APlayer;
+import com.coloryr.allmusic.client.player.decoder.BuffPack;
+import com.coloryr.allmusic.client.player.decoder.IDecoder;
 
 /**
  * The <code>Decoder</code> class encapsulates the details of

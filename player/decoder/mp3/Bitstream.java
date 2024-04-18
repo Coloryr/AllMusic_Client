@@ -25,14 +25,14 @@
  * ----------------------------------------------------------------------
  */
 
-package coloryr.allmusic_client.player.decoder.mp3;
+package com.coloryr.allmusic.client.player.decoder.mp3;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 
-import coloryr.allmusic_client.player.APlayer;
+import com.coloryr.allmusic.client.player.APlayer;
 
 /**
  * The <code>Bistream</code> class is responsible for parsing

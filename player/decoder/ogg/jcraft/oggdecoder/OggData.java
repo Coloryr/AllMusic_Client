@@ -1,4 +1,4 @@
-package coloryr.allmusic_client.player.decoder.ogg.jcraft.oggdecoder;
+package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.oggdecoder;
 
 public class OggData {
 

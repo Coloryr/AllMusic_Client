@@ -1,23 +1,23 @@
-package coloryr.allmusic_client.player.decoder.ogg;
+package com.coloryr.allmusic.client.player.decoder.ogg;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.util.concurrent.Semaphore;
 
-import coloryr.allmusic_client.AllMusic;
-import coloryr.allmusic_client.player.APlayer;
-import coloryr.allmusic_client.player.decoder.BuffPack;
-import coloryr.allmusic_client.player.decoder.IDecoder;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Packet;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Page;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.StreamState;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.SyncState;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis.Block;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis.Comment;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis.DspState;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis.Info;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.oggdecoder.OggData;
+import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.player.APlayer;
+import com.coloryr.allmusic.client.player.decoder.BuffPack;
+import com.coloryr.allmusic.client.player.decoder.IDecoder;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Packet;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Page;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.StreamState;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.SyncState;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.Block;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.Comment;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.DspState;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.Info;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.oggdecoder.OggData;
 
 /**
  * Decode an OGG file to PCM data. This class is based on the example

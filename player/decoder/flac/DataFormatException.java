@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package coloryr.allmusic_client.player.decoder.flac;
+package com.coloryr.allmusic.client.player.decoder.flac;
 
 /**
  * Thrown when data being read violates the FLAC file format.

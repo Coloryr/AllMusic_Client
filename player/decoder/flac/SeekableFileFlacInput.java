@@ -15,13 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package coloryr.allmusic_client.player.decoder.flac;
+package com.coloryr.allmusic.client.player.decoder.flac;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import coloryr.allmusic_client.player.APlayer;
+import com.coloryr.allmusic.client.player.APlayer;
 
 /**
  * A FLAC input stream based on a {@link RandomAccessFile}.

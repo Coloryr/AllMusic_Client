@@ -1,4 +1,4 @@
-package coloryr.allmusic_client.player;
+package com.coloryr.allmusic.client.player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,13 +20,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
-import coloryr.allmusic_client.AllMusic;
-import coloryr.allmusic_client.hud.HudUtils;
-import coloryr.allmusic_client.player.decoder.BuffPack;
-import coloryr.allmusic_client.player.decoder.IDecoder;
-import coloryr.allmusic_client.player.decoder.flac.FlacDecoder;
-import coloryr.allmusic_client.player.decoder.mp3.Mp3Decoder;
-import coloryr.allmusic_client.player.decoder.ogg.OggDecoder;
+import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.hud.HudUtils;
+import com.coloryr.allmusic.client.player.decoder.BuffPack;
+import com.coloryr.allmusic.client.player.decoder.IDecoder;
+import com.coloryr.allmusic.client.player.decoder.flac.FlacDecoder;
+import com.coloryr.allmusic.client.player.decoder.mp3.Mp3Decoder;
+import com.coloryr.allmusic.client.player.decoder.ogg.OggDecoder;
 
 public class APlayer extends InputStream {
 

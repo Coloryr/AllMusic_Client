@@ -16,7 +16,7 @@
  * ----------------------------------------------------------------------
  */
 
-package coloryr.allmusic_client.player.decoder.mp3;
+package com.coloryr.allmusic.client.player.decoder.mp3;
 
 /**
  * Exception erorr codes for components of the JavaLayer API.

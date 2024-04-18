@@ -17,7 +17,7 @@
  * ----------------------------------------------------------------------
  */
 
-package coloryr.allmusic_client.player.decoder.mp3;
+package com.coloryr.allmusic.client.player.decoder.mp3;
 
 /**
  * Implementations of FrameDecoder are responsible for decoding

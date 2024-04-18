@@ -18,7 +18,7 @@
  * ----------------------------------------------------------------------
  */
 
-package coloryr.allmusic_client.player.decoder.mp3;
+package com.coloryr.allmusic.client.player.decoder.mp3;
 
 /**
  * The <code>SampleBuffer</code> class implements an output buffer

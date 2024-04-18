@@ -21,15 +21,15 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
+package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Packet;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Page;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.StreamState;
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.SyncState;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Packet;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Page;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.StreamState;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.SyncState;
 
 public class VorbisFile {
 

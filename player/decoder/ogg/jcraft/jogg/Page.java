@@ -20,7 +20,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg;
+package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg;
 
 public class Page {
 

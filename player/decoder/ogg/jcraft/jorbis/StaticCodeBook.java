@@ -20,9 +20,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
+package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis;
 
-import coloryr.allmusic_client.player.decoder.ogg.jcraft.jogg.Buffer;
+import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class StaticCodeBook {
 

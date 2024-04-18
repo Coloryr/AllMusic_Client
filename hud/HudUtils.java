@@ -1,4 +1,4 @@
-package coloryr.allmusic_client.hud;
+package com.coloryr.allmusic.client.hud;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -21,10 +21,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
+import com.coloryr.allmusic.client.AllMusic;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import coloryr.allmusic_client.AllMusic;
 
 public class HudUtils {
 

@@ -15,14 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package coloryr.allmusic_client.player.decoder.flac;
+package com.coloryr.allmusic.client.player.decoder.flac;
 
 import java.io.IOException;
 
-import coloryr.allmusic_client.AllMusic;
-import coloryr.allmusic_client.player.APlayer;
-import coloryr.allmusic_client.player.decoder.BuffPack;
-import coloryr.allmusic_client.player.decoder.IDecoder;
+import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.player.APlayer;
+import com.coloryr.allmusic.client.player.decoder.BuffPack;
+import com.coloryr.allmusic.client.player.decoder.IDecoder;
 
 /**
  * Handles high-level decoding and seeking in FLAC files. Also returns metadata blocks.

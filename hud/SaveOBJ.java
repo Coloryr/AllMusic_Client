@@ -1,4 +1,4 @@
-package coloryr.allmusic_client.hud;
+package com.coloryr.allmusic.client.hud;
 
 public class SaveOBJ {
 

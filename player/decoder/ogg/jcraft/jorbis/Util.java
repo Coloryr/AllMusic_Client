@@ -1,4 +1,4 @@
-package coloryr.allmusic_client.player.decoder.ogg.jcraft.jorbis;
+package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis;
 
 class Util {
 
