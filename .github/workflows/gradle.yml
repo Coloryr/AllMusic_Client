@@ -12,7 +12,7 @@ on:
     # Sequence of patterns matched against refs/heads
     branches:    
       - 'releases/**'
-      - 'master'
+      - 'main'
     # Sequence of patterns matched against refs/tags
     tags:        
       - '*'
