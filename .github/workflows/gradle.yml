@@ -22,7 +22,6 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -30,26 +29,21 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
-
     - name: build
       shell: cmd
       run: |
         link.cmd && cd fabric_1_14_4 && gradlew build
-        
     - name: update
       uses: actions/upload-artifact@v4
       with:
         name: "allmusic_client_fabric_1_14_4"
         path: build/libs/
-
   build_fabric_1_15_2:
     runs-on: windows-latest
     permissions:
       contents: read
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -57,17 +51,410 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
-
     - name: build
       shell: cmd
       run: |
         link.cmd && cd fabric_1_15_2 && gradlew build
-        
     - name: update
       uses: actions/upload-artifact@v4
       with:
         name: "allmusic_client_fabric_1_15_2"
+        path: build/libs/
+  build_fabric_1_16_5:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_16_5 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_16_5"
+        path: build/libs/
+  build_fabric_1_17_1:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_17_1 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_17_1"
+        path: build/libs/
+  build_fabric_1_18_2:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_18_2 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_18_2"
+        path: build/libs/
+  build_fabric_1_19:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_19 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_19"
+        path: build/libs/
+  build_fabric_1_19_3:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_19_3 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_19_3"
+        path: build/libs/
+  build_fabric_1_19_4:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_19_4 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_19_4"
+        path: build/libs/
+  build_fabric_1_20:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd fabric_1_20 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_fabric_1_20"
+        path: build/libs/
+  build_forge_1_7_10:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_7_10 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_7_10"
+        path: build/libs/
+  build_forge_1_12_2:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_12_2 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_12_2"
+        path: build/libs/
+  build_forge_1_14_4:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_14_4 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_14_4"
+        path: build/libs/
+  build_forge_1_15_2:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_15_2 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_15_2"
+        path: build/libs/
+  build_forge_1_16_5:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_16_5 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_16_5"
+        path: build/libs/
+  build_forge_1_17_1:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_17_1 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_17_1"
+        path: build/libs/
+  build_forge_1_18_2:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_18_2 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_18_2"
+        path: build/libs/
+  build_forge_1_19_2:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_19_2 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_19_2"
+        path: build/libs/
+  build_forge_1_19_3:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_19_3 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_19_3"
+        path: build/libs/
+  build_forge_1_20:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_20 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_20"
+        path: build/libs/
+  build_forge_1_20_2:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+    - name: build
+      shell: cmd
+      run: |
+        link.cmd && cd forge_1_20_2 && gradlew build
+    - name: update
+      uses: actions/upload-artifact@v4
+      with:
+        name: "allmusic_client_forge_1_20_2"
         path: build/libs/
