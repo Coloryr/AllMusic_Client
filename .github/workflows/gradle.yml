@@ -38,7 +38,7 @@ jobs:
       shell: cmd
       working-directory: ./
       run: |
-        link.cmd
+        link.cmd \
         build.cmd
         
     - name: update
