@@ -1,10 +1,5 @@
 package com.coloryr.allmusic.client.player.decoder.ogg;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteOrder;
-import java.util.concurrent.Semaphore;
-
 import com.coloryr.allmusic.client.AllMusic;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.coloryr.allmusic.client.player.decoder.BuffPack;
@@ -18,6 +13,11 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.Comment;
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.DspState;
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis.Info;
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.oggdecoder.OggData;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.util.concurrent.Semaphore;
 
 /**
  * Decode an OGG file to PCM data. This class is based on the example
@@ -82,7 +82,7 @@ public class OggDecoder implements IDecoder {
         int bytes;
 
         boolean bigEndian = ByteOrder.nativeOrder()
-            .equals(ByteOrder.BIG_ENDIAN);
+                .equals(ByteOrder.BIG_ENDIAN);
         // Decode setup
 
         oy.init(); // Now we can read pages

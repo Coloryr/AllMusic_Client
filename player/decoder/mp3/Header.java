@@ -30,8 +30,8 @@ package com.coloryr.allmusic.client.player.decoder.mp3;
  */
 public final class Header {
 
-    public static final int[][] frequencies = { { 22050, 24000, 16000, 1 }, { 44100, 48000, 32000, 1 },
-        { 11025, 12000, 8000, 1 } }; // SZD: MPEG25
+    public static final int[][] frequencies = {{22050, 24000, 16000, 1}, {44100, 48000, 32000, 1},
+            {11025, 12000, 8000, 1}}; // SZD: MPEG25
 
     /**
      * Constant for MPEG-2 LSF version
@@ -53,61 +53,61 @@ public final class Header {
     public static final int THIRTYTWO = 2;
     // E.B -> private to public
     public static final int[][][] bitrates = {
-        { { 0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 176000,
-            192000, 224000, 256000, 0 },
-            { 0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
-                144000, 160000, 0 },
-            { 0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
-                144000, 160000, 0 } },
+            {{0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 176000,
+                    192000, 224000, 256000, 0},
+                    {0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
+                            144000, 160000, 0},
+                    {0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
+                            144000, 160000, 0}},
 
-        { { 0 /* free format */, 32000, 64000, 96000, 128000, 160000, 192000, 224000, 256000, 288000, 320000, 352000,
-            384000, 416000, 448000, 0 },
-            { 0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000, 224000,
-                256000, 320000, 384000, 0 },
-            { 0 /* free format */, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000,
-                224000, 256000, 320000, 0 } },
-        // SZD: MPEG2.5
-        { { 0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 176000,
-            192000, 224000, 256000, 0 },
-            { 0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
-                144000, 160000, 0 },
-            { 0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
-                144000, 160000, 0 } },
+            {{0 /* free format */, 32000, 64000, 96000, 128000, 160000, 192000, 224000, 256000, 288000, 320000, 352000,
+                    384000, 416000, 448000, 0},
+                    {0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000, 224000,
+                            256000, 320000, 384000, 0},
+                    {0 /* free format */, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000,
+                            224000, 256000, 320000, 0}},
+            // SZD: MPEG2.5
+            {{0 /* free format */, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 176000,
+                    192000, 224000, 256000, 0},
+                    {0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
+                            144000, 160000, 0},
+                    {0 /* free format */, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000,
+                            144000, 160000, 0}},
 
     };
     // E.B -> private to public
     public static final String[][][] bitrate_str = {
-        { { "free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s",
-            "128 kbit/s", "144 kbit/s", "160 kbit/s", "176 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s",
-            "forbidden" },
-            { "free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
-                "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
-                "forbidden" },
-            { "free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
-                "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
-                "forbidden" } },
+            {{"free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s",
+                    "128 kbit/s", "144 kbit/s", "160 kbit/s", "176 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s",
+                    "forbidden"},
+                    {"free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
+                            "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
+                            "forbidden"},
+                    {"free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
+                            "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
+                            "forbidden"}},
 
-        { { "free format", "32 kbit/s", "64 kbit/s", "96 kbit/s", "128 kbit/s", "160 kbit/s", "192 kbit/s",
-            "224 kbit/s", "256 kbit/s", "288 kbit/s", "320 kbit/s", "352 kbit/s", "384 kbit/s", "416 kbit/s",
-            "448 kbit/s", "forbidden" },
-            { "free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s",
-                "128 kbit/s", "160 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s", "320 kbit/s", "384 kbit/s",
-                "forbidden" },
-            { "free format", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s",
-                "112 kbit/s", "128 kbit/s", "160 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s", "320 kbit/s",
-                "forbidden" } },
-        // SZD: MPEG2.5
-        { { "free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s",
-            "128 kbit/s", "144 kbit/s", "160 kbit/s", "176 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s",
-            "forbidden" },
-            { "free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
-                "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
-                "forbidden" },
-            { "free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
-                "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
-                "forbidden" } }, };
+            {{"free format", "32 kbit/s", "64 kbit/s", "96 kbit/s", "128 kbit/s", "160 kbit/s", "192 kbit/s",
+                    "224 kbit/s", "256 kbit/s", "288 kbit/s", "320 kbit/s", "352 kbit/s", "384 kbit/s", "416 kbit/s",
+                    "448 kbit/s", "forbidden"},
+                    {"free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s",
+                            "128 kbit/s", "160 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s", "320 kbit/s", "384 kbit/s",
+                            "forbidden"},
+                    {"free format", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s",
+                            "112 kbit/s", "128 kbit/s", "160 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s", "320 kbit/s",
+                            "forbidden"}},
+            // SZD: MPEG2.5
+            {{"free format", "32 kbit/s", "48 kbit/s", "56 kbit/s", "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s",
+                    "128 kbit/s", "144 kbit/s", "160 kbit/s", "176 kbit/s", "192 kbit/s", "224 kbit/s", "256 kbit/s",
+                    "forbidden"},
+                    {"free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
+                            "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
+                            "forbidden"},
+                    {"free format", "8 kbit/s", "16 kbit/s", "24 kbit/s", "32 kbit/s", "40 kbit/s", "48 kbit/s", "56 kbit/s",
+                            "64 kbit/s", "80 kbit/s", "96 kbit/s", "112 kbit/s", "128 kbit/s", "144 kbit/s", "160 kbit/s",
+                            "forbidden"}},};
     // VBR support added by E.B
-    private final double[] h_vbr_time_per_frame = { -1, 384, 1152, 1152 };
+    private final double[] h_vbr_time_per_frame = {-1, 384, 1152, 1152};
     public short checksum;
     public int framesize;
     public int nSlots;
@@ -122,7 +122,8 @@ public final class Header {
     private byte syncmode = Bitstream.INITIAL_SYNC;
     private Crc16 crc;
 
-    Header() {}
+    Header() {
+    }
 
     public String toString() {
         StringBuilder buffer = new StringBuilder(200);
@@ -254,16 +255,16 @@ public final class Header {
                 if ((flags[3] & (byte) (1)) != 0) {
                     System.arraycopy(firstframe, offset + length, tmp, 0, tmp.length);
                     h_vbr_frames = (tmp[0] << 24) & 0xFF000000 | (tmp[1] << 16) & 0x00FF0000
-                        | (tmp[2] << 8) & 0x0000FF00
-                        | tmp[3] & 0x000000FF;
+                            | (tmp[2] << 8) & 0x0000FF00
+                            | tmp[3] & 0x000000FF;
                     length += 4;
                 }
                 // Read size (if available).
                 if ((flags[3] & (byte) (1 << 1)) != 0) {
                     System.arraycopy(firstframe, offset + length, tmp, 0, tmp.length);
                     h_vbr_bytes = (tmp[0] << 24) & 0xFF000000 | (tmp[1] << 16) & 0x00FF0000
-                        | (tmp[2] << 8) & 0x0000FF00
-                        | tmp[3] & 0x000000FF;
+                            | (tmp[2] << 8) & 0x0000FF00
+                            | tmp[3] & 0x000000FF;
                     length += 4;
                 }
                 // Read TOC (if available).
@@ -295,14 +296,14 @@ public final class Header {
                 int length = 4 + 6;
                 System.arraycopy(firstframe, offset + length, tmp, 0, tmp.length);
                 h_vbr_bytes = (tmp[0] << 24) & 0xFF000000 | (tmp[1] << 16) & 0x00FF0000
-                    | (tmp[2] << 8) & 0x0000FF00
-                    | tmp[3] & 0x000000FF;
+                        | (tmp[2] << 8) & 0x0000FF00
+                        | tmp[3] & 0x000000FF;
                 length += 4;
                 // Frames.
                 System.arraycopy(firstframe, offset + length, tmp, 0, tmp.length);
                 h_vbr_frames = (tmp[0] << 24) & 0xFF000000 | (tmp[1] << 16) & 0x00FF0000
-                    | (tmp[2] << 8) & 0x0000FF00
-                    | tmp[3] & 0x000000FF;
+                        | (tmp[2] << 8) & 0x0000FF00
+                        | tmp[3] & 0x000000FF;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new BitstreamException("VBRIVBRHeader Corrupted", e);
@@ -397,19 +398,19 @@ public final class Header {
             nSlots = 0;
         } else {
             framesize = (144 * bitrates[h_version][h_layer - 1][h_bitrate_index])
-                / frequencies[h_version][h_sample_frequency];
+                    / frequencies[h_version][h_sample_frequency];
             if (h_version == MPEG2_LSF || h_version == MPEG25_LSF) framesize >>= 1; // SZD
             if (h_padding_bit != 0) framesize++;
             // Layer III slots
             if (h_layer == 3) {
                 if (h_version == MPEG1) {
                     nSlots = framesize - ((h_mode == SINGLE_CHANNEL) ? 17 : 32) // side info size
-                        - ((h_protection_bit != 0) ? 0 : 2) // CRC size
-                        - 4; // header size
+                            - ((h_protection_bit != 0) ? 0 : 2) // CRC size
+                            - 4; // header size
                 } else { // MPEG-2 LSF, SZD: MPEG-2.5 LSF
                     nSlots = framesize - ((h_mode == SINGLE_CHANNEL) ? 9 : 17) // side info size
-                        - ((h_protection_bit != 0) ? 0 : 2) // CRC size
-                        - 4; // header size
+                            - ((h_protection_bit != 0) ? 0 : 2) // CRC size
+                            - 4; // header size
                 }
             } else {
                 nSlots = 0;
@@ -430,8 +431,8 @@ public final class Header {
             if ((h_version == MPEG2_LSF) || (h_version == MPEG25_LSF)) tpf /= 2;
             return ((float) (tpf * 1000));
         } else {
-            float[][] ms_per_frame_array = { { 8.707483f, 8.0f, 12.0f }, { 26.12245f, 24.0f, 36.0f },
-                { 26.12245f, 24.0f, 36.0f } };
+            float[][] ms_per_frame_array = {{8.707483f, 8.0f, 12.0f}, {26.12245f, 24.0f, 36.0f},
+                    {26.12245f, 24.0f, 36.0f}};
             return (ms_per_frame_array[h_layer - 1][h_sample_frequency]);
         }
     }

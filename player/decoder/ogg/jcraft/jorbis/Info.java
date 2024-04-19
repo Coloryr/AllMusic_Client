@@ -169,9 +169,9 @@ public class Info {
         blocksizes[1] = 1 << opb.read(4);
 
         if ((rate < 1) || (channels < 1)
-            || (blocksizes[0] < 8)
-            || (blocksizes[1] < blocksizes[0])
-            || (opb.read(1) != 1)) {
+                || (blocksizes[0] < 8)
+                || (blocksizes[1] < blocksizes[0])
+                || (opb.read(1) != 1)) {
             clear();
             return (-1);
         }
@@ -277,7 +277,7 @@ public class Info {
             mode_param[i].mapping = opb.read(8);
 
             if ((mode_param[i].windowtype >= VI_WINDOWB) || (mode_param[i].transformtype >= VI_WINDOWB)
-                || (mode_param[i].mapping >= maps)) {
+                    || (mode_param[i].mapping >= maps)) {
                 clear();
                 return (-1);
             }
@@ -309,10 +309,10 @@ public class Info {
                 int packtype = opb.read(8);
                 opb.read(buffer, 6);
                 if (buffer[0] != 'v' || buffer[1] != 'o'
-                    || buffer[2] != 'r'
-                    || buffer[3] != 'b'
-                    || buffer[4] != 'i'
-                    || buffer[5] != 's') {
+                        || buffer[2] != 'r'
+                        || buffer[3] != 'b'
+                        || buffer[4] != 'i'
+                        || buffer[5] != 's') {
                     // not a vorbis header
                     return (-1);
                 }

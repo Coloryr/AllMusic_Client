@@ -82,7 +82,7 @@ class Floor0 extends FuncFloor {
         look.linearmap = new int[look.n];
         for (int j = 0; j < look.n; j++) {
             int val = (int) Math.floor(toBARK((float) ((info.rate / 2.) / look.n * j)) * scale); // bark numbers
-                                                                                                 // represent band edges
+            // represent band edges
             if (val >= look.ln) val = look.ln; // guard against the approximation
             look.linearmap[j] = val;
         }
@@ -104,11 +104,14 @@ class Floor0 extends FuncFloor {
         return (state);
     }
 
-    void free_info(Object i) {}
+    void free_info(Object i) {
+    }
 
-    void free_look(Object i) {}
+    void free_look(Object i) {
+    }
 
-    void free_state(Object vs) {}
+    void free_state(Object vs) {
+    }
 
     int forward(Block vb, Object i, float[] in, float[] out, Object vs) {
         return 0;
@@ -146,7 +149,7 @@ class Floor0 extends FuncFloor {
                             return (0);
                         }
                     }
-                    for (int j = 0; j < look.m;) {
+                    for (int j = 0; j < look.m; ) {
                         for (int k = 0; k < b.dim; k++, j++) lsp[j] += last;
                         last = lsp[j - 1];
                     }
@@ -190,7 +193,7 @@ class Floor0 extends FuncFloor {
                     }
                 }
 
-                for (int j = 0; j < look.m;) {
+                for (int j = 0; j < look.m; ) {
                     for (int k = 0; k < b.dim; k++, j++) lsp[j] += last;
                     last = lsp[j - 1];
                 }

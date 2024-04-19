@@ -25,7 +25,8 @@ package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis;
 class Lpc {
 
     // en/decode lookups
-    Drft fft = new Drft();;
+    Drft fft = new Drft();
+    ;
 
     int ln;
     int m;
@@ -118,7 +119,7 @@ class Lpc {
         // The autocorrelation will not be circular. Shift, else we lose
         // most of the power in the edges.
 
-        for (i = 0, j = n / 2; i < n / 2;) {
+        for (i = 0, j = n / 2; i < n / 2; ) {
             float temp = work[i];
             work[i++] = work[j];
             work[j++] = temp;

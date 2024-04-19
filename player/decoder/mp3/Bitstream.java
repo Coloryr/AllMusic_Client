@@ -27,12 +27,12 @@
 
 package com.coloryr.allmusic.client.player.decoder.mp3;
 
+import com.coloryr.allmusic.client.player.APlayer;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-
-import com.coloryr.allmusic.client.player.APlayer;
 
 /**
  * The <code>Bistream</code> class is responsible for parsing
@@ -64,9 +64,9 @@ public final class Bitstream implements BitstreamErrors {
      * The frame buffer that holds the data for the current frame.
      */
     private final int[] framebuffer = new int[BUFFER_INT_SIZE];
-    private final int[] bitmask = { 0, // dummy
-        0x00000001, 0x00000003, 0x00000007, 0x0000000F, 0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF, 0x000001FF,
-        0x000003FF, 0x000007FF, 0x00000FFF, 0x00001FFF, 0x00003FFF, 0x00007FFF, 0x0000FFFF, 0x0001FFFF };
+    private final int[] bitmask = {0, // dummy
+            0x00000001, 0x00000003, 0x00000007, 0x0000000F, 0x0000001F, 0x0000003F, 0x0000007F, 0x000000FF, 0x000001FF,
+            0x000003FF, 0x000007FF, 0x00000FFF, 0x00001FFF, 0x00003FFF, 0x00007FFF, 0x0000FFFF, 0x0001FFFF};
     private final Header header = new Header();
     private final byte[] syncbuf = new byte[4];
     /**
@@ -135,11 +135,13 @@ public final class Bitstream implements BitstreamErrors {
              * Audio header position in stream.
              */
             int header_pos = size;
-        } catch (IOException ignored) {} finally {
+        } catch (IOException ignored) {
+        } finally {
             try {
                 // Unread ID3v2 header (10 bytes).
                 in.reset();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
         // Load ID3v2 tags.
         try {
@@ -148,7 +150,8 @@ public final class Bitstream implements BitstreamErrors {
                 in.read(rawid3v2, 0, rawid3v2.length);
                 local += rawid3v2.length;
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 
     /**
@@ -201,7 +204,7 @@ public final class Bitstream implements BitstreamErrors {
      * Reads and parses the next frame from the input source.
      *
      * @return the Header describing details of the frame read,
-     *         or null if the end of the stream has been reached.
+     * or null if the end of the stream has been reached.
      */
     public Header readFrame() throws Exception {
         Header result = null;
@@ -289,13 +292,14 @@ public final class Bitstream implements BitstreamErrors {
     public boolean isSyncCurrentPosition(int syncmode) throws Exception {
         int read = readBytes(syncbuf, 0, 4);
         int headerstring = ((syncbuf[0] << 24) & 0xFF000000) | ((syncbuf[1] << 16) & 0x00FF0000)
-            | ((syncbuf[2] << 8) & 0x0000FF00)
-            | ((syncbuf[3]) & 0x000000FF);
+                | ((syncbuf[2] << 8) & 0x0000FF00)
+                | ((syncbuf[3]) & 0x000000FF);
 
         try {
             source.unread(syncbuf, 0, read);
             local -= read;
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         boolean sync = false;
         switch (read) {
@@ -334,7 +338,7 @@ public final class Bitstream implements BitstreamErrors {
         if (bytesRead != 3) throw newBitstreamException(STREAM_EOF, null);
 
         headerstring = ((syncbuf[0] << 16) & 0x00FF0000) | ((syncbuf[1] << 8) & 0x0000FF00)
-            | ((syncbuf[2]) & 0x000000FF);
+                | ((syncbuf[2]) & 0x000000FF);
 
         do {
             headerstring <<= 8;
@@ -356,7 +360,7 @@ public final class Bitstream implements BitstreamErrors {
             sync = ((headerstring & 0xFFE00000) == 0xFFE00000); // SZD: MPEG 2.5
         } else {
             sync = ((headerstring & 0xFFF80C00) == word)
-                && (((headerstring & 0x000000C0) == 0x000000C0) == single_ch_mode);
+                    && (((headerstring & 0x000000C0) == 0x000000C0) == single_ch_mode);
         }
 
         // filter out invalid sample rate
@@ -400,8 +404,8 @@ public final class Bitstream implements BitstreamErrors {
             if (k + 2 < bytesize) b2 = byteread[k + 2];
             if (k + 3 < bytesize) b3 = byteread[k + 3];
             framebuffer[b++] = ((b0 << 24) & 0xFF000000) | ((b1 << 16) & 0x00FF0000)
-                | ((b2 << 8) & 0x0000FF00)
-                | (b3 & 0x000000FF);
+                    | ((b2 << 8) & 0x0000FF00)
+                    | (b3 & 0x000000FF);
         }
         wordpointer = 0;
         bitindex = 0;

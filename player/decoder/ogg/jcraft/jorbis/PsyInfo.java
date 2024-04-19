@@ -66,5 +66,6 @@ class PsyInfo {
     float attack_coeff;
     float decay_coeff;
 
-    void free() {}
+    void free() {
+    }
 }

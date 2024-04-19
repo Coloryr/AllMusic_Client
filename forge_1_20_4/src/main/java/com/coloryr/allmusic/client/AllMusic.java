@@ -28,16 +28,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.network.*;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.SimpleChannel;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 @Mod("allmusic_client")
 public class AllMusic {
@@ -57,15 +54,13 @@ public class AllMusic {
     }
 
     public static void sendMessage(String data) {
-        Minecraft.getInstance().execute(() -> {
-            Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data));
-        });
+        Minecraft.getInstance().execute(() -> Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
     }
 
     private void setup(final FMLClientSetupEvent event) {
         hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
         try {
-            Class parcleClass = Class.forName("coloryr.allmusic.AllMusicForge");
+            Class parcleClass = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
             Field m = parcleClass.getField("channel");
             SimpleChannel channel = (SimpleChannel) m.get(null);
             channel.messageBuilder(FriendlyByteBuf.class)
@@ -75,7 +70,7 @@ public class AllMusic {
                     .add();
         } catch (Exception e) {
             ChannelBuilder.named(channel)
-                    .networkProtocolVersion(666)
+                    .networkProtocolVersion(0)
                     .optional()
                     .clientAcceptedVersions(((status, i) -> true))
                     .serverAcceptedVersions(((status, i) -> true))
@@ -149,7 +144,6 @@ public class AllMusic {
         return new String(temp, StandardCharsets.UTF_8);
     }
 
-
     private void setup1(final FMLLoadCompleteEvent event) {
         nowPlaying = new APlayer();
     }
@@ -197,36 +191,6 @@ public class AllMusic {
         hudUtils.save = null;
     }
 
-    private void onClientPacket(final String message) {
-        try {
-            if (message.equals("[Stop]")) {
-                stopPlaying();
-            } else if (message.startsWith("[Play]")) {
-                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
-                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
-                stopPlaying();
-                String url = message.replace("[Play]", "");
-                nowPlaying.setMusic(url);
-            } else if (message.startsWith("[Lyric]")) {
-                hudUtils.lyric = message.substring(7);
-            } else if (message.startsWith("[Info]")) {
-                hudUtils.info = message.substring(6);
-            } else if (message.startsWith("[Img]")) {
-                hudUtils.setImg(message.substring(5));
-            } else if (message.startsWith("[Pos]")) {
-                nowPlaying.set(message.substring(5));
-            } else if (message.startsWith("[List]")) {
-                hudUtils.list = message.substring(6);
-            } else if (message.equalsIgnoreCase("[clear]")) {
-                hudUtils.close();
-            } else if (message.startsWith("{")) {
-                hudUtils.setPos(message);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static float getVolume() {
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
@@ -241,11 +205,10 @@ public class AllMusic {
 
         int a = size / 2;
 
-        if(ang > 0) {
+        if (ang > 0) {
             matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0,0,1, ang));
-        }
-        else {
+                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
+        } else {
             matrix = matrix.translation(x + a, y + a, 0);
         }
         int x0 = -a;
@@ -283,8 +246,9 @@ public class AllMusic {
             hudUtils.update();
         }
     }
+
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event){
+    public void onTick(TickEvent.ClientTickEvent event) {
         nowPlaying.tick();
     }
 
@@ -293,7 +257,7 @@ public class AllMusic {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable){
+    public static void runMain(Runnable runnable) {
         Minecraft.getInstance().execute(runnable);
     }
 }

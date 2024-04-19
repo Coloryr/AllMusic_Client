@@ -114,7 +114,8 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         byte[] consumeTable = RICE_DECODING_CONSUMED_TABLES[param];
         int[] valueTable = RICE_DECODING_VALUE_TABLES[param];
         while (true) {
-            middle: while (start <= end - RICE_DECODING_CHUNK) {
+            middle:
+            while (start <= end - RICE_DECODING_CHUNK) {
                 if (bitBufferLen < RICE_DECODING_CHUNK * RICE_DECODING_TABLE_BITS) {
                     if (byteBufferIndex <= byteBufferLen - 8) {
                         fillBitBuffer();
@@ -123,7 +124,7 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
                 for (int i = 0; i < RICE_DECODING_CHUNK; i++, start++) {
                     // Fast decoder
                     int extractedBits = (int) (bitBuffer >>> (bitBufferLen - RICE_DECODING_TABLE_BITS))
-                        & RICE_DECODING_TABLE_MASK;
+                            & RICE_DECODING_TABLE_MASK;
                     int consumed = consumeTable[extractedBits];
                     if (consumed == 0) break middle;
                     bitBufferLen -= consumed;
@@ -269,13 +270,13 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
     private static final byte[][] RICE_DECODING_CONSUMED_TABLES = new byte[31][1 << RICE_DECODING_TABLE_BITS];
     private static final int[][] RICE_DECODING_VALUE_TABLES = new int[31][1 << RICE_DECODING_TABLE_BITS];
     private static final int RICE_DECODING_CHUNK = 4; // Configurable, must be positive, and RICE_DECODING_CHUNK *
-                                                      // RICE_DECODING_TABLE_BITS <= 64
+    // RICE_DECODING_TABLE_BITS <= 64
 
     static {
         for (int param = 0; param < RICE_DECODING_CONSUMED_TABLES.length; param++) {
             byte[] consumed = RICE_DECODING_CONSUMED_TABLES[param];
             int[] values = RICE_DECODING_VALUE_TABLES[param];
-            for (int i = 0;; i++) {
+            for (int i = 0; ; i++) {
                 int numBits = (i >>> param) + 1 + param;
                 if (numBits > RICE_DECODING_TABLE_BITS) break;
                 int bits = ((1 << param) | (i & ((1 << param) - 1)));

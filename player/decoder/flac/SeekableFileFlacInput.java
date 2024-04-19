@@ -17,11 +17,11 @@
 
 package com.coloryr.allmusic.client.player.decoder.flac;
 
+import com.coloryr.allmusic.client.player.APlayer;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import com.coloryr.allmusic.client.player.APlayer;
 
 /**
  * A FLAC input stream based on a {@link RandomAccessFile}.

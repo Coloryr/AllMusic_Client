@@ -94,7 +94,7 @@ public class DspState {
         float[] ret = new float[window];
         switch (type) {
             case 0:
-            // The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*2pi)
+                // The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*2pi)
             {
                 int leftbegin = window / 4 - left / 2;
                 int rightbegin = window - window / 4 - right / 2;
@@ -121,7 +121,7 @@ public class DspState {
                     ret[i + rightbegin] = x;
                 }
             }
-                break;
+            break;
             default:
                 // free(ret);
                 return (null);
@@ -324,7 +324,7 @@ public class DspState {
                         // partial last frame. Strip the padding off
                         _centerW -= (granulepos - vb.granulepos);
                     } // else{ Shouldn't happen *unless* the bitstream is out of
-                      // spec. Either way, believe the bitstream }
+                    // spec. Either way, believe the bitstream }
                     granulepos = vb.granulepos;
                 }
             }
@@ -358,5 +358,6 @@ public class DspState {
         return (0);
     }
 
-    public void clear() {}
+    public void clear() {
+    }
 }

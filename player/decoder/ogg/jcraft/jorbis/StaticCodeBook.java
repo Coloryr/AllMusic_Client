@@ -51,7 +51,8 @@ class StaticCodeBook {
     int[] quantlist; // map == 1: (int)(entries/dim) element column map
     // map == 2: list of dim*entries quantized entry vals
 
-    StaticCodeBook() {}
+    StaticCodeBook() {
+    }
 
     int pack(Buffer opb) {
         int i;
@@ -160,7 +161,7 @@ class StaticCodeBook {
                     opb.write(Math.abs(quantlist[i]), q_quant);
                 }
             }
-                break;
+            break;
             default:
                 // error case; we don't have any other map types now
                 return (-1);
@@ -227,12 +228,12 @@ class StaticCodeBook {
                 }
                 break;
             case 1:
-            // ordered
+                // ordered
             {
                 int length = opb.read(5) + 1;
                 lengthlist = new int[entries];
 
-                for (i = 0; i < entries;) {
+                for (i = 0; i < entries; ) {
                     int num = opb.read(Util.ilog(entries - i));
                     if (num == -1) {
                         // goto _eofout;
@@ -245,7 +246,7 @@ class StaticCodeBook {
                     length++;
                 }
             }
-                break;
+            break;
             default:
                 // EOF
                 return (-1);
@@ -287,7 +288,7 @@ class StaticCodeBook {
                     return (-1);
                 }
             }
-                break;
+            break;
             default:
                 // goto _eofout;
                 clear();
@@ -331,7 +332,8 @@ class StaticCodeBook {
         }
     }
 
-    void clear() {}
+    void clear() {
+    }
 
     // unpack the quantized list of values for encode/decode
     // we need to deal with two map types: in map type 1, the values are

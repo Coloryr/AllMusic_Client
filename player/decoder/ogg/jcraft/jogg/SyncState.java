@@ -160,8 +160,8 @@ public class SyncState {
 
             // Compare
             if (chksum[0] != data[page + 22] || chksum[1] != data[page + 23]
-                || chksum[2] != data[page + 24]
-                || chksum[3] != data[page + 25]) {
+                    || chksum[2] != data[page + 24]
+                    || chksum[3] != data[page + 25]) {
                 // D'oh. Mismatch! Corrupt page (or miscapture and not a page at all)
                 // replace the computed checksum with the one actually read in
                 System.arraycopy(chksum, 0, data, page + 22, 4);
@@ -251,7 +251,8 @@ public class SyncState {
         return (0);
     }
 
-    public void init() {}
+    public void init() {
+    }
 
     public int getDataOffset() {
         return returned;

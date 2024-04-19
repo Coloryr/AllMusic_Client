@@ -33,9 +33,9 @@ class Residue0 extends FuncResidue {
         opb.write(info.end, 24);
 
         opb.write(info.grouping - 1, 24); /*
-                                           * residue vectors to group and
-                                           * code with a partitioned book
-                                           */
+         * residue vectors to group and
+         * code with a partitioned book
+         */
         opb.write(info.partitions - 1, 6); /* possible partition choices */
         opb.write(info.groupbook, 8); /* group huffman book */
 
@@ -146,9 +146,11 @@ class Residue0 extends FuncResidue {
         return (look);
     }
 
-    void free_info(Object i) {}
+    void free_info(Object i) {
+    }
 
-    void free_look(Object i) {}
+    void free_look(Object i) {
+    }
 
     private static int[][][] _01inverse_partword = new int[2][][]; // _01inverse is synchronized for
 
@@ -195,24 +197,25 @@ class Residue0 extends FuncResidue {
                 }
 
                 // now we decode residual values for the partitions
-                for (k = 0; k < partitions_per_word && i < partvals; k++, i++) for (j = 0; j < ch; j++) {
-                    int offset = info.begin + i * samples_per_partition;
-                    int index = _01inverse_partword[j][l][k];
-                    if ((info.secondstages[index] & (1 << s)) != 0) {
-                        CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
-                        if (stagebook != null) {
-                            if (decodepart == 0) {
-                                if (stagebook.decodevs_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
-                                    return (0);
-                                }
-                            } else if (decodepart == 1) {
-                                if (stagebook.decodev_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
-                                    return (0);
+                for (k = 0; k < partitions_per_word && i < partvals; k++, i++)
+                    for (j = 0; j < ch; j++) {
+                        int offset = info.begin + i * samples_per_partition;
+                        int index = _01inverse_partword[j][l][k];
+                        if ((info.secondstages[index] & (1 << s)) != 0) {
+                            CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
+                            if (stagebook != null) {
+                                if (decodepart == 0) {
+                                    if (stagebook.decodevs_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
+                                        return (0);
+                                    }
+                                } else if (decodepart == 1) {
+                                    if (stagebook.decodev_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
+                                        return (0);
+                                    }
                                 }
                             }
                         }
                     }
-                }
             }
         }
         return (0);

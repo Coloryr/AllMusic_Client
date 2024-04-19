@@ -240,7 +240,7 @@ public final class FrameInfo {
     // Returns a uint4 value representing the given block size. Pure function.
     private static int getBlockSizeCode(int blockSize) {
         int result = searchFirst(BLOCK_SIZE_CODES, blockSize);
-        if (result != -1); // Already done
+        if (result != -1) ; // Already done
         else if (1 <= blockSize && blockSize <= 256) result = 6;
         else if (1 <= blockSize && blockSize <= 65536) result = 7;
         else // blockSize < 1 || blockSize > 65536
@@ -254,7 +254,7 @@ public final class FrameInfo {
     private static int getSampleRateCode(int sampleRate) {
         if (sampleRate == 0 || sampleRate < -1) throw new IllegalArgumentException();
         int result = searchFirst(SAMPLE_RATE_CODES, sampleRate);
-        if (result != -1); // Already done
+        if (result != -1) ; // Already done
         else if (0 <= sampleRate && sampleRate < 256) result = 12;
         else if (0 <= sampleRate && sampleRate < 65536) result = 13;
         else if (0 <= sampleRate && sampleRate < 655360 && sampleRate % 10 == 0) result = 14;
@@ -289,12 +289,12 @@ public final class FrameInfo {
         return -1;
     }
 
-    private static final int[][] BLOCK_SIZE_CODES = { { 192, 1 }, { 576, 2 }, { 1152, 3 }, { 2304, 4 }, { 4608, 5 },
-        { 256, 8 }, { 512, 9 }, { 1024, 10 }, { 2048, 11 }, { 4096, 12 }, { 8192, 13 }, { 16384, 14 }, { 32768, 15 }, };
+    private static final int[][] BLOCK_SIZE_CODES = {{192, 1}, {576, 2}, {1152, 3}, {2304, 4}, {4608, 5},
+            {256, 8}, {512, 9}, {1024, 10}, {2048, 11}, {4096, 12}, {8192, 13}, {16384, 14}, {32768, 15},};
 
-    private static final int[][] SAMPLE_DEPTH_CODES = { { 8, 1 }, { 12, 2 }, { 16, 4 }, { 20, 5 }, { 24, 6 }, };
+    private static final int[][] SAMPLE_DEPTH_CODES = {{8, 1}, {12, 2}, {16, 4}, {20, 5}, {24, 6},};
 
-    private static final int[][] SAMPLE_RATE_CODES = { { 88200, 1 }, { 176400, 2 }, { 192000, 3 }, { 8000, 4 },
-        { 16000, 5 }, { 22050, 6 }, { 24000, 7 }, { 32000, 8 }, { 44100, 9 }, { 48000, 10 }, { 96000, 11 }, };
+    private static final int[][] SAMPLE_RATE_CODES = {{88200, 1}, {176400, 2}, {192000, 3}, {8000, 4},
+            {16000, 5}, {22050, 6}, {24000, 7}, {32000, 8}, {44100, 9}, {48000, 10}, {96000, 11},};
 
 }

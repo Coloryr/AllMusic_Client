@@ -23,13 +23,13 @@
 
 package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Packet;
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Page;
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.StreamState;
 import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.SyncState;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class VorbisFile {
 
@@ -112,7 +112,8 @@ public class VorbisFile {
     public VorbisFile(InputStream is, byte[] initial, int ibytes) throws JOrbisException {
         super();
         int ret = open(is, initial, ibytes);
-        if (ret == -1) {}
+        if (ret == -1) {
+        }
     }
 
     private int get_data() {
@@ -580,8 +581,10 @@ public class VorbisFile {
                     sis.seek(off);
                 } else if (whence == SEEK_END) {
                     sis.seek(sis.getLength() - off);
-                } else {}
-            } catch (Exception e) {}
+                } else {
+                }
+            } catch (Exception e) {
+            }
             return 0;
         }
         try {
@@ -601,7 +604,8 @@ public class VorbisFile {
                 SeekableInputStream sis = (SeekableInputStream) fis;
                 return (sis.tell());
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return 0;
     }
 
@@ -1270,9 +1274,11 @@ public class VorbisFile {
             raf.close();
         }
 
-        public synchronized void mark(int m) {}
+        public synchronized void mark(int m) {
+        }
 
-        public synchronized void reset() throws IOException {}
+        public synchronized void reset() throws IOException {
+        }
 
         public boolean markSupported() {
             return false;

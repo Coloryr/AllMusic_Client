@@ -435,7 +435,7 @@ jobs:
       with:
         name: "allmusic_client_forge_1_20"
         path: build/libs/
-  build_forge_1_20_2:
+  build_forge_1_20_4:
     runs-on: windows-latest
     permissions:
       contents: read
@@ -451,9 +451,9 @@ jobs:
     - name: build
       shell: cmd
       run: |
-        link.cmd && cd forge_1_20_2 && gradlew build
+        link.cmd && cd forge_1_20_4 && gradlew build
     - name: update
       uses: actions/upload-artifact@v4
       with:
-        name: "allmusic_client_forge_1_20_2"
+        name: "allmusic_client_forge_1_20_4"
         path: build/libs/

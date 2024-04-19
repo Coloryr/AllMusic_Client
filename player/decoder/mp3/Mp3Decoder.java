@@ -152,7 +152,7 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
      * channels in the MPEG audio stream, although it may differ.
      *
      * @return The number of output channels in the decoded samples: 1
-     *         for mono, or 2 for stereo.
+     * for mono, or 2 for stereo.
      */
     public int getOutputChannels() {
         return outputChannels;
@@ -181,12 +181,12 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
             case 3:
                 if (l3decoder == null) {
                     l3decoder = new LayerIIIDecoder(
-                        stream,
-                        header,
-                        filter1,
-                        filter2,
-                        output,
-                        OutputChannels.BOTH_CHANNELS);
+                            stream,
+                            header,
+                            filter1,
+                            filter2,
+                            output,
+                            OutputChannels.BOTH_CHANNELS);
                 }
 
                 decoder = l3decoder;
@@ -246,7 +246,8 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
 
         private final Equalizer equalizer = new Equalizer();
 
-        public Params() {}
+        public Params() {
+        }
 
         public Object clone() {
             try {
@@ -268,7 +269,7 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
          * the decoder.
          *
          * @return The <code>Equalizer</code> used to initialize the
-         *         EQ settings of the decoder.
+         * EQ settings of the decoder.
          */
         public Equalizer getInitialEqualizerSettings() {
             return equalizer;

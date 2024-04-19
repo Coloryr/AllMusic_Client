@@ -34,5 +34,6 @@ class PsyLook {
     float[] ath;
     int[] octave;
 
-    void init(PsyInfo vi, int n, int rate) {}
+    void init(PsyInfo vi, int n, int rate) {
+    }
 }

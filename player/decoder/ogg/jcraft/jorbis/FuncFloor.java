@@ -26,7 +26,7 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 abstract class FuncFloor {
 
-    public static FuncFloor[] floor_P = { new Floor0(), new Floor1() };
+    public static FuncFloor[] floor_P = {new Floor0(), new Floor1()};
 
     abstract void pack(Object i, Buffer opb);
 

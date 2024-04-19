@@ -46,7 +46,7 @@ public abstract class Obuffer {
      */
     public void appendSamples(int channel, float[] f) {
         short s;
-        for (int i = 0; i < 32;) {
+        for (int i = 0; i < 32; ) {
             s = clip(f[i++]);
             append(channel, s);
         }

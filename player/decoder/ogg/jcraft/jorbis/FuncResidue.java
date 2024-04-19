@@ -26,7 +26,7 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 abstract class FuncResidue {
 
-    public static FuncResidue[] residue_P = { new Residue0(), new Residue1(), new Residue2() };
+    public static FuncResidue[] residue_P = {new Residue0(), new Residue1(), new Residue2()};
 
     abstract void pack(Object vr, Buffer opb);
 

@@ -46,7 +46,8 @@ public final class Equalizer {
     /**
      * Creates a new <code>Equalizer</code> instance.
      */
-    public Equalizer() {}
+    public Equalizer() {
+    }
 
     // private Equalizer(float b1, float b2, float b3, float b4, float b5,
     // float b6, float b7, float b8, float b9, float b10, float b11,
@@ -104,7 +105,7 @@ public final class Equalizer {
          * @param band The index of the band to retrieve the setting
          *             for.
          * @return the setting of the specified band. This is a value between
-         *         -1 and +1.
+         * -1 and +1.
          */
         public float getBand(int band) {
             return 0.0f;

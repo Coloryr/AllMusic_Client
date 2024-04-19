@@ -37,11 +37,11 @@ public class Page {
         for (int i = 0; i < 8; i++) {
             if ((r & 0x80000000) != 0) {
                 r = (r << 1) ^ 0x04c11db7; /*
-                                            * The same as the ethernet generator
-                                            * polynomial, although we use an
-                                            * unreflected alg and an init/final
-                                            * of 0, not 0xffffffff
-                                            */
+                 * The same as the ethernet generator
+                 * polynomial, although we use an
+                 * unreflected alg and an init/final
+                 * of 0, not 0xffffffff
+                 */
             } else {
                 r <<= 1;
             }
@@ -86,14 +86,14 @@ public class Page {
 
     public int serialno() {
         return (header_base[header + 14] & 0xff) | ((header_base[header + 15] & 0xff) << 8)
-            | ((header_base[header + 16] & 0xff) << 16)
-            | ((header_base[header + 17] & 0xff) << 24);
+                | ((header_base[header + 16] & 0xff) << 16)
+                | ((header_base[header + 17] & 0xff) << 24);
     }
 
     int pageno() {
         return (header_base[header + 18] & 0xff) | ((header_base[header + 19] & 0xff) << 8)
-            | ((header_base[header + 20] & 0xff) << 16)
-            | ((header_base[header + 21] & 0xff) << 24);
+                | ((header_base[header + 20] & 0xff) << 16)
+                | ((header_base[header + 21] & 0xff) << 24);
     }
 
     void checksum() {

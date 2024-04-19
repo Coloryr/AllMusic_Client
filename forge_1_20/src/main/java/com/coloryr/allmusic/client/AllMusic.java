@@ -35,9 +35,6 @@ import org.joml.Quaternionf;
 
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 @Mod("allmusic_client")
@@ -67,7 +64,7 @@ public class AllMusic {
     private void setup(final FMLClientSetupEvent event) {
         hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
         try {
-            Class parcleClass = Class.forName("coloryr.allmusic.AllMusicForge");
+            Class parcleClass = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
             Field m = parcleClass.getField("channel");
             SimpleChannel channel = (SimpleChannel) m.get(null);
             channel.registerMessage(1, FriendlyByteBuf.class, this::encode, this::decode, this::handle);
@@ -205,11 +202,10 @@ public class AllMusic {
 
         int a = size / 2;
 
-        if(ang > 0) {
+        if (ang > 0) {
             matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0,0,1, ang));
-        }
-        else {
+                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
+        } else {
             matrix = matrix.translation(x + a, y + a, 0);
         }
         int x0 = -a;
@@ -249,7 +245,7 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event){
+    public void onTick(TickEvent.ClientTickEvent event) {
         nowPlaying.tick();
     }
 
@@ -258,7 +254,7 @@ public class AllMusic {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable){
+    public static void runMain(Runnable runnable) {
         Minecraft.getInstance().execute(runnable);
     }
 }

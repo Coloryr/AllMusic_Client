@@ -63,7 +63,7 @@ public class SampleBuffer extends Obuffer {
 
         short s;
         float fs;
-        for (int i = 0; i < 32;) {
+        for (int i = 0; i < 32; ) {
             fs = f[i++];
             fs = (fs > 32767.0f ? 32767.0f : (Math.max(fs, -32767.0f)));
 

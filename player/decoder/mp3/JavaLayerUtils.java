@@ -105,9 +105,9 @@ public class JavaLayerUtils {
      * @param name The name of the resource. This must be a simple
      *             name, and not a qualified package name.
      * @return The InputStream for the named resource, or null if
-     *         the resource has not been found. If a hook has been
-     *         provided, its getResourceAsStream() method is called
-     *         to retrieve the resource.
+     * the resource has not been found. If a hook has been
+     * provided, its getResourceAsStream() method is called
+     * to retrieve the resource.
      */
     static synchronized public InputStream getResourceAsStream(String name) {
         InputStream is;

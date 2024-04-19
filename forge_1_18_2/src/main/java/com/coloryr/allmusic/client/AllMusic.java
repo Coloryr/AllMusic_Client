@@ -59,7 +59,7 @@ public class AllMusic  {
     private void setup(final FMLClientSetupEvent event) {
         hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
         try {
-            Class parcleClass = Class.forName("coloryr.allmusic.AllMusicForge");
+            Class parcleClass = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
             Field m = parcleClass.getField("channel");
             SimpleChannel channel = (SimpleChannel) m.get(null);
             channel.registerMessage(1, FriendlyByteBuf.class, this::encode, this::decode, this::handle);

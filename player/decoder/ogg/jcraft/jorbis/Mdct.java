@@ -71,9 +71,11 @@ class Mdct {
         scale = 4.f / n;
     }
 
-    void clear() {}
+    void clear() {
+    }
 
-    void forward(float[] in, float[] out) {}
+    void forward(float[] in, float[] out) {
+    }
 
     float[] _x = new float[1024];
     float[] _w = new float[1024];
@@ -152,7 +154,7 @@ class Mdct {
         int w2 = n4;
         int A = n2;
 
-        for (int i = 0; i < n4;) {
+        for (int i = 0; i < n4; ) {
             float x0 = x[xA] - x[xB];
             float x1;
             w[w2 + i] = x[xA++] + x[xB++];

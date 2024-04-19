@@ -26,7 +26,8 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class Time0 extends FuncTime {
 
-    void pack(Object i, Buffer opb) {}
+    void pack(Object i, Buffer opb) {
+    }
 
     Object unpack(Info vi, Buffer opb) {
         return "";
@@ -36,9 +37,11 @@ class Time0 extends FuncTime {
         return "";
     }
 
-    void free_info(Object i) {}
+    void free_info(Object i) {
+    }
 
-    void free_look(Object i) {}
+    void free_look(Object i) {
+    }
 
     int inverse(Block vb, Object i, float[] in, float[] out) {
         return 0;

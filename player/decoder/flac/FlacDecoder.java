@@ -17,17 +17,17 @@
 
 package com.coloryr.allmusic.client.player.decoder.flac;
 
-import java.io.IOException;
-
 import com.coloryr.allmusic.client.AllMusic;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.coloryr.allmusic.client.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.player.decoder.IDecoder;
 
+import java.io.IOException;
+
 /**
  * Handles high-level decoding and seeking in FLAC files. Also returns metadata blocks.
  * Every object is stateful, not thread-safe, and needs to be closed. Sample usage:
- * 
+ *
  * <pre>
  * // Create a decoder
  * FlacDecoder dec = new FlacDecoder(...);
@@ -111,7 +111,7 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
             metadataEndPos = input.getPosition();
             frameDec = new FrameDecoder(input, streamInfo.sampleDepth);
         }
-        return new Object[] { type, data };
+        return new Object[]{type, data};
     }
 
     // Reads and decodes the next block of audio samples into the given buffer,

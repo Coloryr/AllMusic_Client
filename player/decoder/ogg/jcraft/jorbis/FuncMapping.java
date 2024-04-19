@@ -26,7 +26,7 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 abstract class FuncMapping {
 
-    public static FuncMapping[] mapping_P = { new Mapping0() };
+    public static FuncMapping[] mapping_P = {new Mapping0()};
 
     abstract void pack(Info info, Object imap, Buffer buffer);
 

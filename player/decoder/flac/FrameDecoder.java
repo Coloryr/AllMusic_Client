@@ -226,8 +226,8 @@ public final class FrameDecoder {
         restoreLpc(result, FIXED_PREDICTION_COEFFICIENTS[predOrder], sampleDepth, 0);
     }
 
-    private static final int[][] FIXED_PREDICTION_COEFFICIENTS = { {}, { 1 }, { 2, -1 }, { 3, -3, 1 },
-        { 4, -6, 4, -1 }, };
+    private static final int[][] FIXED_PREDICTION_COEFFICIENTS = {{}, {1}, {2, -1}, {3, -3, 1},
+            {4, -6, 4, -1},};
 
     // Reads from the input stream, performs computation, and writes to result[0 : currentBlockSize].
     private void decodeLinearPredictiveCodingSubframe(int lpcOrder, int sampleDepth, long[] result) throws IOException {
@@ -310,7 +310,7 @@ public final class FrameDecoder {
         if (currentBlockSize % numPartitions != 0)
             throw new DataFormatException("Block size not divisible by number of Rice partitions");
         for (int inc = currentBlockSize >>> partitionOrder, partEnd = inc, resultIndex = warmup; partEnd
-            <= currentBlockSize; partEnd += inc) {
+                <= currentBlockSize; partEnd += inc) {
 
             int param = in.readUint(paramBits);
             if (param == escapeParam) {

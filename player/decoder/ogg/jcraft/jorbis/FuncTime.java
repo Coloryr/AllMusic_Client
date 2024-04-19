@@ -26,7 +26,7 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 abstract class FuncTime {
 
-    public static FuncTime[] time_P = { new Time0() };
+    public static FuncTime[] time_P = {new Time0()};
 
     abstract void pack(Object i, Buffer opb);
 

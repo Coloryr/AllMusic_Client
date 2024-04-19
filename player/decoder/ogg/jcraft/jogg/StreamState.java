@@ -31,10 +31,10 @@ public class StreamState {
 
     int[] lacing_vals; /* The values that will go to the segment table */
     long[] granule_vals; /*
-                          * pcm_pos values for headers. Not compact
-                          * this way, but it is simple coupled to the
-                          * lacing fifo
-                          */
+     * pcm_pos values for headers. Not compact
+     * this way, but it is simple coupled to the
+     * lacing fifo
+     */
     int lacing_storage;
     int lacing_fill;
     int lacing_packet;
@@ -44,22 +44,22 @@ public class StreamState {
     int header_fill;
 
     public int e_o_s; /*
-                       * set when we have buffered the last packet in the
-                       * logical bitstream
-                       */
+     * set when we have buffered the last packet in the
+     * logical bitstream
+     */
     int b_o_s; /*
-                * set after we've written the initial page
-                * of a logical bitstream
-                */
+     * set after we've written the initial page
+     * of a logical bitstream
+     */
     int serialno;
     int pageno;
     long packetno; /*
-                    * sequence number for decode; the framing
-                    * knows where there's a hole in the data,
-                    * but we need coupling so that the codec
-                    * (which is in a seperate abstraction
-                    * layer) also knows about the gap
-                    */
+     * sequence number for decode; the framing
+     * knows where there's a hole in the data,
+     * but we need coupling so that the codec
+     * (which is in a seperate abstraction
+     * layer) also knows about the gap
+     */
     long granulepos;
 
     public StreamState() {
@@ -441,12 +441,12 @@ public class StreamState {
          * because this val can roll over)
          */
         if (pageno == -1) pageno = 0; /*
-                                       * because someone called
-                                       * stream_reset; this would be a
-                                       * strange thing to do in an
-                                       * encode stream, but it has
-                                       * plausible uses
-                                       */
+         * because someone called
+         * stream_reset; this would be a
+         * strange thing to do in an
+         * encode stream, but it has
+         * plausible uses
+         */
         {
             int _pageno = pageno++;
             for (i = 18; i < 22; i++) {
@@ -498,9 +498,9 @@ public class StreamState {
      */
     public int pageout(Page og) {
         if ((e_o_s != 0 && lacing_fill != 0) || /* 'were done, now flush' case */
-            body_fill - body_returned > 4096 || /* 'page nominal size' case */
-            lacing_fill >= 255 || /* 'segment table full' case */
-            (lacing_fill != 0 && b_o_s == 0)) { /* 'initial header page' case */
+                body_fill - body_returned > 4096 || /* 'page nominal size' case */
+                lacing_fill >= 255 || /* 'segment table full' case */
+                (lacing_fill != 0 && b_o_s == 0)) { /* 'initial header page' case */
             return flush(og);
         }
         return 0;

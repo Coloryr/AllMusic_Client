@@ -45,7 +45,7 @@ class Drft {
         if (splitcache != null) splitcache = null;
     }
 
-    static int[] ntryh = { 4, 2, 3, 5 };
+    static int[] ntryh = {4, 2, 3, 5};
     static float tpi = ((float) Math.PI * 2F);
     static float hsqt2 = .70710678118654752440084436210485f;
     static float taui = .86602540378443864676372317075293618f;
@@ -63,7 +63,8 @@ class Drft {
 
         int state = 101;
 
-        loop: while (true) {
+        loop:
+        while (true) {
             switch (state) {
                 case 101:
                     j++;
@@ -194,7 +195,7 @@ class Drft {
     }
 
     static void dradf4(int ido, int l1, float[] cc, float[] ch, float[] wa1, int index1, float[] wa2, int index2,
-        float[] wa3, int index3) {
+                       float[] wa3, int index3) {
         int i, k, t0, t1, t2, t3, t4, t5, t6;
         float ci2, ci3, ci4, cr2, cr3, cr4, ti1, ti2, ti3, ti4, tr1, tr2, tr3, tr4;
         t0 = l1 * ido;
@@ -292,7 +293,7 @@ class Drft {
     }
 
     static void dradfg(int ido, int ip, int l1, int idl1, float[] cc, float[] c1, float[] c2, float[] ch, float[] ch2,
-        float[] wa, int index) {
+                       float[] wa, int index) {
         int idij, ipph, i, j, k, l, ic, ik, is;
         int t0, t1, t2 = 0, t3, t4, t5, t6, t7, t8, t9, t10;
         float dc2, ai1, ai2, ar1, ar2, ds2;
@@ -311,7 +312,8 @@ class Drft {
         t10 = ip * ido;
 
         int state = 100;
-        loop: while (true) {
+        loop:
+        while (true) {
             switch (state) {
                 case 101:
                     if (ido == 1) {
@@ -621,7 +623,8 @@ class Drft {
             na = 1 - na;
 
             int state = 100;
-            loop: while (true) {
+            loop:
+            while (true) {
                 switch (state) {
                     case 100:
                         if (ip != 4) {
@@ -783,7 +786,7 @@ class Drft {
     }
 
     static void dradb4(int ido, int l1, float[] cc, float[] ch, float[] wa1, int index1, float[] wa2, int index2,
-        float[] wa3, int index3) {
+                       float[] wa3, int index3) {
         int i, k, t0, t1, t2, t3, t4, t5, t6, t7, t8;
         float ci2, ci3, ci4, cr2, cr3, cr4, ti1, ti2, ti3, ti4, tr1, tr2, tr3, tr4;
         t0 = l1 * ido;
@@ -870,7 +873,7 @@ class Drft {
     }
 
     static void dradbg(int ido, int ip, int l1, int idl1, float[] cc, float[] c1, float[] c2, float[] ch, float[] ch2,
-        float[] wa, int index) {
+                       float[] wa, int index) {
 
         int idij, ipph = 0, i, j, k, l, ik, is, t0 = 0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10 = 0, t11, t12;
         float dc2, ai1, ai2, ar1, ar2, ds2;
@@ -880,7 +883,8 @@ class Drft {
 
         int state = 100;
 
-        loop: while (true) {
+        loop:
+        while (true) {
             switch (state) {
                 case 100:
                     t10 = ip * ido;
@@ -1215,7 +1219,8 @@ class Drft {
 
         for (k1 = 0; k1 < nf; k1++) {
             int state = 100;
-            loop: while (true) {
+            loop:
+            while (true) {
                 switch (state) {
                     case 100:
                         ip = ifac[k1 + 2];

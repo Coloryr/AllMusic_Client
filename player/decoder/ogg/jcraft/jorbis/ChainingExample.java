@@ -50,13 +50,13 @@ class ChainingExample {
             Info vi = ov.getInfo(i);
             System.out.println("\tlogical bitstream section " + (i + 1) + " information:");
             System.out.println(
-                "\t\t" + vi.rate
-                    + "Hz "
-                    + vi.channels
-                    + " channels bitrate "
-                    + (ov.bitrate(i) / 1000)
-                    + "kbps serial number="
-                    + ov.serialnumber(i));
+                    "\t\t" + vi.rate
+                            + "Hz "
+                            + vi.channels
+                            + " channels bitrate "
+                            + (ov.bitrate(i) / 1000)
+                            + "kbps serial number="
+                            + ov.serialnumber(i));
             System.out.print("\t\tcompressed length: " + ov.raw_total(i) + " bytes ");
             System.out.println(" play time: " + ov.time_total(i) + "s");
             Comment vc = ov.getComment(i);

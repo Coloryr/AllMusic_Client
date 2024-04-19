@@ -6,7 +6,6 @@ import com.coloryr.allmusic.client.player.APlayer;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -19,19 +18,86 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Mod(modid = "allmusic", version = "3.0.0", acceptedMinecraftVersions = "[1.12,)")
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
+
+    public static class AllMusicMessage implements IMessage {
+        public ByteBuf data;
+
+        @Override
+        public void fromBytes(ByteBuf buf) {
+            data = buf;
+        }
+
+        @Override
+        public void toBytes(ByteBuf buf) {
+
+        }
+    }
+
+    public class AllMusicMessageHandler implements IMessageHandler<AllMusicMessage, IMessage> {
+        @Override
+        public IMessage onMessage(AllMusicMessage message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                try {
+                    final ByteBuf buffer = message.data;
+                    byte type = buffer.readByte();
+                    if (type >= HudUtils.types.length || type < 0) {
+                        return;
+                    }
+                    ComType type1 = ComType.values()[type];
+                    switch (type1) {
+                        case lyric:
+                            hudUtils.lyric = readString(buffer);
+                            break;
+                        case info:
+                            hudUtils.info = readString(buffer);
+                            break;
+                        case list:
+                            hudUtils.list = readString(buffer);
+                            break;
+                        case play:
+                            Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
+                            Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
+                            stopPlaying();
+                            nowPlaying.setMusic(readString(buffer));
+                            break;
+                        case img:
+                            hudUtils.setImg(readString(buffer));
+                            break;
+                        case stop:
+                            stopPlaying();
+                            break;
+                        case clear:
+                            hudUtils.close();
+                            break;
+                        case pos:
+                            nowPlaying.set(buffer.readInt());
+                            break;
+                        case hud:
+                            hudUtils.setPos(readString(buffer));
+                            break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            return null;
+        }
+    }
 
     @Mod.EventHandler
     public void test(final FMLPostInitializationEvent event) {
@@ -45,7 +111,15 @@ public class AllMusic {
         }
         hudUtils = new HudUtils(evt.getModConfigurationDirectory().toPath());
         MinecraftForge.EVENT_BUS.register(this);
-        NetworkRegistry.INSTANCE.newEventDrivenChannel("allmusic:channel").register(this);
+        try {
+            Class<?> server = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
+            Field m = server.getField("channel");
+            SimpleNetworkWrapper channel = (SimpleNetworkWrapper) m.get(null);
+            channel.registerMessage(AllMusicMessageHandler.class, AllMusicMessage.class, 1, Side.CLIENT);
+        } catch (Exception e) {
+            NetworkRegistry.INSTANCE.newSimpleChannel("allmusic:channel")
+                    .registerMessage(AllMusicMessageHandler.class, AllMusicMessage.class, 1, Side.CLIENT);
+        }
     }
 
     @SubscribeEvent
@@ -77,52 +151,6 @@ public class AllMusic {
         buf.readBytes(temp);
 
         return new String(temp, StandardCharsets.UTF_8);
-    }
-
-    @SubscribeEvent
-    public void onClicentPacket(final FMLNetworkEvent.ClientCustomPacketEvent evt) {
-        try {
-            final ByteBuf buffer = evt.getPacket().payload();
-            byte type = buffer.readByte();
-            if (type >= HudUtils.types.length || type < 0) {
-                return;
-            }
-            ComType type1 = ComType.values()[type];
-            switch (type1) {
-                case lyric:
-                    hudUtils.lyric = readString(buffer);
-                    break;
-                case info:
-                    hudUtils.info = readString(buffer);
-                    break;
-                case list:
-                    hudUtils.list = readString(buffer);
-                    break;
-                case play:
-                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
-                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
-                    stopPlaying();
-                    nowPlaying.setMusic(readString(buffer));
-                    break;
-                case img:
-                    hudUtils.setImg(readString(buffer));
-                    break;
-                case stop:
-                    stopPlaying();
-                    break;
-                case clear:
-                    hudUtils.close();
-                    break;
-                case pos:
-                    nowPlaying.set(buffer.readInt());
-                    break;
-                case hud:
-                    hudUtils.setPos(readString(buffer));
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @SubscribeEvent

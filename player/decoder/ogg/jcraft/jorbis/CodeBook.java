@@ -108,16 +108,16 @@ class CodeBook {
         int t;
 
         if (dim > 8) {
-            for (i = 0; i < n;) {
+            for (i = 0; i < n; ) {
                 entry = decode(b);
                 if (entry == -1) return (-1);
                 t = entry * dim;
-                for (j = 0; j < dim;) {
+                for (j = 0; j < dim; ) {
                     a[offset + (i++)] += valuelist[t + (j++)];
                 }
             }
         } else {
-            for (i = 0; i < n;) {
+            for (i = 0; i < n; ) {
                 entry = decode(b);
                 if (entry == -1) return (-1);
                 t = entry * dim;
@@ -151,11 +151,11 @@ class CodeBook {
         int i, j, entry;
         int t;
 
-        for (i = 0; i < n;) {
+        for (i = 0; i < n; ) {
             entry = decode(b);
             if (entry == -1) return (-1);
             t = entry * dim;
-            for (j = 0; j < dim;) {
+            for (j = 0; j < dim; ) {
                 a[offset + i++] = valuelist[t + (j++)];
             }
         }
@@ -166,7 +166,7 @@ class CodeBook {
         int i, j, entry;
         int chptr = 0;
 
-        for (i = offset / ch; i < (offset + n) / ch;) {
+        for (i = offset / ch; i < (offset + n) / ch; ) {
             entry = decode(b);
             if (entry == -1) return (-1);
 
@@ -286,7 +286,8 @@ class CodeBook {
         return (best);
     }
 
-    void clear() {}
+    void clear() {
+    }
 
     private static float dist(int el, float[] ref, int index, float[] b, int step) {
         float acc = (float) 0.;

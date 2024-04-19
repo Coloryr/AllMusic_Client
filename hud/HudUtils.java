@@ -1,5 +1,17 @@
 package com.coloryr.allmusic.client.hud;
 
+import com.coloryr.allmusic.client.AllMusic;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -10,20 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Queue;
 import java.util.concurrent.*;
-
-import javax.imageio.ImageIO;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
-
-import com.coloryr.allmusic.client.AllMusic;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class HudUtils {
 
@@ -51,14 +49,14 @@ public class HudUtils {
         thread.setName("allmusic_pic");
         thread.start();
         client = HttpClientBuilder.create()
-            .useSystemProperties()
-            .build();
+                .useSystemProperties()
+                .build();
         File configFile = new File(path.toFile(), "allmusic.json");
         if (configFile.exists()) {
             try {
                 InputStreamReader reader = new InputStreamReader(
-                    Files.newInputStream(configFile.toPath()),
-                    StandardCharsets.UTF_8);
+                        Files.newInputStream(configFile.toPath()),
+                        StandardCharsets.UTF_8);
                 BufferedReader bf = new BufferedReader(reader);
                 config = new Gson().fromJson(bf, ConfigObj.class);
                 bf.close();
@@ -74,8 +72,8 @@ public class HudUtils {
             config.exitSize = 50;
             try {
                 String data = new GsonBuilder().setPrettyPrinting()
-                    .create()
-                    .toJson(config);
+                        .create()
+                        .toJson(config);
                 FileOutputStream out = new FileOutputStream(configFile);
                 OutputStreamWriter write = new OutputStreamWriter(out, StandardCharsets.UTF_8);
                 write.write(data);
@@ -126,7 +124,7 @@ public class HudUtils {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
         outputImage.getGraphics()
-            .drawImage(resultingImage, 0, 0, null);
+                .drawImage(resultingImage, 0, 0, null);
         return outputImage;
     }
 
@@ -192,13 +190,13 @@ public class HudUtils {
                 graphics.dispose();
 
                 formatAvatarImage.getRGB(
-                    0,
-                    0,
-                    formatAvatarImage.getWidth(),
-                    formatAvatarImage.getHeight(),
-                    pixels,
-                    0,
-                    formatAvatarImage.getWidth());
+                        0,
+                        0,
+                        formatAvatarImage.getWidth(),
+                        formatAvatarImage.getHeight(),
+                        pixels,
+                        0,
+                        formatAvatarImage.getWidth());
                 getClose();
                 thisRoute = true;
             } else {
@@ -226,15 +224,15 @@ public class HudUtils {
                 }
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
                 GL11.glTexImage2D(
-                    GL11.GL_TEXTURE_2D,
-                    0,
-                    GL11.GL_RGBA8,
-                    image.getWidth(),
-                    image.getHeight(),
-                    0,
-                    GL11.GL_RGBA,
-                    GL11.GL_UNSIGNED_BYTE,
-                    byteBuffer);
+                        GL11.GL_TEXTURE_2D,
+                        0,
+                        GL11.GL_RGBA8,
+                        image.getWidth(),
+                        image.getHeight(),
+                        0,
+                        GL11.GL_RGBA,
+                        GL11.GL_UNSIGNED_BYTE,
+                        byteBuffer);
                 GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
@@ -299,12 +297,12 @@ public class HudUtils {
                 int offset = 0;
                 for (String item : temp) {
                     drawText(
-                        item,
-                        save.lyric.x,
-                        save.lyric.y + offset,
-                        save.lyric.dir,
-                        save.lyric.color,
-                        save.lyric.shadow);
+                            item,
+                            save.lyric.x,
+                            save.lyric.y + offset,
+                            save.lyric.dir,
+                            save.lyric.color,
+                            save.lyric.shadow);
                     offset += 10;
                 }
             }
