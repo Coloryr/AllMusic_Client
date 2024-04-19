@@ -22,3 +22,5 @@ for %%i in (%array%) do (
     if not exist "%%i\build" mklink /j "%%i\build" "build"
     if not exist "%%i\.gradle" mklink /j "%%i\.gradle" ".gradle"
 )
+
+endlocal
