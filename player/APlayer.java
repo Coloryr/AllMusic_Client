@@ -10,17 +10,17 @@ import com.coloryr.allmusic.client.player.decoder.ogg.OggDecoder;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.SocketException;
-import java.net.URL;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -72,24 +72,19 @@ public class APlayer extends InputStream {
         return isPlay;
     }
 
-    public static URL Get(URL url) {
-        if (url.toString()
-                .contains("https://music.163.com/song/media/outer/url?id=")
-                || url.toString()
-                .contains("http://music.163.com/song/media/outer/url?id=")) {
+    public String Get(String url) {
+        if (url.contains("https://music.163.com/song/media/outer/url?id=")
+                || url.contains("http://music.163.com/song/media/outer/url?id=")) {
             try {
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setConnectTimeout(4 * 1000);
-                connection.setRequestProperty(
-                        "User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
-                connection.setRequestProperty("Host", "music.163.com");
-                connection.connect();
-                if (connection.getResponseCode() == 302) {
-                    return new URL(connection.getHeaderField("Location"));
+                HttpGet get = new HttpGet(url);
+                get.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
+                get.setHeader("Host", "music.163.com");
+                HttpResponse response = client.execute(get);
+                StatusLine line = response.getStatusLine();
+                if (line.getStatusCode() == 302) {
+                    return response.getFirstHeader("Location").getValue();
                 }
-                return connection.getURL();
+                return url;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -133,9 +128,8 @@ public class APlayer extends InputStream {
                 url = urls.poll();
                 if (url == null || url.isEmpty()) continue;
                 urls.clear();
-                URL nowURL = new URL(url);
-                nowURL = Get(nowURL);
-                if (nowURL == null) continue;
+                url = Get(url);
+                if (url == null) continue;
                 try {
                     local = 0;
                     connect();
@@ -313,12 +307,12 @@ public class APlayer extends InputStream {
     }
 
     @Override
-    public int read(byte[] buf) throws IOException {
+    public int read(byte @NotNull [] buf) throws IOException {
         return content.read(buf);
     }
 
     @Override
-    public synchronized int read(byte[] buf, int off, int len) throws IOException {
+    public synchronized int read(byte @NotNull [] buf, int off, int len) throws IOException {
         try {
             int temp = content.read(buf, off, len);
             local += temp;
