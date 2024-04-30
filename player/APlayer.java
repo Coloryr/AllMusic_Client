@@ -14,7 +14,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
@@ -307,12 +306,12 @@ public class APlayer extends InputStream {
     }
 
     @Override
-    public int read(byte @NotNull [] buf) throws IOException {
+    public int read(byte[] buf) throws IOException {
         return content.read(buf);
     }
 
     @Override
-    public synchronized int read(byte @NotNull [] buf, int off, int len) throws IOException {
+    public synchronized int read(byte[] buf, int off, int len) throws IOException {
         try {
             int temp = content.read(buf, off, len);
             local += temp;

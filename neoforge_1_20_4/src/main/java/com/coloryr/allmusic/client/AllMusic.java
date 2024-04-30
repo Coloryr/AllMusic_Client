@@ -22,12 +22,16 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.sound.PlaySoundSourceEvent;
+import net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEvent;
 import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.handling.IPlayPayloadHandler;
 import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
@@ -38,7 +42,7 @@ import org.joml.Quaternionf;
 import java.nio.charset.StandardCharsets;
 
 @Mod("allmusic_client")
-public class AllMusic implements IPlayPayloadHandler<PackData>{
+public class AllMusic implements IPlayPayloadHandler<PackData> {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private static GuiGraphics gui;
@@ -66,7 +70,8 @@ public class AllMusic implements IPlayPayloadHandler<PackData>{
 
     public void register(final RegisterPayloadHandlerEvent event) {
         final IPayloadRegistrar registrar = event.registrar("allmusic");
-        registrar.versioned("1.0").optional().play(channel, new DataReader(), this);
+        registrar.optional().play(channel, new DataReader(), handler -> handler
+                .client(this));
     }
 
     @Override
@@ -160,7 +165,17 @@ public class AllMusic implements IPlayPayloadHandler<PackData>{
     }
 
     @SubscribeEvent
-    public void onSound(final SoundEvent.SoundSourceEvent e) {
+    public void onSound(final PlayStreamingSourceEvent e) {
+        if (!nowPlaying.isPlay())
+            return;
+        SoundSource data = e.getSound().getSource();
+        switch (data) {
+            case MUSIC, RECORDS -> e.getChannel().stop();
+        }
+    }
+
+    @SubscribeEvent
+    public void onSound(final PlaySoundSourceEvent e) {
         if (!nowPlaying.isPlay())
             return;
         SoundSource data = e.getSound().getSource();

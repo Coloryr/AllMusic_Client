@@ -54,77 +54,60 @@ public class AllMusic {
 
     private void setup(final FMLClientSetupEvent event) {
         hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
+        NetworkRegistry.ChannelBuilder.named(channel)
+                .networkProtocolVersion(() -> "1.0")
+                .clientAcceptedVersions(((status) -> true))
+                .serverAcceptedVersions(((status) -> true))
+                .eventNetworkChannel()
+                .addListener(this::handle);
+    }
+
+    public void handle(NetworkEvent.ServerCustomPayloadEvent event) {
         try {
-            Class parcleClass = Class.forName("coloryr.allmusic.AllMusicForge");
-            Field m = parcleClass.getField("channel");
-            SimpleChannel channel = (SimpleChannel) m.get(null);
-            channel.registerMessage(1, PacketBuffer.class, this::encode, this::decode, this::handle);
+            PacketBuffer buffer = event.getPayload();
+            byte type = buffer.readByte();
+            if (type >= HudUtils.types.length || type < 0) {
+                return;
+            }
+            ComType type1 = ComType.values()[type];
+            switch (type1) {
+                case lyric:
+                    hudUtils.lyric = readString(buffer);
+                    break;
+                case info:
+                    hudUtils.info = readString(buffer);
+                    break;
+                case list:
+                    hudUtils.list = readString(buffer);
+                    break;
+                case play:
+                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
+                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
+                    stopPlaying();
+                    nowPlaying.setMusic(readString(buffer));
+                    break;
+                case img:
+                    hudUtils.setImg(readString(buffer));
+                    break;
+                case stop:
+                    stopPlaying();
+                    break;
+                case clear:
+                    hudUtils.close();
+                    break;
+                case pos:
+                    nowPlaying.set(buffer.readInt());
+                    break;
+                case hud:
+                    hudUtils.setPos(readString(buffer));
+                    break;
+            }
         } catch (Exception e) {
-            NetworkRegistry.ChannelBuilder.named(channel)
-                    .networkProtocolVersion(() -> "1.0")
-                    .clientAcceptedVersions(((status) -> true))
-                    .serverAcceptedVersions(((status) -> true))
-                    .simpleChannel()
-                    .registerMessage(0, PacketBuffer.class, this::encode, this::decode, this::handle);
+            e.printStackTrace();
         }
     }
 
-    public void encode(PacketBuffer msg, PacketBuffer buf) {
-
-    }
-
-    public PacketBuffer decode(PacketBuffer buf) {
-        return buf;
-    }
-
-    public void handle(PacketBuffer buffer, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            try {
-                byte type = buffer.readByte();
-                if (type >= HudUtils.types.length || type < 0) {
-                    return;
-                }
-                ComType type1 = ComType.values()[type];
-                switch (type1) {
-                    case lyric:
-                        hudUtils.lyric = readString(buffer);
-                        break;
-                    case info:
-                        hudUtils.info = readString(buffer);
-                        break;
-                    case list:
-                        hudUtils.list = readString(buffer);
-                        break;
-                    case play:
-                        Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
-                        Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
-                        stopPlaying();
-                        nowPlaying.setMusic(readString(buffer));
-                        break;
-                    case img:
-                        hudUtils.setImg(readString(buffer));
-                        break;
-                    case stop:
-                        stopPlaying();
-                        break;
-                    case clear:
-                        hudUtils.close();
-                        break;
-                    case pos:
-                        nowPlaying.set(buffer.readInt());
-                        break;
-                    case hud:
-                        hudUtils.setPos(readString(buffer));
-                        break;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        ctx.get().setPacketHandled(true);
-    }
-
-    private static String readString(ByteBuf buf) {
+    private static String readString(PacketBuffer buf) {
         int size = buf.readInt();
         byte[] temp = new byte[size];
         buf.readBytes(temp);

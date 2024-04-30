@@ -30,6 +30,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
 @Mod(modid = "allmusic_client", version = "3.0.0", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
+@SideOnly(Side.CLIENT)
 public class AllMusic {
 
     private static APlayer nowPlaying;
@@ -119,53 +120,50 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onClicentPacket(final FMLNetworkEvent.ClientCustomPacketEvent evt) {
+    @SideOnly(Side.CLIENT)
+    public void onClientPacket(final FMLNetworkEvent.ClientCustomPacketEvent evt) {
+        final ByteBuf buffer = evt.packet.payload();
         try {
-            final ByteBuf buffer = evt.packet.payload();
-            try {
-                byte type = buffer.readByte();
-                if (type >= HudUtils.types.length || type < 0) {
-                    return;
-                }
-                ComType type1 = ComType.values()[type];
-                switch (type1) {
-                    case lyric:
-                        hudUtils.lyric = readString(buffer);
-                        break;
-                    case info:
-                        hudUtils.info = readString(buffer);
-                        break;
-                    case list:
-                        hudUtils.list = readString(buffer);
-                        break;
-                    case play:
-                        Minecraft.getMinecraft()
+            byte type = buffer.readByte();
+            if (type >= HudUtils.types.length || type < 0) {
+                return;
+            }
+            ComType type1 = ComType.values()[type];
+            switch (type1) {
+                case lyric:
+                    hudUtils.lyric = readString(buffer);
+                    break;
+                case info:
+                    hudUtils.info = readString(buffer);
+                    break;
+                case list:
+                    hudUtils.list = readString(buffer);
+                    break;
+                case play:
+                    Minecraft.getMinecraft()
                             .getSoundHandler()
                             .stopSounds();
-                        Minecraft.getMinecraft()
+                    Minecraft.getMinecraft()
                             .getSoundHandler()
                             .stopSounds();
-                        stopPlaying();
-                        nowPlaying.setMusic(readString(buffer));
-                        break;
-                    case img:
-                        hudUtils.setImg(readString(buffer));
-                        break;
-                    case stop:
-                        stopPlaying();
-                        break;
-                    case clear:
-                        hudUtils.close();
-                        break;
-                    case pos:
-                        nowPlaying.set(buffer.readInt());
-                        break;
-                    case hud:
-                        hudUtils.setPos(readString(buffer));
-                        break;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                    stopPlaying();
+                    nowPlaying.setMusic(readString(buffer));
+                    break;
+                case img:
+                    hudUtils.setImg(readString(buffer));
+                    break;
+                case stop:
+                    stopPlaying();
+                    break;
+                case clear:
+                    hudUtils.close();
+                    break;
+                case pos:
+                    nowPlaying.set(buffer.readInt());
+                    break;
+                case hud:
+                    hudUtils.setPos(readString(buffer));
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();

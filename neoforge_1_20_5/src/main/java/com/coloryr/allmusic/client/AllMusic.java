@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -17,17 +17,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.sound.PlaySoundSourceEvent;
+import net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
@@ -39,7 +42,7 @@ import org.joml.Quaternionf;
 import java.nio.charset.StandardCharsets;
 
 @Mod("allmusic_client")
-public class AllMusic implements IPayloadHandler<PackData> {
+public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<RegistryFriendlyByteBuf, PackData> {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private static GuiGraphics gui;
@@ -47,7 +50,7 @@ public class AllMusic implements IPayloadHandler<PackData> {
     public static final ResourceLocation channel =
             new ResourceLocation("allmusic", "channel");
 
-    public AllMusic(IEventBus modEventBus) {
+    public AllMusic(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::setup1);
         modEventBus.addListener(this::onLoad);
@@ -66,14 +69,25 @@ public class AllMusic implements IPayloadHandler<PackData> {
     }
 
     public void register(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("allmusic");
-        registrar.versioned("1.0").optional().playToClient(PackData.TYPE, PackData.CODEC, this);
+        final PayloadRegistrar registrar = event.registrar("1.0")
+                .optional()
+                .playToClient(PackData.TYPE, this,this);
+    }
+
+    @Override
+    public PackData decode(RegistryFriendlyByteBuf p_320376_) {
+        handle(p_320376_);
+        return new PackData();
+    }
+
+    @Override
+    public void encode(RegistryFriendlyByteBuf p_320158_, PackData p_320396_) {
+
     }
 
     @Override
     public void handle(@NotNull PackData payload, IPayloadContext context) {
-        context.enqueueWork(() -> handle(payload.buffer()));
-        context.handle(payload);
+
     }
 
     public void handle(ByteBuf buffer) {
@@ -155,7 +169,17 @@ public class AllMusic implements IPayloadHandler<PackData> {
     }
 
     @SubscribeEvent
-    public void onSound(final SoundEvent.SoundSourceEvent e) {
+    public void onSound(final PlaySoundSourceEvent e) {
+        if (!nowPlaying.isPlay())
+            return;
+        SoundSource data = e.getSound().getSource();
+        switch (data) {
+            case MUSIC, RECORDS -> e.getChannel().stop();
+        }
+    }
+
+    @SubscribeEvent
+    public void onSound(final PlayStreamingSourceEvent e) {
         if (!nowPlaying.isPlay())
             return;
         SoundSource data = e.getSound().getSource();
@@ -232,7 +256,7 @@ public class AllMusic implements IPayloadHandler<PackData> {
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
+    public void onTick(ClientTickEvent.Post event) {
         nowPlaying.tick();
     }
 

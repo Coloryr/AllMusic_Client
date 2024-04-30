@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -34,68 +35,49 @@ public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
 
-    public static class AllMusicMessage implements IMessage {
-        public ByteBuf data;
-
-        @Override
-        public void fromBytes(ByteBuf buf) {
-            data = buf;
-        }
-
-        @Override
-        public void toBytes(ByteBuf buf) {
-
-        }
-    }
-
-    public class AllMusicMessageHandler implements IMessageHandler<AllMusicMessage, IMessage> {
-        @Override
-        public IMessage onMessage(AllMusicMessage message, MessageContext ctx) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                try {
-                    final ByteBuf buffer = message.data;
-                    byte type = buffer.readByte();
-                    if (type >= HudUtils.types.length || type < 0) {
-                        return;
-                    }
-                    ComType type1 = ComType.values()[type];
-                    switch (type1) {
-                        case lyric:
-                            hudUtils.lyric = readString(buffer);
-                            break;
-                        case info:
-                            hudUtils.info = readString(buffer);
-                            break;
-                        case list:
-                            hudUtils.list = readString(buffer);
-                            break;
-                        case play:
-                            Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
-                            Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
-                            stopPlaying();
-                            nowPlaying.setMusic(readString(buffer));
-                            break;
-                        case img:
-                            hudUtils.setImg(readString(buffer));
-                            break;
-                        case stop:
-                            stopPlaying();
-                            break;
-                        case clear:
-                            hudUtils.close();
-                            break;
-                        case pos:
-                            nowPlaying.set(buffer.readInt());
-                            break;
-                        case hud:
-                            hudUtils.setPos(readString(buffer));
-                            break;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            return null;
+    @SubscribeEvent
+    public void onMessage(FMLNetworkEvent.ServerCustomPacketEvent message) {
+        try {
+            final ByteBuf buffer = message.getPacket().payload();
+            byte type = buffer.readByte();
+            if (type >= HudUtils.types.length || type < 0) {
+                return;
+            }
+            ComType type1 = ComType.values()[type];
+            switch (type1) {
+                case lyric:
+                    hudUtils.lyric = readString(buffer);
+                    break;
+                case info:
+                    hudUtils.info = readString(buffer);
+                    break;
+                case list:
+                    hudUtils.list = readString(buffer);
+                    break;
+                case play:
+                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
+                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
+                    stopPlaying();
+                    nowPlaying.setMusic(readString(buffer));
+                    break;
+                case img:
+                    hudUtils.setImg(readString(buffer));
+                    break;
+                case stop:
+                    stopPlaying();
+                    break;
+                case clear:
+                    hudUtils.close();
+                    break;
+                case pos:
+                    nowPlaying.set(buffer.readInt());
+                    break;
+                case hud:
+                    hudUtils.setPos(readString(buffer));
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -114,11 +96,11 @@ public class AllMusic {
         try {
             Class<?> server = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
             Field m = server.getField("channel");
-            SimpleNetworkWrapper channel = (SimpleNetworkWrapper) m.get(null);
-            channel.registerMessage(AllMusicMessageHandler.class, AllMusicMessage.class, 1, Side.CLIENT);
+            FMLEventChannel channel = (FMLEventChannel) m.get(null);
+            channel.register(this);
         } catch (Exception e) {
-            NetworkRegistry.INSTANCE.newSimpleChannel("allmusic:channel")
-                    .registerMessage(AllMusicMessageHandler.class, AllMusicMessage.class, 1, Side.CLIENT);
+            NetworkRegistry.INSTANCE.newEventDrivenChannel("allmusic:channel")
+                    .register(this);
         }
     }
 
