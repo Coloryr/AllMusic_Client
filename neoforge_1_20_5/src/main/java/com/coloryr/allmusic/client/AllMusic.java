@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.bus.api.IEventBus;
@@ -28,7 +27,6 @@ import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.sound.PlaySoundSourceEvent;
 import net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
-import net.neoforged.neoforge.client.event.sound.SoundEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -75,19 +73,20 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     @Override
-    public PackData decode(RegistryFriendlyByteBuf p_320376_) {
-        handle(p_320376_);
+    public PackData decode(RegistryFriendlyByteBuf pack) {
+        handle(pack);
+        pack.clear();
         return new PackData();
     }
 
     @Override
-    public void encode(RegistryFriendlyByteBuf p_320158_, PackData p_320396_) {
+    public void encode(RegistryFriendlyByteBuf pack, PackData data) {
 
     }
 
     @Override
     public void handle(@NotNull PackData payload, IPayloadContext context) {
-
+        context.handle(payload);
     }
 
     public void handle(ByteBuf buffer) {
