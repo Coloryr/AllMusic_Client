@@ -6,6 +6,6 @@ public record PackData() implements CustomPacketPayload {
     public static final Type<PackData> TYPE = new Type<>(AllMusic.channel);
     @Override
     public Type<? extends CustomPacketPayload> type() {
-        return new Type<>(AllMusic.channel);
+        return TYPE;
     }
 }

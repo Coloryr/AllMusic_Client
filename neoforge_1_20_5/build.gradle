@@ -14,7 +14,7 @@ repositories {
 }
 
 base {
-    archivesName = mod_id
+    archivesName = file_name
 }
 
 // Mojang ships Java 21 to end users starting in 1.20.5, so mods should target Java 21.

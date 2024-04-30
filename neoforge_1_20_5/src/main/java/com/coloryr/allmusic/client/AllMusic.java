@@ -86,7 +86,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     @Override
     public void handle(@NotNull PackData payload, IPayloadContext context) {
-        context.handle(payload);
+        //context.handle(payload);
     }
 
     public void handle(ByteBuf buffer) {
