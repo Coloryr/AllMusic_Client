@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 
 version = "3.0.0"
 group = "com.coloryr.allmusic.client" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "[forge-1.12.2]AllMusic"
+archivesBaseName = "[forge-1.12.2]AllMusic_Client"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 

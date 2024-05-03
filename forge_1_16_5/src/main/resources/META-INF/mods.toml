@@ -25,7 +25,7 @@ displayURL="https://github.com/Coloryr/AllMusic3_Client" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="icon.png" #optional
 # A text field displayed in the mod UI
-credits="" #optional
+credits="AllMusic Client Mod" #optional
 # A text field displayed in the mod UI
 authors="Color_yr" #optional
 # The description text for the mod (multi line!) (#mandatory)

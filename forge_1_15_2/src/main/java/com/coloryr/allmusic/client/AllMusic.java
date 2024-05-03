@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-@Mod("allmusic")
+@Mod("allmusic_client")
 public class AllMusic  {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
@@ -101,6 +101,7 @@ public class AllMusic  {
                     hudUtils.setPos(readString(buffer));
                     break;
             }
+            event.getSource().get().setPacketHandled(true);
         } catch (Exception e) {
             e.printStackTrace();
         }

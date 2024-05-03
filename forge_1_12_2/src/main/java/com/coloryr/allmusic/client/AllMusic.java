@@ -30,13 +30,14 @@ import org.lwjgl.opengl.GL11;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
-@Mod(modid = "allmusic", version = "3.0.0", acceptedMinecraftVersions = "[1.12,)")
+@Mod(modid = "allmusic_client", version = "3.0.0", acceptedMinecraftVersions = "[1.12,)")
+@SideOnly(Side.CLIENT)
 public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
 
     @SubscribeEvent
-    public void onMessage(FMLNetworkEvent.ServerCustomPacketEvent message) {
+    public void onMessage(FMLNetworkEvent.ClientCustomPacketEvent message) {
         try {
             final ByteBuf buffer = message.getPacket().payload();
             byte type = buffer.readByte();

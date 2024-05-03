@@ -13,6 +13,7 @@
     "credits": "This mod is use in allmusic",
     "logoFile": "icon.png",
     "screenshots": [],
-    "dependencies": []
+    "useDependencyInformation": true,
+    "dependencies": ["allmusic_server"]
   }
 ]

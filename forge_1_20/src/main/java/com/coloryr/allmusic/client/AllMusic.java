@@ -111,6 +111,7 @@ public class AllMusic {
                     hudUtils.setPos(readString(buf));
                     break;
             }
+            event.getSource().get().setPacketHandled(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
