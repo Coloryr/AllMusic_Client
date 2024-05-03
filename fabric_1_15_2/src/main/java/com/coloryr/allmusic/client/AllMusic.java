@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AllMusic implements ModInitializer {
-    public static final Identifier ID = new Identifier("assets/allmusic_client", "channel");
+    public static final Identifier ID = new Identifier("allmusic", "channel");
     public static APlayer nowPlaying;
     public static HudUtils hudUtils;
 
