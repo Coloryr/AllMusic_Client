@@ -28,13 +28,7 @@ public class AllMusic implements ModInitializer {
     public static HudUtils hudUtils;
 
     public static void onServerQuit() {
-        try {
-            nowPlaying.close();
-            hudUtils.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        hudUtils.close();
+        stopPlaying();
         hudUtils.save = null;
     }
 

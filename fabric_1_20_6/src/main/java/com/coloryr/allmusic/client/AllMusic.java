@@ -30,14 +30,7 @@ public class AllMusic implements ModInitializer {
     private static DrawContext context;
 
     public static void onServerQuit() {
-        try {
-            nowPlaying.close();
-            hudUtils.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        hudUtils.lyric = hudUtils.info = hudUtils.list = "";
-        hudUtils.haveImg = false;
+        stopPlaying();
         hudUtils.save = null;
     }
 
