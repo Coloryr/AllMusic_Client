@@ -237,8 +237,6 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
         bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
 
         BufferUploader.drawWithShader(bufferBuilder.end());
-
-        //GuiComponent.blit(stack, x, y, 0, 0, 0, size, size, size, size);
     }
 
     public static void drawText(String item, int x, int y, int color, boolean shadow) {

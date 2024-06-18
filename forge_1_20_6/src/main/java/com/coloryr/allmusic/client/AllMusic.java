@@ -39,7 +39,7 @@ public class AllMusic {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private static GuiGraphics gui;
-    private static final ResourceLocation channel = ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
+    private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
 
     public AllMusic() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -59,7 +59,7 @@ public class AllMusic {
         hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
         try {
             Class parcleClass = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
-            Field m = parcleClass.getField("channel1");
+            Field m = parcleClass.getField("channel");
             SimpleChannel channel = (SimpleChannel) m.get(null);
             channel.messageBuilder(FriendlyByteBuf.class)
                     .decoder(this::decode)
@@ -220,17 +220,19 @@ public class AllMusic {
         float v1 = 1;
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.addVertex(matrix, (float) x0, (float) y1, (float) z).setUv(u0, v1);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y1, (float) z).setUv(u1, v1);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y0, (float) z).setUv(u1, v0);
-        bufferBuilder.addVertex(matrix, (float) x0, (float) y0, (float) z).setUv(u0, v0);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     public static void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = Minecraft.getInstance().font;
+
         gui.drawString(hud, item, x, y, color, shadow);
     }
 
