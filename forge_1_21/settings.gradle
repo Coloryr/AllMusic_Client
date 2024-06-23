@@ -9,6 +9,7 @@ pluginManagement {
             name = "Sponge Maven Repository"
             url = "https://repo.spongepowered.org/repository/maven-public/"
         }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
 }
 

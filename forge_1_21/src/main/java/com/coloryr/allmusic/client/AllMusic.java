@@ -2,18 +2,24 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
+import com.coloryr.allmusic.client.mixin.IGuiGetter;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,14 +34,16 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.SimpleChannel;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
+@OnlyIn(Dist.CLIENT)
 @Mod("allmusic_client")
-public class AllMusic {
+public class AllMusic implements LayeredDraw.Layer {
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private static GuiGraphics gui;
@@ -75,6 +83,8 @@ public class AllMusic {
                     .eventNetworkChannel()
                     .addListener((data) -> handle(data.getPayload()));
         }
+        var get = (IGuiGetter) (Minecraft.getInstance().gui);
+        get.getLayers().add(this);
     }
 
     public void encode(FriendlyByteBuf msg, FriendlyByteBuf buf) {
@@ -235,15 +245,6 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(TickEvent.RenderTickEvent.Pre e) {
-        var minecraft = Minecraft.getInstance();
-        gui = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
-        hudUtils.update();
-        gui.flush();
-        gui = null;
-    }
-
-    @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         nowPlaying.tick();
     }
@@ -255,5 +256,13 @@ public class AllMusic {
 
     public static void runMain(Runnable runnable) {
         Minecraft.getInstance().execute(runnable);
+    }
+
+    @Override
+    public void render(@NotNull GuiGraphics guiGraphics, @NotNull DeltaTracker deltaTracker) {
+        if (!Minecraft.getInstance().options.hideGui) {
+            gui = guiGraphics;
+            hudUtils.update();
+        }
     }
 }

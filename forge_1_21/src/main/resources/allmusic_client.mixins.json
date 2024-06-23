@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.coloryr.allmusic.client.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "allmusic_client.refmap.json",
+  "mixins": [
+    "IGuiGetter",
+    "GuiMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
