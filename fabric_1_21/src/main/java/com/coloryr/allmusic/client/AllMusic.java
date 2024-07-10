@@ -142,8 +142,8 @@ public class AllMusic implements ModInitializer {
             PackPayload payload = new PackPayload(ComType.clear, null, 0);
             switch (type1) {
                 case lyric, info, list, play, img, hud -> payload = new PackPayload(type1, readString(buffer), 0);
-                case stop, clear -> new PackPayload(type1, null, 0);
-                case pos -> new PackPayload(type1, null, buffer.readInt());
+                case stop, clear -> payload = new PackPayload(type1, null, 0);
+                case pos -> payload = new PackPayload(type1, null, buffer.readInt());
             }
             buffer.clear();
             return payload;
