@@ -369,7 +369,17 @@ catch (Exception ignored) {
 
 // Pulls version first from the VERSION env and then git tag
 String identifiedVersion
-String versionOverride = "3.0.0"
+
+def getVersionFromFile() {
+    def versionFile = file('../version')
+    if (versionFile.exists()) {
+        return versionFile.text.trim()
+    } else {
+        throw new GradleException("Version file not found: ${versionFile.absolutePath}")
+    }
+}
+
+String versionOverride = getVersionFromFile()
 try {
     // Produce a version based on the tag, or for branches something like 0.2.2-configurable-maven-and-extras.38+43090270b6-dirty
     if (versionOverride == null) {

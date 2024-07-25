@@ -13,7 +13,17 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '3.0.0'
+def getVersionFromFile() {
+    def versionFile = file('../version')
+    if (versionFile.exists()) {
+        return versionFile.text.trim()
+    } else {
+        throw new GradleException("Version file not found: ${versionFile.absolutePath}")
+    }
+}
+
+version = getVersionFromFile()
+
 group = 'com.coloryr.allmusic.client' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = '[forge-1.17.1]AllMusic_Client'
 

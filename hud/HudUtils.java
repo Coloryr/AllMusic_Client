@@ -136,13 +136,15 @@ public class HudUtils {
             HttpEntity entity = response.getEntity();
             inputStream = entity.getContent();
             BufferedImage image = resizeImage(ImageIO.read(inputStream), config.picSize, config.picSize);
-            int[] pixels = new int[image.getWidth() * image.getHeight()];
-            byteBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
-
             int width = image.getWidth();
+            int height = image.getHeight();
+            int[] pixels = new int[width * height];
+            byteBuffer = ByteBuffer.allocateDirect(width * height * 4);
+
             while (save == null) {
                 Thread.sleep(200);
             }
+            //图片旋转
             if (save.pic.shadow) {
                 // 透明底的图片
                 BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
@@ -200,14 +202,14 @@ public class HudUtils {
                 getClose();
                 thisRoute = true;
             } else {
-                image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+                image.getRGB(0, 0, width, height, pixels, 0, width);
                 getClose();
                 thisRoute = false;
             }
 
-            for (int h = 0; h < image.getHeight(); h++) {
-                for (int w = 0; w < image.getWidth(); w++) {
-                    int pixel = pixels[h * image.getWidth() + w];
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
+                    int pixel = pixels[h * width + w];
 
                     byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
                     byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
@@ -227,8 +229,8 @@ public class HudUtils {
                         GL11.GL_TEXTURE_2D,
                         0,
                         GL11.GL_RGBA8,
-                        image.getWidth(),
-                        image.getHeight(),
+                        width,
+                        height,
                         0,
                         GL11.GL_RGBA,
                         GL11.GL_UNSIGNED_BYTE,

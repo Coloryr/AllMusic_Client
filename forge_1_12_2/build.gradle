@@ -10,7 +10,16 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "3.0.0"
+def getVersionFromFile() {
+    def versionFile = file('../version')
+    if (versionFile.exists()) {
+        return versionFile.text.trim()
+    } else {
+        throw new GradleException("Version file not found: ${versionFile.absolutePath}")
+    }
+}
+
+version = getVersionFromFile()
 group = "com.coloryr.allmusic.client" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "[forge-1.12.2]AllMusic_Client"
 

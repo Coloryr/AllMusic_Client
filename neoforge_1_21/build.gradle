@@ -6,7 +6,17 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.0.142'
 }
 
-version = mod_version
+def getVersionFromFile() {
+    def versionFile = file('../version')
+    if (versionFile.exists()) {
+        return versionFile.text.trim()
+    } else {
+        throw new GradleException("Version file not found: ${versionFile.absolutePath}")
+    }
+}
+
+version = getVersionFromFile()
+
 group = mod_group_id
 
 repositories {
