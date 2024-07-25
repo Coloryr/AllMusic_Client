@@ -4,6 +4,7 @@ import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,9 +17,6 @@ import net.minecraft.util.PacketByteBuf;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class AllMusic implements ModInitializer {
     public static final Identifier ID = new Identifier("allmusic", "channel");
@@ -108,8 +106,8 @@ public class AllMusic implements ModInitializer {
         });
     }
 
-    public static void runMain(Runnable runnable){
-        MinecraftClient.getInstance().execute(runnable);
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
     }
 
     public static float getVolume(){

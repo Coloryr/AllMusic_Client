@@ -263,6 +263,6 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     public static void runMain(Runnable runnable) {
-        Minecraft.getInstance().execute(runnable);
+        RenderSystem.recordRenderCall(runnable::run);
     }
 }

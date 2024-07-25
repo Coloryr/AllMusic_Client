@@ -4,6 +4,7 @@ import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -222,8 +223,8 @@ public class AllMusic  {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable){
-        Minecraft.getInstance().execute(runnable);
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
     }
 
     public static void sendMessage(String data) {

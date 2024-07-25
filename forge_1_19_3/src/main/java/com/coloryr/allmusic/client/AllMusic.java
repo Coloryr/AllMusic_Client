@@ -189,11 +189,10 @@ public class AllMusic {
 
         int a = size / 2;
 
-        if(ang > 0) {
+        if (ang > 0) {
             matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0,0,1, ang));
-        }
-        else {
+                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
+        } else {
             matrix = matrix.translation(x + a, y + a, 0);
         }
         int x0 = -a;
@@ -236,7 +235,7 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event){
+    public void onTick(TickEvent.ClientTickEvent event) {
         nowPlaying.tick();
     }
 
@@ -245,7 +244,7 @@ public class AllMusic {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable){
-        Minecraft.getInstance().execute(runnable);
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
     }
 }

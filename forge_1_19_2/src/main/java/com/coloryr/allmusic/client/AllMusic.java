@@ -242,7 +242,7 @@ public class AllMusic {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable){
-        Minecraft.getInstance().execute(runnable);
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
     }
 }

@@ -42,7 +42,7 @@ public class AllMusic implements ModInitializer {
         hudUtils.close();
     }
 
-    private static MatrixStack stack = new MatrixStack();
+    private static final MatrixStack stack = new MatrixStack();
 
     public static int getScreenWidth() {
         return MinecraftClient.getInstance().getWindow().getScaledWidth();
@@ -111,8 +111,8 @@ public class AllMusic implements ModInitializer {
         });
     }
 
-    public static void runMain(Runnable runnable){
-        MinecraftClient.getInstance().execute(runnable);
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
     }
 
     public static float getVolume(){

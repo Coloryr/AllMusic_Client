@@ -36,6 +36,8 @@ def getVersionFromFile() {
 
 version = getVersionFromFile()
 
+mod_version = version
+
 group = mod_group_id
 
 base {

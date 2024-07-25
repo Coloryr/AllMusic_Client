@@ -262,6 +262,6 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
     }
 
     public static void runMain(Runnable runnable) {
-        Minecraft.getInstance().execute(runnable);
+        RenderSystem.recordRenderCall(runnable::run);
     }
 }

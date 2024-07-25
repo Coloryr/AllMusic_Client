@@ -104,8 +104,6 @@ public class AllMusic implements ModInitializer {
         bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).texture(u0, v0).next();
 
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-
-//        DrawableHelper.drawTexture();
     }
 
     public static void sendMessage(String data) {
@@ -115,7 +113,7 @@ public class AllMusic implements ModInitializer {
     }
 
     public static void runMain(Runnable runnable) {
-        MinecraftClient.getInstance().execute(runnable);
+        RenderSystem.recordRenderCall(runnable::run);
     }
 
     public static float getVolume() {

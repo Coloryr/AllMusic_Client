@@ -255,7 +255,7 @@ public class AllMusic implements LayeredDraw.Layer {
     }
 
     public static void runMain(Runnable runnable) {
-        Minecraft.getInstance().execute(runnable);
+        RenderSystem.recordRenderCall(runnable::run);
     }
 
     @Override

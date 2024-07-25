@@ -118,8 +118,8 @@ public class AllMusic implements ModInitializer {
         });
     }
 
-    public static void runMain(Runnable runnable){
-        MinecraftClient.getInstance().execute(runnable);
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
     }
 
     public static float getVolume(){
