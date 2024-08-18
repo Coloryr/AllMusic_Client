@@ -33,7 +33,6 @@ public class HudUtils {
     private ByteBuffer byteBuffer;
     private int textureID = -1;
     public boolean haveImg;
-    public final Object lock = new Object();
     private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
     private final Semaphore semaphore = new Semaphore(0);
     private final HttpClient client;
@@ -67,7 +66,7 @@ public class HudUtils {
         }
         if (config == null) {
             config = new ConfigObj();
-            config.picSize = 500;
+            config.picSize = 200;
             config.queueSize = 100;
             config.exitSize = 50;
             try {
@@ -270,47 +269,43 @@ public class HudUtils {
     }
 
     public void setPos(String data) {
-        synchronized (lock) {
-            save = new Gson().fromJson(data, SaveOBJ.class);
-        }
+        save = new Gson().fromJson(data, SaveOBJ.class);
     }
 
     public void update() {
+        SaveOBJ save = this.save;
         if (save == null) return;
-        synchronized (lock) {
-            if (save.info.enable && !info.isEmpty()) {
-                int offset = 0;
-                String[] temp = info.split("\n");
-                for (String item : temp) {
-                    drawText(item, save.info.x, save.info.y + offset, save.info.dir, save.info.color, save.info.shadow);
-                    offset += 10;
-                }
+        if (save.info.enable && !info.isEmpty()) {
+            int offset = 0;
+            String[] temp = info.split("\n");
+            for (String item : temp) {
+                drawText(item, save.info.x, save.info.y + offset, save.info.dir, save.info.color, save.info.shadow);
+                offset += 10;
             }
-            if (save.list.enable && !list.isEmpty()) {
-                String[] temp = list.split("\n");
-                int offset = 0;
-                for (String item : temp) {
-                    drawText(item, save.list.x, save.list.y + offset, save.list.dir, save.list.color, save.list.shadow);
-                    offset += 10;
-                }
+        }
+        if (save.list.enable && !list.isEmpty()) {
+            String[] temp = list.split("\n");
+            int offset = 0;
+            for (String item : temp) {
+                drawText(item, save.list.x, save.list.y + offset, save.list.dir, save.list.color, save.list.shadow);
+                offset += 10;
             }
-            if (save.lyric.enable && !lyric.isEmpty()) {
-                String[] temp = lyric.split("\n");
-                int offset = 0;
-                for (String item : temp) {
-                    drawText(
-                            item,
-                            save.lyric.x,
-                            save.lyric.y + offset,
-                            save.lyric.dir,
-                            save.lyric.color,
-                            save.lyric.shadow);
-                    offset += 10;
-                }
+        }
+        if (save.lyric.enable && !lyric.isEmpty()) {
+            String[] temp = lyric.split("\n");
+            int offset = 0;
+            for (String item : temp) {
+                drawText(item,
+                        save.lyric.x,
+                        save.lyric.y + offset,
+                        save.lyric.dir,
+                        save.lyric.color,
+                        save.lyric.shadow);
+                offset += 10;
             }
-            if (save.pic.enable && haveImg) {
-                drawPic(textureID, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
-            }
+        }
+        if (save.pic.enable && haveImg) {
+            drawPic(textureID, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
         }
     }
 

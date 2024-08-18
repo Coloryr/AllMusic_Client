@@ -162,8 +162,8 @@ public class AllMusic  {
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(final RenderGameOverlayEvent.Post e) {
-        if (e.getType() == RenderGameOverlayEvent.ElementType.LAYER) {
+    public void onRenderOverlay(final RenderGameOverlayEvent.Pre e) {
+        if (e.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             hudUtils.update();
         }
     }
