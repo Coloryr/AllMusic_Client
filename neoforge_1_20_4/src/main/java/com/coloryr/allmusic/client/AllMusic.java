@@ -244,7 +244,7 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(RenderGuiOverlayEvent.Post e) {
+    public void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
             gui = e.getGuiGraphics();
             hudUtils.update();

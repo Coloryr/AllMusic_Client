@@ -138,7 +138,7 @@ public class AllMusic {
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    public void onRenderOverlay(RenderGameOverlayEvent.Post e) {
+    public void onRenderOverlay(RenderGameOverlayEvent.Pre e) {
         if (e.getType() == RenderGameOverlayEvent.ElementType.PORTAL) {
             hudUtils.update();
         }

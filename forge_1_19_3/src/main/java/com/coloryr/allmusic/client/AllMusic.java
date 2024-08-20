@@ -228,7 +228,7 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(RenderGuiOverlayEvent.Post e) {
+    public void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
             hudUtils.update();
         }

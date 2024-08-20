@@ -245,7 +245,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(RenderGuiLayerEvent.Post e) {
+    public void onRenderOverlay(RenderGuiLayerEvent.Pre e) {
         if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
             gui = e.getGuiGraphics();
             hudUtils.update();

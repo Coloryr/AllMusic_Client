@@ -160,8 +160,8 @@ public class AllMusic  {
     }
 
     @SubscribeEvent
-    public void onRed(final RenderGameOverlayEvent.Post e) {
-        if (e.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE) {
+    public void onRed(final RenderGameOverlayEvent.Pre e) {
+        if (e.getType() == RenderGameOverlayEvent.ElementType.PORTAL) {
             hudUtils.update();
         }
     }
