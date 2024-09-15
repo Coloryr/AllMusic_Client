@@ -36,14 +36,14 @@ public final class FrameDecoder {
 
     /*---- Fields ----*/
 
+    private static final int[][] FIXED_PREDICTION_COEFFICIENTS = {{}, {1}, {2, -1}, {3, -3, 1},
+            {4, -6, 4, -1},};
     // Can be changed when there is no active call of readFrame().
     // Must be not null when readFrame() is called.
     public FlacLowLevelInput in;
-
     // Can be changed when there is no active call of readFrame().
     // Must be in the range [4, 32].
     public int expectedSampleDepth;
-
     // Temporary arrays to hold two decoded audio channels (a.k.a. subframes). They have int64 range
     // because the worst case of 32-bit audio encoded in stereo side mode uses signed 33 bits.
     // The maximum possible block size is either 65536 samples per channel from the
@@ -53,12 +53,13 @@ public final class FrameDecoder {
     private long[] temp0;
     private long[] temp1;
 
+    /*---- Constructors ----*/
     // The number of samples (per channel) in the current block/frame being processed.
     // This value is only valid while the method readFrame() is on the call stack.
     // When readFrame() is active, this value is in the range [1, 65536].
     private int currentBlockSize;
 
-    /*---- Constructors ----*/
+    /*---- Methods ----*/
 
     // Constructs a frame decoder that initially uses the given stream.
     // The caller is responsible for cleaning up the input stream.
@@ -70,7 +71,16 @@ public final class FrameDecoder {
         currentBlockSize = -1;
     }
 
-    /*---- Methods ----*/
+    // Checks that 'val' is a signed 'depth'-bit integer, and either returns the
+    // value downcasted to an int or throws an exception if it's out of range.
+    // Note that depth must be in the range [1, 32] because the return value is an int.
+    // For example when depth = 16, the range of valid values is [-32768, 32767].
+    private static int checkBitDepth(long val, int depth) {
+        assert 1 <= depth && depth <= 32;
+        // Equivalent check: (val >> (depth - 1)) == 0 || (val >> (depth - 1)) == -1
+        if (val >> (depth - 1) == val >> depth) return (int) val;
+        else throw new IllegalArgumentException(val + " is not a signed " + depth + "-bit value");
+    }
 
     // Reads the next frame of FLAC data from the current bit input stream, decodes it,
     // and stores output samples into the given array, and returns a new metadata object.
@@ -164,17 +174,6 @@ public final class FrameDecoder {
             throw new DataFormatException("Reserved channel assignment");
     }
 
-    // Checks that 'val' is a signed 'depth'-bit integer, and either returns the
-    // value downcasted to an int or throws an exception if it's out of range.
-    // Note that depth must be in the range [1, 32] because the return value is an int.
-    // For example when depth = 16, the range of valid values is [-32768, 32767].
-    private static int checkBitDepth(long val, int depth) {
-        assert 1 <= depth && depth <= 32;
-        // Equivalent check: (val >> (depth - 1)) == 0 || (val >> (depth - 1)) == -1
-        if (val >> (depth - 1) == val >> depth) return (int) val;
-        else throw new IllegalArgumentException(val + " is not a signed " + depth + "-bit value");
-    }
-
     // Reads one subframe from the bit input stream, decodes it, and writes to result[0 : currentBlockSize].
     private void decodeSubframe(int sampleDepth, long[] result) throws IOException {
         // Check arguments
@@ -225,9 +224,6 @@ public final class FrameDecoder {
         readResiduals(predOrder, result);
         restoreLpc(result, FIXED_PREDICTION_COEFFICIENTS[predOrder], sampleDepth, 0);
     }
-
-    private static final int[][] FIXED_PREDICTION_COEFFICIENTS = {{}, {1}, {2, -1}, {3, -3, 1},
-            {4, -6, 4, -1},};
 
     // Reads from the input stream, performs computation, and writes to result[0 : currentBlockSize].
     private void decodeLinearPredictiveCodingSubframe(int lpcOrder, int sampleDepth, long[] result) throws IOException {

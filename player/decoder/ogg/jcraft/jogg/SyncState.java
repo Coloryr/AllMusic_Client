@@ -48,6 +48,15 @@ public class SyncState {
     int unsynced;
     int headerbytes;
     int bodybytes;
+    // sync the stream. This is meant to be useful for finding page
+    // boundaries.
+    //
+    // return values for this:
+    // -n) skipped n bytes
+    // 0) page not ready; more data (no bytes skipped)
+    // n) page synced at current location; page length n bytes
+    private Page pageseek = new Page();
+    private byte[] chksum = new byte[4];
 
     public int clear() {
         data = null;
@@ -85,16 +94,6 @@ public class SyncState {
         fill += bytes;
         return (0);
     }
-
-    // sync the stream. This is meant to be useful for finding page
-    // boundaries.
-    //
-    // return values for this:
-    // -n) skipped n bytes
-    // 0) page not ready; more data (no bytes skipped)
-    // n) page synced at current location; page length n bytes
-    private Page pageseek = new Page();
-    private byte[] chksum = new byte[4];
 
     public int pageseek(Page og) {
         int page = returned;

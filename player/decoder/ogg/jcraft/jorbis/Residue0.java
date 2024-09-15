@@ -26,6 +26,124 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class Residue0 extends FuncResidue {
 
+    static int[][] _2inverse_partword = null;
+    private static int[][][] _01inverse_partword = new int[2][][]; // _01inverse is synchronized for
+
+    // re-using partword
+    synchronized static int _01inverse(Block vb, Object vl, float[][] in, int ch, int decodepart) {
+        int i, j, k, l, s;
+        LookResidue0 look = (LookResidue0) vl;
+        InfoResidue0 info = look.info;
+
+        // move all this setup out later
+        int samples_per_partition = info.grouping;
+        int partitions_per_word = look.phrasebook.dim;
+        int n = info.end - info.begin;
+
+        int partvals = n / samples_per_partition;
+        int partwords = (partvals + partitions_per_word - 1) / partitions_per_word;
+
+        if (_01inverse_partword.length < ch) {
+            _01inverse_partword = new int[ch][][];
+        }
+
+        for (j = 0; j < ch; j++) {
+            if (_01inverse_partword[j] == null || _01inverse_partword[j].length < partwords) {
+                _01inverse_partword[j] = new int[partwords][];
+            }
+        }
+
+        for (s = 0; s < look.stages; s++) {
+            // each loop decodes on partition codeword containing
+            // partitions_pre_word partitions
+            for (i = 0, l = 0; i < partvals; l++) {
+                if (s == 0) {
+                    // fetch the partition word for each channel
+                    for (j = 0; j < ch; j++) {
+                        int temp = look.phrasebook.decode(vb.opb);
+                        if (temp == -1) {
+                            return (0);
+                        }
+                        _01inverse_partword[j][l] = look.decodemap[temp];
+                        if (_01inverse_partword[j][l] == null) {
+                            return (0);
+                        }
+                    }
+                }
+
+                // now we decode residual values for the partitions
+                for (k = 0; k < partitions_per_word && i < partvals; k++, i++)
+                    for (j = 0; j < ch; j++) {
+                        int offset = info.begin + i * samples_per_partition;
+                        int index = _01inverse_partword[j][l][k];
+                        if ((info.secondstages[index] & (1 << s)) != 0) {
+                            CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
+                            if (stagebook != null) {
+                                if (decodepart == 0) {
+                                    if (stagebook.decodevs_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
+                                        return (0);
+                                    }
+                                } else if (decodepart == 1) {
+                                    if (stagebook.decodev_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
+                                        return (0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+        return (0);
+    }
+
+    synchronized static int _2inverse(Block vb, Object vl, float[][] in, int ch) {
+        int i, k, l, s;
+        LookResidue0 look = (LookResidue0) vl;
+        InfoResidue0 info = look.info;
+
+        // move all this setup out later
+        int samples_per_partition = info.grouping;
+        int partitions_per_word = look.phrasebook.dim;
+        int n = info.end - info.begin;
+
+        int partvals = n / samples_per_partition;
+        int partwords = (partvals + partitions_per_word - 1) / partitions_per_word;
+
+        if (_2inverse_partword == null || _2inverse_partword.length < partwords) {
+            _2inverse_partword = new int[partwords][];
+        }
+        for (s = 0; s < look.stages; s++) {
+            for (i = 0, l = 0; i < partvals; l++) {
+                if (s == 0) {
+                    // fetch the partition word for each channel
+                    int temp = look.phrasebook.decode(vb.opb);
+                    if (temp == -1) {
+                        return (0);
+                    }
+                    _2inverse_partword[l] = look.decodemap[temp];
+                    if (_2inverse_partword[l] == null) {
+                        return (0);
+                    }
+                }
+
+                // now we decode residual values for the partitions
+                for (k = 0; k < partitions_per_word && i < partvals; k++, i++) {
+                    int offset = info.begin + i * samples_per_partition;
+                    int index = _2inverse_partword[l][k];
+                    if ((info.secondstages[index] & (1 << s)) != 0) {
+                        CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
+                        if (stagebook != null) {
+                            if (stagebook.decodevv_add(in, offset, ch, vb.opb, samples_per_partition) == -1) {
+                                return (0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return (0);
+    }
+
     void pack(Object vr, Buffer opb) {
         InfoResidue0 info = (InfoResidue0) vr;
         int acc = 0;
@@ -150,125 +268,6 @@ class Residue0 extends FuncResidue {
     }
 
     void free_look(Object i) {
-    }
-
-    private static int[][][] _01inverse_partword = new int[2][][]; // _01inverse is synchronized for
-
-    // re-using partword
-    synchronized static int _01inverse(Block vb, Object vl, float[][] in, int ch, int decodepart) {
-        int i, j, k, l, s;
-        LookResidue0 look = (LookResidue0) vl;
-        InfoResidue0 info = look.info;
-
-        // move all this setup out later
-        int samples_per_partition = info.grouping;
-        int partitions_per_word = look.phrasebook.dim;
-        int n = info.end - info.begin;
-
-        int partvals = n / samples_per_partition;
-        int partwords = (partvals + partitions_per_word - 1) / partitions_per_word;
-
-        if (_01inverse_partword.length < ch) {
-            _01inverse_partword = new int[ch][][];
-        }
-
-        for (j = 0; j < ch; j++) {
-            if (_01inverse_partword[j] == null || _01inverse_partword[j].length < partwords) {
-                _01inverse_partword[j] = new int[partwords][];
-            }
-        }
-
-        for (s = 0; s < look.stages; s++) {
-            // each loop decodes on partition codeword containing
-            // partitions_pre_word partitions
-            for (i = 0, l = 0; i < partvals; l++) {
-                if (s == 0) {
-                    // fetch the partition word for each channel
-                    for (j = 0; j < ch; j++) {
-                        int temp = look.phrasebook.decode(vb.opb);
-                        if (temp == -1) {
-                            return (0);
-                        }
-                        _01inverse_partword[j][l] = look.decodemap[temp];
-                        if (_01inverse_partword[j][l] == null) {
-                            return (0);
-                        }
-                    }
-                }
-
-                // now we decode residual values for the partitions
-                for (k = 0; k < partitions_per_word && i < partvals; k++, i++)
-                    for (j = 0; j < ch; j++) {
-                        int offset = info.begin + i * samples_per_partition;
-                        int index = _01inverse_partword[j][l][k];
-                        if ((info.secondstages[index] & (1 << s)) != 0) {
-                            CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
-                            if (stagebook != null) {
-                                if (decodepart == 0) {
-                                    if (stagebook.decodevs_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
-                                        return (0);
-                                    }
-                                } else if (decodepart == 1) {
-                                    if (stagebook.decodev_add(in[j], offset, vb.opb, samples_per_partition) == -1) {
-                                        return (0);
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
-        }
-        return (0);
-    }
-
-    static int[][] _2inverse_partword = null;
-
-    synchronized static int _2inverse(Block vb, Object vl, float[][] in, int ch) {
-        int i, k, l, s;
-        LookResidue0 look = (LookResidue0) vl;
-        InfoResidue0 info = look.info;
-
-        // move all this setup out later
-        int samples_per_partition = info.grouping;
-        int partitions_per_word = look.phrasebook.dim;
-        int n = info.end - info.begin;
-
-        int partvals = n / samples_per_partition;
-        int partwords = (partvals + partitions_per_word - 1) / partitions_per_word;
-
-        if (_2inverse_partword == null || _2inverse_partword.length < partwords) {
-            _2inverse_partword = new int[partwords][];
-        }
-        for (s = 0; s < look.stages; s++) {
-            for (i = 0, l = 0; i < partvals; l++) {
-                if (s == 0) {
-                    // fetch the partition word for each channel
-                    int temp = look.phrasebook.decode(vb.opb);
-                    if (temp == -1) {
-                        return (0);
-                    }
-                    _2inverse_partword[l] = look.decodemap[temp];
-                    if (_2inverse_partword[l] == null) {
-                        return (0);
-                    }
-                }
-
-                // now we decode residual values for the partitions
-                for (k = 0; k < partitions_per_word && i < partvals; k++, i++) {
-                    int offset = info.begin + i * samples_per_partition;
-                    int index = _2inverse_partword[l][k];
-                    if ((info.secondstages[index] & (1 << s)) != 0) {
-                        CodeBook stagebook = look.fullbooks[look.partbooks[index][s]];
-                        if (stagebook != null) {
-                            if (stagebook.decodevv_add(in, offset, ch, vb.opb, samples_per_partition) == -1) {
-                                return (0);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return (0);
     }
 
     int inverse(Block vb, Object vl, float[][] in, int[] nonzero, int ch) {

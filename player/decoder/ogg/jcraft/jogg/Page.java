@@ -32,6 +32,13 @@ public class Page {
         }
     }
 
+    public byte[] header_base;
+    public int header;
+    public int header_len;
+    public byte[] body_base;
+    public int body;
+    public int body_len;
+
     private static int crc_entry(int index) {
         int r = index << 24;
         for (int i = 0; i < 8; i++) {
@@ -48,13 +55,6 @@ public class Page {
         }
         return (r & 0xffffffff);
     }
-
-    public byte[] header_base;
-    public int header;
-    public int header_len;
-    public byte[] body_base;
-    public int body;
-    public int body_len;
 
     int version() {
         return header_base[header + 4] & 0xff;

@@ -33,12 +33,7 @@ class CodeBook {
     float[] valuelist; // list of dim*entries actual entry values
     int[] codelist; // list of bitstream codewords for each entry
     DecodeAux decode_tree;
-
-    // returns the number of bits
-    int encode(int a, Buffer b) {
-        b.write(codelist[a], c.lengthlist[a]);
-        return (c.lengthlist[a]);
-    }
+    private int[] t = new int[15]; // decodevs_add is synchronized for re-using t.
 
     // One the encode side, our vector writers are each designed for a
     // specific purpose, and the encoder is not flexible without modification:
@@ -52,6 +47,89 @@ class CodeBook {
     // to match by threshhold, not nearest match). Residue doesn't *have* to
     // be encoded that way, but to change it, one will need to add more
     // infrastructure on the encode side (decode side is specced and simpler)
+
+    private static float dist(int el, float[] ref, int index, float[] b, int step) {
+        float acc = (float) 0.;
+        for (int i = 0; i < el; i++) {
+            float val = (ref[index + i] - b[i * step]);
+            acc += val * val;
+        }
+        return (acc);
+    }
+
+    // given a list of word lengths, generate a list of codewords. Works
+    // for length ordered or unordered, always assigns the lowest valued
+    // codewords first. Extended to handle unused entries (length 0)
+    static int[] make_words(int[] l, int n) {
+        int[] marker = new int[33];
+        int[] r = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            int length = l[i];
+            if (length > 0) {
+                int entry = marker[length];
+
+                // when we claim a node for an entry, we also claim the nodes
+                // below it (pruning off the imagined tree that may have dangled
+                // from it) as well as blocking the use of any nodes directly
+                // above for leaves
+
+                // update ourself
+                if (length < 32 && (entry >>> length) != 0) {
+                    // error condition; the lengths must specify an overpopulated tree
+                    // free(r);
+                    return (null);
+                }
+                r[i] = entry;
+
+                // Look to see if the next shorter marker points to the node
+                // above. if so, update it and repeat.
+                {
+                    for (int j = length; j > 0; j--) {
+                        if ((marker[j] & 1) != 0) {
+                            // have to jump branches
+                            if (j == 1) marker[1]++;
+                            else marker[j] = marker[j - 1] << 1;
+                            break; // invariant says next upper marker would already
+                            // have been moved if it was on the same path
+                        }
+                        marker[j]++;
+                    }
+                }
+
+                // prune the tree; the implicit invariant says all the longer
+                // markers were dangling from our just-taken node. Dangle them
+                // from our *new* node.
+                for (int j = length + 1; j < 33; j++) {
+                    if ((marker[j] >>> 1) == entry) {
+                        entry = marker[j];
+                        marker[j] = marker[j - 1] << 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // bitreverse the words because our bitwise packer/unpacker is LSb
+        // endian
+        for (int i = 0; i < n; i++) {
+            int temp = 0;
+            for (int j = 0; j < l[i]; j++) {
+                temp <<= 1;
+                temp |= (r[i] >>> j) & 1;
+            }
+            r[i] = temp;
+        }
+
+        return (r);
+    }
+
+    // returns the number of bits
+    int encode(int a, Buffer b) {
+        b.write(codelist[a], c.lengthlist[a]);
+        return (c.lengthlist[a]);
+    }
 
     // floor0 LSP (single stage, non interleaved, nearest match)
     // returns entry number and *modifies a* to the quantization value
@@ -77,8 +155,6 @@ class CodeBook {
         int best = besterror(a, step, addmul);
         return (encode(best, b));
     }
-
-    private int[] t = new int[15]; // decodevs_add is synchronized for re-using t.
 
     synchronized int decodevs_add(float[] a, int offset, Buffer b, int n) {
         int step = n / dim;
@@ -147,6 +223,20 @@ class CodeBook {
         return (0);
     }
 
+    // Decode side is specced and easier, because we don't need to find
+    // matches using different criteria; we simply read and map. There are
+    // two things we need to do 'depending':
+    //
+    // We may need to support interleave. We don't really, but it's
+    // convenient to do it here rather than rebuild the vector later.
+    //
+    // Cascades may be additive or multiplicitive; this is not inherent in
+    // the codebook, but set in the code using the codebook. Like
+    // interleaving, it's easiest to do it here.
+    // stage==0 -> declarative (set the value)
+    // stage==1 -> additive
+    // stage==2 -> multiplicitive
+
     int decodev_set(float[] a, int offset, Buffer b, int n) {
         int i, j, entry;
         int t;
@@ -181,20 +271,6 @@ class CodeBook {
         }
         return (0);
     }
-
-    // Decode side is specced and easier, because we don't need to find
-    // matches using different criteria; we simply read and map. There are
-    // two things we need to do 'depending':
-    //
-    // We may need to support interleave. We don't really, but it's
-    // convenient to do it here rather than rebuild the vector later.
-    //
-    // Cascades may be additive or multiplicitive; this is not inherent in
-    // the codebook, but set in the code using the codebook. Like
-    // interleaving, it's easiest to do it here.
-    // stage==0 -> declarative (set the value)
-    // stage==1 -> additive
-    // stage==2 -> multiplicitive
 
     // returns the entry number or -1 on eof
     int decode(Buffer b) {
@@ -289,15 +365,6 @@ class CodeBook {
     void clear() {
     }
 
-    private static float dist(int el, float[] ref, int index, float[] b, int step) {
-        float acc = (float) 0.;
-        for (int i = 0; i < el; i++) {
-            float val = (ref[index + i] - b[i * step]);
-            acc += val * val;
-        }
-        return (acc);
-    }
-
     int init_decode(StaticCodeBook s) {
         c = s;
         entries = s.entries;
@@ -310,74 +377,6 @@ class CodeBook {
             return (-1);
         }
         return (0);
-    }
-
-    // given a list of word lengths, generate a list of codewords. Works
-    // for length ordered or unordered, always assigns the lowest valued
-    // codewords first. Extended to handle unused entries (length 0)
-    static int[] make_words(int[] l, int n) {
-        int[] marker = new int[33];
-        int[] r = new int[n];
-
-        for (int i = 0; i < n; i++) {
-            int length = l[i];
-            if (length > 0) {
-                int entry = marker[length];
-
-                // when we claim a node for an entry, we also claim the nodes
-                // below it (pruning off the imagined tree that may have dangled
-                // from it) as well as blocking the use of any nodes directly
-                // above for leaves
-
-                // update ourself
-                if (length < 32 && (entry >>> length) != 0) {
-                    // error condition; the lengths must specify an overpopulated tree
-                    // free(r);
-                    return (null);
-                }
-                r[i] = entry;
-
-                // Look to see if the next shorter marker points to the node
-                // above. if so, update it and repeat.
-                {
-                    for (int j = length; j > 0; j--) {
-                        if ((marker[j] & 1) != 0) {
-                            // have to jump branches
-                            if (j == 1) marker[1]++;
-                            else marker[j] = marker[j - 1] << 1;
-                            break; // invariant says next upper marker would already
-                            // have been moved if it was on the same path
-                        }
-                        marker[j]++;
-                    }
-                }
-
-                // prune the tree; the implicit invariant says all the longer
-                // markers were dangling from our just-taken node. Dangle them
-                // from our *new* node.
-                for (int j = length + 1; j < 33; j++) {
-                    if ((marker[j] >>> 1) == entry) {
-                        entry = marker[j];
-                        marker[j] = marker[j - 1] << 1;
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-
-        // bitreverse the words because our bitwise packer/unpacker is LSb
-        // endian
-        for (int i = 0; i < n; i++) {
-            int temp = 0;
-            for (int j = 0; j < l[i]; j++) {
-                temp <<= 1;
-                temp |= (r[i] >>> j) & 1;
-            }
-            r[i] = temp;
-        }
-
-        return (r);
     }
 
     // build the decode helper tree from the codewords

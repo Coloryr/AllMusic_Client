@@ -26,6 +26,77 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class Floor0 extends FuncFloor {
 
+    float[] lsp = null;
+
+    static float toBARK(float f) {
+        return (float) (13.1 * Math.atan(.00074 * (f)) + 2.24 * Math.atan((f) * (f) * 1.85e-8) + 1e-4 * (f));
+    }
+
+    static float fromdB(float x) {
+        return (float) (Math.exp((x) * .11512925));
+    }
+
+    static void lsp_to_lpc(float[] lsp, float[] lpc, int m) {
+        int i, j, m2 = m / 2;
+        float[] O = new float[m2];
+        float[] E = new float[m2];
+        float A;
+        float[] Ae = new float[m2 + 1];
+        float[] Ao = new float[m2 + 1];
+        float B;
+        float[] Be = new float[m2];
+        float[] Bo = new float[m2];
+        float temp;
+
+        // even/odd roots setup
+        for (i = 0; i < m2; i++) {
+            O[i] = (float) (-2. * Math.cos(lsp[i * 2]));
+            E[i] = (float) (-2. * Math.cos(lsp[i * 2 + 1]));
+        }
+
+        // set up impulse response
+        for (j = 0; j < m2; j++) {
+            Ae[j] = 0.f;
+            Ao[j] = 1.f;
+            Be[j] = 0.f;
+            Bo[j] = 1.f;
+        }
+        Ao[j] = 1.f;
+        Ae[j] = 1.f;
+
+        // run impulse response
+        for (i = 1; i < m + 1; i++) {
+            A = B = 0.f;
+            for (j = 0; j < m2; j++) {
+                temp = O[j] * Ao[j] + Ae[j];
+                Ae[j] = Ao[j];
+                Ao[j] = A;
+                A += temp;
+
+                temp = E[j] * Bo[j] + Be[j];
+                Be[j] = Bo[j];
+                Bo[j] = B;
+                B += temp;
+            }
+            lpc[i - 1] = (A + Ao[j] + B - Ae[j]) / 2;
+            Ao[j] = A;
+            Ae[j] = B;
+        }
+    }
+
+    static void lpc_to_curve(float[] curve, float[] lpc, float amp, LookFloor0 l, String name, int frameno) {
+        // l->m+1 must be less than l->ln, but guard in case we get a bad stream
+        float[] lcurve = new float[Math.max(l.ln * 2, l.m * 2 + 2)];
+
+        if (amp == 0) {
+            for (int j = 0; j < l.n; j++) curve[j] = 0.0f;
+            return;
+        }
+        l.lpclook.lpc_to_curve(lcurve, lpc, amp);
+
+        for (int i = 0; i < l.n; i++) curve[i] = lcurve[l.linearmap[i]];
+    }
+
     void pack(Object i, Buffer opb) {
         InfoFloor0 info = (InfoFloor0) i;
         opb.write(info.order, 8);
@@ -89,10 +160,6 @@ class Floor0 extends FuncFloor {
         return look;
     }
 
-    static float toBARK(float f) {
-        return (float) (13.1 * Math.atan(.00074 * (f)) + 2.24 * Math.atan((f) * (f) * 1.85e-8) + 1e-4 * (f));
-    }
-
     Object state(Object i) {
         EchstateFloor0 state = new EchstateFloor0();
         InfoFloor0 info = (InfoFloor0) i;
@@ -116,8 +183,6 @@ class Floor0 extends FuncFloor {
     int forward(Block vb, Object i, float[] in, float[] out, Object vs) {
         return 0;
     }
-
-    float[] lsp = null;
 
     int inverse(Block vb, Object i, float[] out) {
         // System.err.println("Floor0.inverse "+i.getClass()+"]");
@@ -219,71 +284,6 @@ class Floor0 extends FuncFloor {
             out[j] = 0.f;
         }
         return (0);
-    }
-
-    static float fromdB(float x) {
-        return (float) (Math.exp((x) * .11512925));
-    }
-
-    static void lsp_to_lpc(float[] lsp, float[] lpc, int m) {
-        int i, j, m2 = m / 2;
-        float[] O = new float[m2];
-        float[] E = new float[m2];
-        float A;
-        float[] Ae = new float[m2 + 1];
-        float[] Ao = new float[m2 + 1];
-        float B;
-        float[] Be = new float[m2];
-        float[] Bo = new float[m2];
-        float temp;
-
-        // even/odd roots setup
-        for (i = 0; i < m2; i++) {
-            O[i] = (float) (-2. * Math.cos(lsp[i * 2]));
-            E[i] = (float) (-2. * Math.cos(lsp[i * 2 + 1]));
-        }
-
-        // set up impulse response
-        for (j = 0; j < m2; j++) {
-            Ae[j] = 0.f;
-            Ao[j] = 1.f;
-            Be[j] = 0.f;
-            Bo[j] = 1.f;
-        }
-        Ao[j] = 1.f;
-        Ae[j] = 1.f;
-
-        // run impulse response
-        for (i = 1; i < m + 1; i++) {
-            A = B = 0.f;
-            for (j = 0; j < m2; j++) {
-                temp = O[j] * Ao[j] + Ae[j];
-                Ae[j] = Ao[j];
-                Ao[j] = A;
-                A += temp;
-
-                temp = E[j] * Bo[j] + Be[j];
-                Be[j] = Bo[j];
-                Bo[j] = B;
-                B += temp;
-            }
-            lpc[i - 1] = (A + Ao[j] + B - Ae[j]) / 2;
-            Ao[j] = A;
-            Ae[j] = B;
-        }
-    }
-
-    static void lpc_to_curve(float[] curve, float[] lpc, float amp, LookFloor0 l, String name, int frameno) {
-        // l->m+1 must be less than l->ln, but guard in case we get a bad stream
-        float[] lcurve = new float[Math.max(l.ln * 2, l.m * 2 + 2)];
-
-        if (amp == 0) {
-            for (int j = 0; j < l.n; j++) curve[j] = 0.0f;
-            return;
-        }
-        l.lpclook.lpc_to_curve(lcurve, lpc, amp);
-
-        for (int i = 0; i < l.n; i++) curve[i] = lcurve[l.linearmap[i]];
     }
 
     class InfoFloor0 {

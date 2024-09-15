@@ -33,7 +33,8 @@ import com.coloryr.allmusic.client.player.decoder.IDecoder;
 public class Mp3Decoder implements DecoderErrors, IDecoder {
 
     static private final Params DEFAULT_PARAMS = new Params();
-
+    private final APlayer player;
+    private final BuffPack pack = new BuffPack();
     /**
      * The Obuffer instance that will receive the decoded
      * PCM samples.
@@ -57,7 +58,7 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
     private int outputChannels;
     private boolean initialized;
     private Bitstream bitstream;
-    private final APlayer player;
+    private byte[] byteBuf = new byte[4096];
 
     /**
      * Creates a new <code>Decoder</code> instance with default
@@ -77,8 +78,6 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
         }
     }
 
-    private byte[] byteBuf = new byte[4096];
-
     protected byte[] getByteArray(int length) {
         if (byteBuf.length < length) {
             byteBuf = new byte[length + 1024];
@@ -97,8 +96,6 @@ public class Mp3Decoder implements DecoderErrors, IDecoder {
         }
         return b;
     }
-
-    private final BuffPack pack = new BuffPack();
 
     /**
      * Decodes one frame from an MPEG audio bitstream.

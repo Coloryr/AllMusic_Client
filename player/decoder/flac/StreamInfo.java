@@ -148,54 +148,6 @@ public final class StreamInfo {
     /*---- Methods ----*/
 
     /**
-     * Checks the state of this object, and either returns silently or throws an exception.
-     *
-     * @throws NullPointerException  if the MD5 hash array is {@code null}
-     * @throws IllegalStateException if any field has an invalid value
-     */
-    public void checkValues() {
-        if ((minBlockSize >>> 16) != 0) throw new IllegalStateException("Invalid minimum block size");
-        if ((maxBlockSize >>> 16) != 0) throw new IllegalStateException("Invalid maximum block size");
-        if ((minFrameSize >>> 24) != 0) throw new IllegalStateException("Invalid minimum frame size");
-        if ((maxFrameSize >>> 24) != 0) throw new IllegalStateException("Invalid maximum frame size");
-        if (sampleRate == 0 || (sampleRate >>> 20) != 0) throw new IllegalStateException("Invalid sample rate");
-        if (numChannels < 1 || numChannels > 8) throw new IllegalStateException("Invalid number of channels");
-        if (sampleDepth < 4 || sampleDepth > 32) throw new IllegalStateException("Invalid sample depth");
-        if ((numSamples >>> 36) != 0) throw new IllegalStateException("Invalid number of samples");
-        Objects.requireNonNull(md5Hash);
-        if (md5Hash.length != 16) throw new IllegalStateException("Invalid MD5 hash length");
-    }
-
-    /**
-     * Checks whether the specified frame information is consistent with values in
-     * this stream info object, either returning silently or throwing an exception.
-     *
-     * @param meta the frame info object to check (not {@code null})
-     * @throws NullPointerException if the frame info is {@code null}
-     * @throws DataFormatException  if the frame info contains bad values
-     */
-    public void checkFrame(FrameInfo meta) {
-        if (meta.numChannels != numChannels) throw new DataFormatException("Channel count mismatch");
-        if (meta.sampleRate != -1 && meta.sampleRate != sampleRate)
-            throw new DataFormatException("Sample rate mismatch");
-        if (meta.sampleDepth != -1 && meta.sampleDepth != sampleDepth)
-            throw new DataFormatException("Sample depth mismatch");
-        if (numSamples != 0 && meta.blockSize > numSamples)
-            throw new DataFormatException("Block size exceeds total number of samples");
-
-        if (meta.blockSize > maxBlockSize) throw new DataFormatException("Block size exceeds maximum");
-        // Note: If minBlockSize == maxBlockSize, then the final block
-        // in the stream is allowed to be smaller than minBlockSize
-
-        if (minFrameSize != 0 && meta.frameSize < minFrameSize)
-            throw new DataFormatException("Frame size less than minimum");
-        if (maxFrameSize != 0 && meta.frameSize > maxFrameSize)
-            throw new DataFormatException("Frame size exceeds maximum");
-    }
-
-    /*---- Static functions ----*/
-
-    /**
      * Computes and returns the MD5 hash of the specified raw audio sample data at the specified
      * bit depth. Currently, the bit depth must be a multiple of 8, between 8 and 32 inclusive.
      * The returned array is a new object of length 16.
@@ -238,6 +190,54 @@ public final class StreamInfo {
             }
         }
         return hasher.digest();
+    }
+
+    /**
+     * Checks the state of this object, and either returns silently or throws an exception.
+     *
+     * @throws NullPointerException  if the MD5 hash array is {@code null}
+     * @throws IllegalStateException if any field has an invalid value
+     */
+    public void checkValues() {
+        if ((minBlockSize >>> 16) != 0) throw new IllegalStateException("Invalid minimum block size");
+        if ((maxBlockSize >>> 16) != 0) throw new IllegalStateException("Invalid maximum block size");
+        if ((minFrameSize >>> 24) != 0) throw new IllegalStateException("Invalid minimum frame size");
+        if ((maxFrameSize >>> 24) != 0) throw new IllegalStateException("Invalid maximum frame size");
+        if (sampleRate == 0 || (sampleRate >>> 20) != 0) throw new IllegalStateException("Invalid sample rate");
+        if (numChannels < 1 || numChannels > 8) throw new IllegalStateException("Invalid number of channels");
+        if (sampleDepth < 4 || sampleDepth > 32) throw new IllegalStateException("Invalid sample depth");
+        if ((numSamples >>> 36) != 0) throw new IllegalStateException("Invalid number of samples");
+        Objects.requireNonNull(md5Hash);
+        if (md5Hash.length != 16) throw new IllegalStateException("Invalid MD5 hash length");
+    }
+
+    /*---- Static functions ----*/
+
+    /**
+     * Checks whether the specified frame information is consistent with values in
+     * this stream info object, either returning silently or throwing an exception.
+     *
+     * @param meta the frame info object to check (not {@code null})
+     * @throws NullPointerException if the frame info is {@code null}
+     * @throws DataFormatException  if the frame info contains bad values
+     */
+    public void checkFrame(FrameInfo meta) {
+        if (meta.numChannels != numChannels) throw new DataFormatException("Channel count mismatch");
+        if (meta.sampleRate != -1 && meta.sampleRate != sampleRate)
+            throw new DataFormatException("Sample rate mismatch");
+        if (meta.sampleDepth != -1 && meta.sampleDepth != sampleDepth)
+            throw new DataFormatException("Sample depth mismatch");
+        if (numSamples != 0 && meta.blockSize > numSamples)
+            throw new DataFormatException("Block size exceeds total number of samples");
+
+        if (meta.blockSize > maxBlockSize) throw new DataFormatException("Block size exceeds maximum");
+        // Note: If minBlockSize == maxBlockSize, then the final block
+        // in the stream is allowed to be smaller than minBlockSize
+
+        if (minFrameSize != 0 && meta.frameSize < minFrameSize)
+            throw new DataFormatException("Frame size less than minimum");
+        if (maxFrameSize != 0 && meta.frameSize > maxFrameSize)
+            throw new DataFormatException("Frame size exceeds maximum");
     }
 
 }

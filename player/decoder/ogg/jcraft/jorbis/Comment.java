@@ -29,16 +29,30 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Packet;
 // static storage
 public class Comment {
 
+    private static final int OV_EIMPL = -130;
     private static byte[] _vorbis = "vorbis".getBytes();
     private static byte[] _vendor = "Xiphophorus libVorbis I 20000508".getBytes();
-
-    private static final int OV_EIMPL = -130;
-
     // unlimited user comment fields.
     public byte[][] user_comments;
     public int[] comment_lengths;
     public int comments;
     public byte[] vendor;
+
+    static boolean tagcompare(byte[] s1, byte[] s2, int n) {
+        int c = 0;
+        byte u1, u2;
+        while (c < n) {
+            u1 = s1[c];
+            u2 = s2[c];
+            if ('Z' >= u1 && u1 >= 'A') u1 = (byte) (u1 - 'A' + 'a');
+            if ('Z' >= u2 && u2 >= 'A') u2 = (byte) (u2 - 'A' + 'a');
+            if (u1 != u2) {
+                return false;
+            }
+            c++;
+        }
+        return true;
+    }
 
     public void init() {
         user_comments = null;
@@ -74,22 +88,6 @@ public class Comment {
     public void add_tag(String tag, String contents) {
         if (contents == null) contents = "";
         add(tag + "=" + contents);
-    }
-
-    static boolean tagcompare(byte[] s1, byte[] s2, int n) {
-        int c = 0;
-        byte u1, u2;
-        while (c < n) {
-            u1 = s1[c];
-            u2 = s2[c];
-            if ('Z' >= u1 && u1 >= 'A') u1 = (byte) (u1 - 'A' + 'a');
-            if ('Z' >= u2 && u2 >= 'A') u2 = (byte) (u2 - 'A' + 'a');
-            if (u1 != u2) {
-                return false;
-            }
-            c++;
-        }
-        return true;
     }
 
     public String query(String tag) {

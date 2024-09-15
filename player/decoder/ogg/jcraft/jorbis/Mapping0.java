@@ -27,11 +27,15 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 class Mapping0 extends FuncMapping {
 
     static int seq = 0;
+    float[][] pcmbundle = null;
+
+    ;
+    int[] zerobundle = null;
+    int[] nonzero = null;
+    Object[] floormemo = null;
 
     void free_info(Object imap) {
     }
-
-    ;
 
     void free_look(Object imap) {
     }
@@ -176,11 +180,6 @@ class Mapping0 extends FuncMapping {
         }
         return info;
     }
-
-    float[][] pcmbundle = null;
-    int[] zerobundle = null;
-    int[] nonzero = null;
-    Object[] floormemo = null;
 
     synchronized int inverse(Block vb, Object l) {
         DspState vd = vb.vd;

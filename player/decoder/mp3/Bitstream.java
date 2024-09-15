@@ -74,10 +74,10 @@ public final class Bitstream implements BitstreamErrors {
      */
     private final byte[] frame_bytes = new byte[BUFFER_INT_SIZE * 4];
     private final Crc16[] crc = new Crc16[1];
-    private PushbackInputStream source;
     // private int current_frame_number;
     // private int last_frame_number;
     public long local = 0;
+    private PushbackInputStream source;
     /**
      * Number of valid bytes in the frame buffer.
      */

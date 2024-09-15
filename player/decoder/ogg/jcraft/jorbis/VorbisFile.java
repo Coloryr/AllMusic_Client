@@ -116,6 +116,42 @@ public class VorbisFile {
         }
     }
 
+    static int fseek(InputStream fis, long off, int whence) {
+        if (fis instanceof SeekableInputStream) {
+            SeekableInputStream sis = (SeekableInputStream) fis;
+            try {
+                if (whence == SEEK_SET) {
+                    sis.seek(off);
+                } else if (whence == SEEK_END) {
+                    sis.seek(sis.getLength() - off);
+                } else {
+                }
+            } catch (Exception e) {
+            }
+            return 0;
+        }
+        try {
+            if (whence == 0) {
+                fis.reset();
+            }
+            fis.skip(off);
+        } catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+
+    static long ftell(InputStream fis) {
+        try {
+            if (fis instanceof SeekableInputStream) {
+                SeekableInputStream sis = (SeekableInputStream) fis;
+                return (sis.tell());
+            }
+        } catch (Exception e) {
+        }
+        return 0;
+    }
+
     private int get_data() {
         int index = oy.buffer(CHUNKSIZE);
         byte[] buffer = oy.data;
@@ -393,6 +429,16 @@ public class VorbisFile {
         return 0;
     }
 
+    // fetch and process a packet. Handles the case where we're at a
+    // bitstream boundary and dumps the decoding machine. If the decoding
+    // machine is unloaded, it loads it. It also keeps pcm_offset up to
+    // date (seek and read both use this. seek uses a special hack with
+    // readp).
+    //
+    // return: -1) hole in the data (lost packet)
+    // 0) need more date (only if readp==0)/eof
+    // 1) got a packet
+
     int open_nonseekable() {
         // we cannot seek. Set up a 'single' (current) logical bitstream entry
         links = 1;
@@ -418,16 +464,6 @@ public class VorbisFile {
         bittrack = 0.f;
         samptrack = 0.f;
     }
-
-    // fetch and process a packet. Handles the case where we're at a
-    // bitstream boundary and dumps the decoding machine. If the decoding
-    // machine is unloaded, it loads it. It also keeps pcm_offset up to
-    // date (seek and read both use this. seek uses a special hack with
-    // readp).
-    //
-    // return: -1) hole in the data (lost packet)
-    // 0) need more date (only if readp==0)/eof
-    // 1) got a packet
 
     int process_packet(int readp) {
         Page og = new Page();
@@ -571,42 +607,6 @@ public class VorbisFile {
         oy.clear();
 
         return (0);
-    }
-
-    static int fseek(InputStream fis, long off, int whence) {
-        if (fis instanceof SeekableInputStream) {
-            SeekableInputStream sis = (SeekableInputStream) fis;
-            try {
-                if (whence == SEEK_SET) {
-                    sis.seek(off);
-                } else if (whence == SEEK_END) {
-                    sis.seek(sis.getLength() - off);
-                } else {
-                }
-            } catch (Exception e) {
-            }
-            return 0;
-        }
-        try {
-            if (whence == 0) {
-                fis.reset();
-            }
-            fis.skip(off);
-        } catch (Exception e) {
-            return -1;
-        }
-        return 0;
-    }
-
-    static long ftell(InputStream fis) {
-        try {
-            if (fis instanceof SeekableInputStream) {
-                SeekableInputStream sis = (SeekableInputStream) fis;
-                return (sis.tell());
-            }
-        } catch (Exception e) {
-        }
-        return 0;
     }
 
     // inspects the OggVorbis file and finds/documents all the logical
@@ -1235,8 +1235,8 @@ public class VorbisFile {
 
     class SeekableInputStream extends InputStream {
 
-        java.io.RandomAccessFile raf = null;
         final String mode = "r";
+        java.io.RandomAccessFile raf = null;
 
         SeekableInputStream(String file) throws IOException {
             raf = new java.io.RandomAccessFile(file, mode);

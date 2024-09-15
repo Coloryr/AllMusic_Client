@@ -26,20 +26,18 @@ import com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg.Buffer;
 
 class StaticCodeBook {
 
+    static final int VQ_FEXP = 10;
+    static final int VQ_FMAN = 21;
+    static final int VQ_FEXP_BIAS = 768; // bias toward values smaller than 1.
     int dim; // codebook dimensions (elements per vector)
-    int entries; // codebook entries
-    int[] lengthlist; // codeword lengths in bits
-
-    // mapping
-    int maptype; // 0=none
     // 1=implicitly populated values from map column
     // 2=listed arbitrary values
-
+    int entries; // codebook entries
+    int[] lengthlist; // codeword lengths in bits
+    // mapping
+    int maptype; // 0=none
     // The below does a linear, single monotonic sequence mapping.
     int q_min; // packed 32 bit float; quant value 0 maps to minval
-    int q_delta; // packed 32 bit float; val 1 - val 0 == delta
-    int q_quant; // bits: 0 < quant <= 16
-    int q_sequencep; // bitflag
 
     // additional information for log (dB) mapping; the linear mapping
     // is assumed to actually be values in dB. encodebias is used to
@@ -47,11 +45,43 @@ class StaticCodeBook {
     // zeroflag indicates if entry zero is to represent -Inf dB; negflag
     // indicates if we're to represent negative linear values in a
     // mirror of the positive mapping.
-
-    int[] quantlist; // map == 1: (int)(entries/dim) element column map
+    int q_delta; // packed 32 bit float; val 1 - val 0 == delta
     // map == 2: list of dim*entries quantized entry vals
+    int q_quant; // bits: 0 < quant <= 16
+    int q_sequencep; // bitflag
+    int[] quantlist; // map == 1: (int)(entries/dim) element column map
 
     StaticCodeBook() {
+    }
+
+    // doesn't currently guard under/overflow
+    static long float32_pack(float val) {
+        int sign = 0;
+        int exp;
+        int mant;
+        if (val < 0) {
+            sign = 0x80000000;
+            val = -val;
+        }
+        exp = (int) Math.floor(Math.log(val) / Math.log(2));
+        mant = (int) Math.rint(Math.pow(val, (VQ_FMAN - 1) - exp));
+        exp = (exp + VQ_FEXP_BIAS) << VQ_FMAN;
+        return (sign | exp | mant);
+    }
+
+    static float float32_unpack(int val) {
+        float mant = val & 0x1fffff;
+        float exp = (val & 0x7fe00000) >>> VQ_FMAN;
+        if ((val & 0x80000000) != 0) mant = -mant;
+        return (ldexp(mant, ((int) exp) - (VQ_FMAN - 1) - VQ_FEXP_BIAS));
+    }
+
+    // 32 bit float (not IEEE; nonnormalized mantissa +
+    // biased exponent) : neeeeeee eeemmmmm mmmmmmmm mmmmmmmm
+    // Why not IEEE? It's just not that important here.
+
+    static float ldexp(float foo, int e) {
+        return (float) (foo * Math.pow(2, e));
     }
 
     int pack(Buffer opb) {
@@ -389,39 +419,5 @@ class StaticCodeBook {
             return (r);
         }
         return (null);
-    }
-
-    // 32 bit float (not IEEE; nonnormalized mantissa +
-    // biased exponent) : neeeeeee eeemmmmm mmmmmmmm mmmmmmmm
-    // Why not IEEE? It's just not that important here.
-
-    static final int VQ_FEXP = 10;
-    static final int VQ_FMAN = 21;
-    static final int VQ_FEXP_BIAS = 768; // bias toward values smaller than 1.
-
-    // doesn't currently guard under/overflow
-    static long float32_pack(float val) {
-        int sign = 0;
-        int exp;
-        int mant;
-        if (val < 0) {
-            sign = 0x80000000;
-            val = -val;
-        }
-        exp = (int) Math.floor(Math.log(val) / Math.log(2));
-        mant = (int) Math.rint(Math.pow(val, (VQ_FMAN - 1) - exp));
-        exp = (exp + VQ_FEXP_BIAS) << VQ_FMAN;
-        return (sign | exp | mant);
-    }
-
-    static float float32_unpack(int val) {
-        float mant = val & 0x1fffff;
-        float exp = (val & 0x7fe00000) >>> VQ_FMAN;
-        if ((val & 0x80000000) != 0) mant = -mant;
-        return (ldexp(mant, ((int) exp) - (VQ_FMAN - 1) - VQ_FEXP_BIAS));
-    }
-
-    static float ldexp(float foo, int e) {
-        return (float) (foo * Math.pow(2, e));
     }
 }

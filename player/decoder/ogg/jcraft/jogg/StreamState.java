@@ -24,11 +24,13 @@ package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jogg;
 
 public class StreamState {
 
+    public int e_o_s; /*
+     * set when we have buffered the last packet in the
+     * logical bitstream
+     */
     byte[] body_data; /* bytes from packet bodies */
     int body_storage; /* storage elements allocated */
     int body_fill; /* elements stored; fill mark */
-    private int body_returned; /* elements of fill returned */
-
     int[] lacing_vals; /* The values that will go to the segment table */
     long[] granule_vals; /*
      * pcm_pos values for headers. Not compact
@@ -42,11 +44,6 @@ public class StreamState {
 
     byte[] header = new byte[282]; /* working space for header encode */
     int header_fill;
-
-    public int e_o_s; /*
-     * set when we have buffered the last packet in the
-     * logical bitstream
-     */
     int b_o_s; /*
      * set after we've written the initial page
      * of a logical bitstream
@@ -61,6 +58,7 @@ public class StreamState {
      * layer) also knows about the gap
      */
     long granulepos;
+    private int body_returned; /* elements of fill returned */
 
     public StreamState() {
         init();

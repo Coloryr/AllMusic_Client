@@ -4,14 +4,14 @@
 # Note that there are a couple of TOML lists in this file.
 # Find more information on toml format here:  https://github.com/toml-lang/toml
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
-modLoader="javafml" #mandatory
+modLoader = "javafml" #mandatory
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the the FML version. This is currently 47.
-loaderVersion="${loader_version_range}" #mandatory
+loaderVersion = "${loader_version_range}" #mandatory
 
 # The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
-license="${mod_license}"
+license = "${mod_license}"
 
 # A URL to refer people to when problems occur with this mod
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
@@ -20,13 +20,13 @@ license="${mod_license}"
 [[mods]] #mandatory
 
 # The modid of the mod
-modId="${mod_id}" #mandatory
+modId = "${mod_id}" #mandatory
 
 # The version number of the mod
-version="${mod_version}" #mandatory
+version = "${mod_version}" #mandatory
 
 # A display name for the mod
-displayName="${mod_name}" #mandatory
+displayName = "${mod_name}" #mandatory
 
 # A URL to query for updates for this mod. See the JSON update specification https://docs.neoforged.net/docs/misc/updatechecker/
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
@@ -35,13 +35,13 @@ displayName="${mod_name}" #mandatory
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
 
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="icon.png" #optional
+logoFile = "icon.png" #optional
 
 # A text field displayed in the mod UI
 #credits="" #optional
 
 # A text field displayed in the mod UI
-authors="${mod_authors}" #optional
+authors = "${mod_authors}" #optional
 
 # Display Test controls the display for your mod in the server connection screen
 # MATCH_VERSION means that your mod will cause a red X if the versions on client and server differ. This is the default behaviour and should be what you choose if you have server and client elements to your mod.
@@ -52,7 +52,7 @@ authors="${mod_authors}" #optional
 #displayTest="MATCH_VERSION" # MATCH_VERSION is the default if nothing is specified (#optional)
 
 # The description text for the mod (multi line!) (#mandatory)
-description='''${mod_description}'''
+description = '''${mod_description}'''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
 #[[mixins]]
@@ -66,29 +66,29 @@ description='''${mod_description}'''
 # The coremods config file path is not configurable and is always loaded from META-INF/coremods.json
 
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.${mod_id}]] #optional
+[[dependencies.${ mod_id }]] #optional
 # the modid of the dependency
-modId="neoforge" #mandatory
+modId = "neoforge" #mandatory
 # The type of the dependency. Can be one of "required", "optional", "incompatible" or "discouraged" (case insensitive).
 # 'required' requires the mod to exist, 'optional' does not
 # 'incompatible' will prevent the game from loading when the mod exists, and 'discouraged' will show a warning
-type="required" #mandatory
+type = "required" #mandatory
 # Optional field describing why the dependency is required or why it is incompatible
 # reason="..."
 # The version range of the dependency
-versionRange="${neo_version_range}" #mandatory
+versionRange = "${neo_version_range}" #mandatory
 # An ordering relationship for the dependency.
 # BEFORE - This mod is loaded BEFORE the dependency
 # AFTER - This mod is loaded AFTER the dependency
-ordering="NONE"
+ordering = "NONE"
 # Side this dependency is applied on - BOTH, CLIENT, or SERVER
-side="CLIENT"
+side = "CLIENT"
 
 # Here's another dependency
-[[dependencies.${mod_id}]]
-modId="minecraft"
-type="required"
+[[dependencies.${ mod_id }]]
+modId = "minecraft"
+type = "required"
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange="${minecraft_version_range}"
-ordering="NONE"
-side="CLIENT"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "CLIENT"

@@ -51,14 +51,6 @@ class Lookup {
             -0.9415440651830f, -0.9495281805930f, -0.9569403357322f, -0.9637760657954f, -0.9700312531945f,
             -0.9757021300385f, -0.9807852804032f, -0.9852776423889f, -0.9891765099648f, -0.9924795345987f,
             -0.9951847266722f, -0.9972904566787f, -0.9987954562052f, -0.9996988186962f, -1.0000000000000f,};
-
-    /* interpolated lookup based cos function, domain 0 to PI only */
-    static float coslook(float a) {
-        double d = a * (.31830989 * (float) COS_LOOKUP_SZ);
-        int i = (int) d;
-        return COS_LOOKUP[i] + ((float) (d - i)) * (COS_LOOKUP[i + 1] - COS_LOOKUP[i]);
-    }
-
     static final int INVSQ_LOOKUP_SZ = 32;
     static final float[] INVSQ_LOOKUP = {1.414213562373f, 1.392621247646f, 1.371988681140f, 1.352246807566f,
             1.333333333333f, 1.315191898443f, 1.297771369046f, 1.281025230441f, 1.264911064067f, 1.249390095109f,
@@ -66,14 +58,6 @@ class Lookup {
             1.154700538379f, 1.142857142857f, 1.131370849898f, 1.120224067222f, 1.109400392450f, 1.098884511590f,
             1.088662107904f, 1.078719779941f, 1.069044967650f, 1.059625885652f, 1.050451462878f, 1.041511287847f,
             1.032795558989f, 1.024295039463f, 1.016001016002f, 1.007905261358f, 1.000000000000f,};
-
-    /* interpolated 1./sqrt(p) where .5 <= p < 1. */
-    static float invsqlook(float a) {
-        double d = a * (2.f * (float) INVSQ_LOOKUP_SZ) - (float) INVSQ_LOOKUP_SZ;
-        int i = (int) d;
-        return INVSQ_LOOKUP[i] + ((float) (d - i)) * (INVSQ_LOOKUP[i + 1] - INVSQ_LOOKUP[i]);
-    }
-
     static final int INVSQ2EXP_LOOKUP_MIN = -32;
     static final int INVSQ2EXP_LOOKUP_MAX = 32;
     static final float[] INVSQ2EXP_LOOKUP = {65536.f, 46340.95001f, 32768.f, 23170.47501f, 16384.f, 11585.2375f,
@@ -85,12 +69,6 @@ class Lookup {
             0.0009765625f, 0.000690533966f, 0.00048828125f, 0.000345266983f, 0.000244140625f, 0.0001726334915f,
             0.0001220703125f, 8.631674575e-05f, 6.103515625e-05f, 4.315837288e-05f, 3.051757812e-05f, 2.157918644e-05f,
             1.525878906e-05f,};
-
-    /* interpolated 1./sqrt(p) where .5 <= p < 1. */
-    static float invsq2explook(int a) {
-        return INVSQ2EXP_LOOKUP[a - INVSQ2EXP_LOOKUP_MIN];
-    }
-
     static final int FROMdB_LOOKUP_SZ = 35;
     static final int FROMdB2_LOOKUP_SZ = 32;
     static final int FROMdB_SHIFT = 5;
@@ -107,6 +85,25 @@ class Lookup {
             0.835362547f, 0.8234268041f, 0.8116616003f, 0.8000644989f, 0.7886330981f, 0.7773650302f, 0.7662579617f,
             0.755309592f, 0.7445176537f, 0.7338799116f, 0.7233941627f, 0.7130582353f, 0.7028699885f, 0.6928273125f,
             0.6829281272f, 0.6731703824f, 0.6635520573f, 0.6540711597f, 0.6447257262f, 0.6355138211f,};
+
+    /* interpolated lookup based cos function, domain 0 to PI only */
+    static float coslook(float a) {
+        double d = a * (.31830989 * (float) COS_LOOKUP_SZ);
+        int i = (int) d;
+        return COS_LOOKUP[i] + ((float) (d - i)) * (COS_LOOKUP[i + 1] - COS_LOOKUP[i]);
+    }
+
+    /* interpolated 1./sqrt(p) where .5 <= p < 1. */
+    static float invsqlook(float a) {
+        double d = a * (2.f * (float) INVSQ_LOOKUP_SZ) - (float) INVSQ_LOOKUP_SZ;
+        int i = (int) d;
+        return INVSQ_LOOKUP[i] + ((float) (d - i)) * (INVSQ_LOOKUP[i + 1] - INVSQ_LOOKUP[i]);
+    }
+
+    /* interpolated 1./sqrt(p) where .5 <= p < 1. */
+    static float invsq2explook(int a) {
+        return INVSQ2EXP_LOOKUP[a - INVSQ2EXP_LOOKUP_MIN];
+    }
 
     /* interpolated lookup based fromdB function, domain -140dB to 0dB only */
     static float fromdBlook(float a) {

@@ -24,33 +24,15 @@ package com.coloryr.allmusic.client.player.decoder.ogg.jcraft.jorbis;
 
 class Drft {
 
-    int n;
-    float[] trigcache;
-    int[] splitcache;
-
-    void backward(float[] data) {
-        if (n == 1) return;
-        drftb1(n, data, trigcache, trigcache, n, splitcache);
-    }
-
-    void init(int n) {
-        this.n = n;
-        trigcache = new float[3 * n];
-        splitcache = new int[32];
-        fdrffti(n, trigcache, splitcache);
-    }
-
-    void clear() {
-        if (trigcache != null) trigcache = null;
-        if (splitcache != null) splitcache = null;
-    }
-
     static int[] ntryh = {4, 2, 3, 5};
     static float tpi = ((float) Math.PI * 2F);
     static float hsqt2 = .70710678118654752440084436210485f;
     static float taui = .86602540378443864676372317075293618f;
     static float taur = -.5f;
     static float sqrt2 = 1.4142135623730950488016887242097f;
+    int n;
+    float[] trigcache;
+    int[] splitcache;
 
     static void drfti1(int n, float[] wa, int index, int[] ifac) {
         float arg, argh, argld, fi;
@@ -1278,5 +1260,22 @@ class Drft {
         }
         if (na == 0) return;
         for (i = 0; i < n; i++) c[i] = ch[i];
+    }
+
+    void backward(float[] data) {
+        if (n == 1) return;
+        drftb1(n, data, trigcache, trigcache, n, splitcache);
+    }
+
+    void init(int n) {
+        this.n = n;
+        trigcache = new float[3 * n];
+        splitcache = new int[32];
+        fdrffti(n, trigcache, splitcache);
+    }
+
+    void clear() {
+        if (trigcache != null) trigcache = null;
+        if (splitcache != null) splitcache = null;
     }
 }

@@ -59,17 +59,18 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
     private final APlayer player;
     /*---- Fields ----*/
-
+    private final BuffPack pack = new BuffPack();
     public StreamInfo streamInfo;
     public SeekTable seekTable;
-
     private FlacLowLevelInput input;
-
     private long metadataEndPos;
 
+    /*---- Constructors ----*/
     private FrameDecoder frameDec;
 
-    /*---- Constructors ----*/
+    /*---- Methods ----*/
+    private int[][] samples;
+    private byte[] sampleBytes;
 
     // Constructs a new FLAC decoder to read the given file.
     // This immediately reads the basic header but not metadata blocks.
@@ -77,8 +78,6 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
         // Initialize streams
         this.player = player;
     }
-
-    /*---- Methods ----*/
 
     // Reads, handles, and returns the next metadata block. Returns a pair (Integer type, byte[] data) if the
     // next metadata block exists, otherwise returns null if the final metadata block was previously read.
@@ -127,10 +126,6 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
             return frame.blockSize; // In the range [1, 65536]
         }
     }
-
-    private int[][] samples;
-    private byte[] sampleBytes;
-    private final BuffPack pack = new BuffPack();
 
     @Override
     public BuffPack decodeFrame() throws Exception {

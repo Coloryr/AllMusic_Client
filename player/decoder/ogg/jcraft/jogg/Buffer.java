@@ -37,6 +37,20 @@ public class Buffer {
     int endbyte = 0;
     int storage = 0;
 
+    public static int ilog(int v) {
+        int ret = 0;
+        while (v > 0) {
+            ret++;
+            v >>>= 1;
+        }
+        return (ret);
+    }
+
+    public static void report(String in) {
+        System.err.println(in);
+        System.exit(1);
+    }
+
     public void writeinit() {
         buffer = new byte[BUFFER_INCREMENT];
         ptr = 0;
@@ -265,19 +279,5 @@ public class Buffer {
 
     public byte[] buffer() {
         return (buffer);
-    }
-
-    public static int ilog(int v) {
-        int ret = 0;
-        while (v > 0) {
-            ret++;
-            v >>>= 1;
-        }
-        return (ret);
-    }
-
-    public static void report(String in) {
-        System.err.println(in);
-        System.exit(1);
     }
 }

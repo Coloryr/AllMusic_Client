@@ -28,20 +28,19 @@ import java.util.concurrent.*;
 
 public class APlayer extends InputStream {
 
+    private final Queue<String> urls = new ConcurrentLinkedQueue<>();
+    private final Semaphore semaphore = new Semaphore(0);
+    private final Semaphore semaphore1 = new Semaphore(0);
+    private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private HttpClient client;
     private String url;
     private HttpGet get;
     private InputStream content;
-
     private boolean isClose = false;
     private boolean reload = false;
     private IDecoder decoder;
-    private final Queue<String> urls = new ConcurrentLinkedQueue<>();
     private int time = 0;
     private long local = 0;
-    private final Semaphore semaphore = new Semaphore(0);
-    private final Semaphore semaphore1 = new Semaphore(0);
-    private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
     private boolean isPlay = false;
     private boolean wait = false;
     private int index;

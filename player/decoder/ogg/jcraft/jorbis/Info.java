@@ -29,8 +29,6 @@ public class Info {
 
     private static final int OV_EBADPACKET = -136;
     private static final int OV_ENOTAUDIO = -135;
-
-    private static byte[] _vorbis = "vorbis".getBytes();
     private static final int VI_TIMEB = 1;
     // private static final int VI_FLOORB=1;
     private static final int VI_FLOORB = 2;
@@ -38,7 +36,7 @@ public class Info {
     private static final int VI_RESB = 3;
     private static final int VI_MAPB = 1;
     private static final int VI_WINDOWB = 1;
-
+    private static byte[] _vorbis = "vorbis".getBytes();
     public int version;
     public int channels;
     public int rate;

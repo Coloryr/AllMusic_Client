@@ -32,6 +32,11 @@ public final class FrameInfo {
 
     // Exactly one of these following two fields equals -1.
 
+    private static final int[][] BLOCK_SIZE_CODES = {{192, 1}, {576, 2}, {1152, 3}, {2304, 4}, {4608, 5},
+            {256, 8}, {512, 9}, {1024, 10}, {2048, 11}, {4096, 12}, {8192, 13}, {16384, 14}, {32768, 15},};
+    private static final int[][] SAMPLE_DEPTH_CODES = {{8, 1}, {12, 2}, {16, 4}, {20, 5}, {24, 6},};
+    private static final int[][] SAMPLE_RATE_CODES = {{88200, 1}, {176400, 2}, {192000, 3}, {8000, 4},
+            {16000, 5}, {22050, 6}, {24000, 7}, {32000, 8}, {44100, 9}, {48000, 10}, {96000, 11},};
     /**
      * The index of this frame, where the foremost frame has index 0 and each subsequent frame
      * increments it. This is either a uint31 value or &minus;1 if unused. Exactly one of the fields
@@ -39,51 +44,46 @@ public final class FrameInfo {
      * be used if the stream info's minBlockSize = maxBlockSize (constant block size encoding style).
      */
     public int frameIndex;
-
     /**
      * The offset of the first sample in this frame with respect to the beginning of the
      * audio stream. This is either a uint36 value or &minus;1 if unused. Exactly one of
      * the fields frameIndex and sampleOffse is equal to &minus;1 (not both nor neither).
      */
     public long sampleOffset;
-
     /**
      * The number of audio channels in this frame, in the range 1 to 8 inclusive.
      * This value is fully determined by the channelAssignment field.
      */
     public int numChannels;
-
     /**
      * The raw channel assignment value of this frame, which is a uint4 value.
      * This indicates the number of channels, but also tells the stereo coding mode.
      */
     public int channelAssignment;
-
     /**
      * The number of samples per channel in this frame, in the range 1 to 65536 inclusive.
      */
     public int blockSize;
 
+    /*---- Constructors ----*/
     /**
      * The sample rate of this frame in hertz (Hz), in the range 1 to 655360 inclusive,
      * or &minus;1 if unavailable (i.e. the stream info should be consulted).
      */
     public int sampleRate;
 
+    /*---- Functions to read FrameInfo from stream ----*/
     /**
      * The sample depth of this frame in bits, in the range 8 to 24 inclusive,
      * or &minus;1 if unavailable (i.e. the stream info should be consulted).
      */
     public int sampleDepth;
-
     /**
      * The size of this frame in bytes, from the start of the sync sequence to the end
      * of the trailing CRC-16 checksum. A valid value is at least 10, or &minus;1
      * if unavailable (e.g. the frame header was parsed but not the entire frame).
      */
     public int frameSize;
-
-    /*---- Constructors ----*/
 
     /**
      * Constructs a blank frame metadata structure, setting all fields to unknown or invalid values.
@@ -98,8 +98,6 @@ public final class FrameInfo {
         sampleDepth = -1;
         frameSize = -1;
     }
-
-    /*---- Functions to read FrameInfo from stream ----*/
 
     /**
      * Reads the next FLAC frame header from the specified input stream, either returning
@@ -237,6 +235,8 @@ public final class FrameInfo {
         }
     }
 
+    /*---- Tables of constants and search functions ----*/
+
     // Returns a uint4 value representing the given block size. Pure function.
     private static int getBlockSizeCode(int blockSize) {
         int result = searchFirst(BLOCK_SIZE_CODES, blockSize);
@@ -273,8 +273,6 @@ public final class FrameInfo {
         return result;
     }
 
-    /*---- Tables of constants and search functions ----*/
-
     private static final int searchFirst(int[][] table, int key) {
         for (int[] pair : table) {
             if (pair[0] == key) return pair[1];
@@ -288,13 +286,5 @@ public final class FrameInfo {
         }
         return -1;
     }
-
-    private static final int[][] BLOCK_SIZE_CODES = {{192, 1}, {576, 2}, {1152, 3}, {2304, 4}, {4608, 5},
-            {256, 8}, {512, 9}, {1024, 10}, {2048, 11}, {4096, 12}, {8192, 13}, {16384, 14}, {32768, 15},};
-
-    private static final int[][] SAMPLE_DEPTH_CODES = {{8, 1}, {12, 2}, {16, 4}, {20, 5}, {24, 6},};
-
-    private static final int[][] SAMPLE_RATE_CODES = {{88200, 1}, {176400, 2}, {192000, 3}, {8000, 4},
-            {16000, 5}, {22050, 6}, {24000, 7}, {32000, 8}, {44100, 9}, {48000, 10}, {96000, 11},};
 
 }

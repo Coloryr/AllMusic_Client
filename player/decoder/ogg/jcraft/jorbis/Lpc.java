@@ -99,6 +99,10 @@ class Lpc {
     // Input : n element envelope spectral curve
     // Output: m lpc coefficients, excitation energy
 
+    static float FAST_HYPOT(float a, float b) {
+        return (float) Math.sqrt((a) * (a) + (b) * (b));
+    }
+
     float lpc_from_curve(float[] curve, float[] lpc) {
         int n = ln;
         float[] work = new float[n + n];
@@ -138,10 +142,6 @@ class Lpc {
 
     void clear() {
         fft.clear();
-    }
-
-    static float FAST_HYPOT(float a, float b) {
-        return (float) Math.sqrt((a) * (a) + (b) * (b));
     }
 
     // One can do this the long way by generating the transfer function in

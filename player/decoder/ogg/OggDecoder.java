@@ -29,34 +29,30 @@ import java.util.concurrent.Semaphore;
 public class OggDecoder implements IDecoder {
 
     private final APlayer player;
-    /**
-     * The conversion buffer size
-     */
-    private int convsize = 4096 * 2;
-    private boolean isDone = false;
-    private int size;
-    private boolean isClose;
-    private boolean isOK;
-
     private final SyncState oy = new SyncState(); // sync and verify incoming physical bitstream
     private final StreamState os = new StreamState(); // take physical pages, weld into a logical stream of packets
     private final Page og = new Page(); // one Ogg bitstream page. Vorbis packets are inside
     private final Packet op = new Packet(); // one raw packet of data for decode
-
     private final Info vi = new Info(); // struct that stores all the static vorbis bitstream settings
     private final Comment vc = new Comment(); // struct that stores all the bitstream user comments
     private final DspState vd = new DspState(); // central working state for the packet->PCM decoder
     private final Block vb = new Block(vd); // local working space for packet->PCM decode
-
+    private final BuffPack buff = new BuffPack();
+    private final Semaphore get1 = new Semaphore(0);
+    private final Semaphore get2 = new Semaphore(0);
+    /**
+     * The conversion buffer size
+     */
+    private int convsize = 4096 * 2;
     /**
      * The buffer used to read OGG file
      */
     private final byte[] convbuffer = new byte[convsize]; // take 8k out of the data segment, not the stack
+    private boolean isDone = false;
+    private int size;
+    private boolean isClose;
+    private boolean isOK;
     private OggData ogg;
-    private final BuffPack buff = new BuffPack();
-
-    private final Semaphore get1 = new Semaphore(0);
-    private final Semaphore get2 = new Semaphore(0);
 
     /**
      * Create a new OGG decoder

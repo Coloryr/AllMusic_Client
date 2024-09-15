@@ -26,20 +26,29 @@ import java.util.concurrent.*;
 public class HudUtils {
 
     public static final ComType[] types = ComType.values();
+    public static ConfigObj config;
+
+    public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        outputImage.getGraphics()
+                .drawImage(resultingImage, 0, 0, null);
+        return outputImage;
+    }
+
+    private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
+    private final Semaphore semaphore = new Semaphore(0);
+    private final HttpClient client;
     public String info = "";
     public String list = "";
     public String lyric = "";
     public SaveOBJ save;
+    public boolean haveImg;
+    public boolean thisRoute;
     private ByteBuffer byteBuffer;
     private int textureID = -1;
-    public boolean haveImg;
-    private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
-    private final Semaphore semaphore = new Semaphore(0);
-    private final HttpClient client;
-    public static ConfigObj config;
     private HttpGet get;
     private InputStream inputStream;
-    public boolean thisRoute;
     private int ang = 0;
     private int count = 0;
 
@@ -119,17 +128,18 @@ public class HudUtils {
         }
     }
 
-    public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
-        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        outputImage.getGraphics()
-                .drawImage(resultingImage, 0, 0, null);
-        return outputImage;
-    }
-
     private void loadPic(String picUrl) {
+        haveImg = false;
         try {
             getClose();
+
+            while (save == null) {
+                Thread.sleep(200);
+            }
+            if (!save.pic.enable) {
+                return;
+            }
+
             get = new HttpGet(picUrl);
             HttpResponse response = client.execute(get);
             HttpEntity entity = response.getEntity();
@@ -140,9 +150,6 @@ public class HudUtils {
             int[] pixels = new int[width * height];
             byteBuffer = ByteBuffer.allocateDirect(width * height * 4);
 
-            while (save == null) {
-                Thread.sleep(200);
-            }
             //图片旋转
             if (save.pic.shadow) {
                 // 透明底的图片

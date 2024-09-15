@@ -11,7 +11,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.bus.api.IEventBus;
@@ -25,13 +24,10 @@ import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.sound.PlaySoundSourceEvent;
 import net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
-import net.neoforged.neoforge.client.event.sound.SoundEvent;
 import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.handling.IPlayPayloadHandler;
 import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
@@ -43,12 +39,11 @@ import java.nio.charset.StandardCharsets;
 
 @Mod("allmusic_client")
 public class AllMusic implements IPlayPayloadHandler<PackData> {
+    public static final ResourceLocation channel =
+            new ResourceLocation("allmusic", "channel");
     private static APlayer nowPlaying;
     private static HudUtils hudUtils;
     private static GuiGraphics gui;
-
-    public static final ResourceLocation channel =
-            new ResourceLocation("allmusic", "channel");
 
     public AllMusic(IEventBus modEventBus) {
         modEventBus.addListener(this::setup);
@@ -64,82 +59,12 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
                 Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
     }
 
-    private void setup(final FMLClientSetupEvent event) {
-        hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
-    }
-
-    public void register(final RegisterPayloadHandlerEvent event) {
-        final IPayloadRegistrar registrar = event.registrar("allmusic");
-        registrar.optional().play(channel, new DataReader(), handler -> handler
-                .client(this));
-    }
-
-    @Override
-    public void handle(@NotNull PackData payload, PlayPayloadContext context) {
-        context.workHandler().execute(() -> handle(payload.buffer()));
-    }
-
-    public static class DataReader implements FriendlyByteBuf.Reader<PackData> {
-        @Override
-        public PackData apply(FriendlyByteBuf buf) {
-            return new PackData(buf);
-        }
-    }
-
-    public void handle(ByteBuf buffer) {
-        try {
-            byte type = buffer.readByte();
-            if (type >= HudUtils.types.length || type < 0) {
-                return;
-            }
-            ComType type1 = ComType.values()[type];
-            switch (type1) {
-                case lyric:
-                    hudUtils.lyric = readString(buffer);
-                    break;
-                case info:
-                    hudUtils.info = readString(buffer);
-                    break;
-                case list:
-                    hudUtils.list = readString(buffer);
-                    break;
-                case play:
-                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
-                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
-                    stopPlaying();
-                    nowPlaying.setMusic(readString(buffer));
-                    break;
-                case img:
-                    hudUtils.setImg(readString(buffer));
-                    break;
-                case stop:
-                    stopPlaying();
-                    break;
-                case clear:
-                    hudUtils.close();
-                    break;
-                case pos:
-                    nowPlaying.set(buffer.readInt());
-                    break;
-                case hud:
-                    hudUtils.setPos(readString(buffer));
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private static String readString(ByteBuf buf) {
         int size = buf.readInt();
         byte[] temp = new byte[size];
         buf.readBytes(temp);
 
         return new String(temp, StandardCharsets.UTF_8);
-    }
-
-    private void setup1(final FMLCommonSetupEvent event) {
-        nowPlaying = new APlayer();
     }
 
     public static int getScreenWidth() {
@@ -156,43 +81,6 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
 
     public static int getFontHeight() {
         return Minecraft.getInstance().font.lineHeight;
-    }
-
-    public void onLoad(final SoundEngineLoadEvent e) {
-        if (nowPlaying != null) {
-            nowPlaying.setReload();
-        }
-    }
-
-    @SubscribeEvent
-    public void onSound(final PlayStreamingSourceEvent e) {
-        if (!nowPlaying.isPlay())
-            return;
-        SoundSource data = e.getSound().getSource();
-        switch (data) {
-            case MUSIC, RECORDS -> e.getChannel().stop();
-        }
-    }
-
-    @SubscribeEvent
-    public void onSound(final PlaySoundSourceEvent e) {
-        if (!nowPlaying.isPlay())
-            return;
-        SoundSource data = e.getSound().getSource();
-        switch (data) {
-            case MUSIC, RECORDS -> e.getChannel().stop();
-        }
-    }
-
-    @SubscribeEvent
-    public void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
-        try {
-            stopPlaying();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
-        hudUtils.close();
-        hudUtils.save = null;
     }
 
     public static float getVolume() {
@@ -243,6 +131,111 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         gui.drawString(hud, item, x, y, color, shadow);
     }
 
+    public static void runMain(Runnable runnable) {
+        RenderSystem.recordRenderCall(runnable::run);
+    }
+
+    private void setup(final FMLClientSetupEvent event) {
+        hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
+    }
+
+    public void register(final RegisterPayloadHandlerEvent event) {
+        final IPayloadRegistrar registrar = event.registrar("allmusic");
+        registrar.optional().play(channel, new DataReader(), handler -> handler
+                .client(this));
+    }
+
+    @Override
+    public void handle(@NotNull PackData payload, PlayPayloadContext context) {
+        context.workHandler().execute(() -> handle(payload.buffer()));
+    }
+
+    public void handle(ByteBuf buffer) {
+        try {
+            byte type = buffer.readByte();
+            if (type >= HudUtils.types.length || type < 0) {
+                return;
+            }
+            ComType type1 = ComType.values()[type];
+            switch (type1) {
+                case lyric:
+                    hudUtils.lyric = readString(buffer);
+                    break;
+                case info:
+                    hudUtils.info = readString(buffer);
+                    break;
+                case list:
+                    hudUtils.list = readString(buffer);
+                    break;
+                case play:
+                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
+                    stopPlaying();
+                    nowPlaying.setMusic(readString(buffer));
+                    break;
+                case img:
+                    hudUtils.setImg(readString(buffer));
+                    break;
+                case stop:
+                    stopPlaying();
+                    break;
+                case clear:
+                    hudUtils.close();
+                    break;
+                case pos:
+                    nowPlaying.set(buffer.readInt());
+                    break;
+                case hud:
+                    hudUtils.setPos(readString(buffer));
+                    break;
+            }
+            buffer.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setup1(final FMLCommonSetupEvent event) {
+        nowPlaying = new APlayer();
+    }
+
+    public void onLoad(final SoundEngineLoadEvent e) {
+        if (nowPlaying != null) {
+            nowPlaying.setReload();
+        }
+    }
+
+    @SubscribeEvent
+    public void onSound(final PlayStreamingSourceEvent e) {
+        if (!nowPlaying.isPlay())
+            return;
+        SoundSource data = e.getSound().getSource();
+        switch (data) {
+            case MUSIC, RECORDS -> e.getChannel().stop();
+        }
+    }
+
+    @SubscribeEvent
+    public void onSound(final PlaySoundSourceEvent e) {
+        if (!nowPlaying.isPlay())
+            return;
+        SoundSource data = e.getSound().getSource();
+        switch (data) {
+            case MUSIC, RECORDS -> e.getChannel().stop();
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
+        try {
+            stopPlaying();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        hudUtils.close();
+        hudUtils.save = null;
+    }
+
     @SubscribeEvent
     public void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
@@ -261,7 +254,10 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         hudUtils.close();
     }
 
-    public static void runMain(Runnable runnable) {
-        RenderSystem.recordRenderCall(runnable::run);
+    public static class DataReader implements FriendlyByteBuf.Reader<PackData> {
+        @Override
+        public PackData apply(FriendlyByteBuf buf) {
+            return new PackData(buf);
+        }
     }
 }

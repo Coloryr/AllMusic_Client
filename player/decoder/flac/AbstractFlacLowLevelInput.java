@@ -29,32 +29,73 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
 
     /*---- Fields ----*/
 
+    private static final int RICE_DECODING_TABLE_BITS = 13; // Configurable, must be positive
+    private static final int RICE_DECODING_TABLE_MASK = (1 << RICE_DECODING_TABLE_BITS) - 1;
+    private static final byte[][] RICE_DECODING_CONSUMED_TABLES = new byte[31][1 << RICE_DECODING_TABLE_BITS];
+    private static final int[][] RICE_DECODING_VALUE_TABLES = new int[31][1 << RICE_DECODING_TABLE_BITS];
+    private static final int RICE_DECODING_CHUNK = 4; // Configurable, must be positive, and RICE_DECODING_CHUNK *
+    private static byte[] CRC8_TABLE = new byte[256];
+    private static char[] CRC16_TABLE = new char[256];
+
+    static {
+        for (int param = 0; param < RICE_DECODING_CONSUMED_TABLES.length; param++) {
+            byte[] consumed = RICE_DECODING_CONSUMED_TABLES[param];
+            int[] values = RICE_DECODING_VALUE_TABLES[param];
+            for (int i = 0; ; i++) {
+                int numBits = (i >>> param) + 1 + param;
+                if (numBits > RICE_DECODING_TABLE_BITS) break;
+                int bits = ((1 << param) | (i & ((1 << param) - 1)));
+                int shift = RICE_DECODING_TABLE_BITS - numBits;
+                for (int j = 0; j < (1 << shift); j++) {
+                    consumed[(bits << shift) | j] = (byte) numBits;
+                    values[(bits << shift) | j] = (i >>> 1) ^ -(i & 1);
+                }
+            }
+            if (consumed[0] != 0) throw new AssertionError();
+        }
+    }
+
+    static {
+        for (int i = 0; i < CRC8_TABLE.length; i++) {
+            int temp8 = i;
+            int temp16 = i << 8;
+            for (int j = 0; j < 8; j++) {
+                temp8 = (temp8 << 1) ^ ((temp8 >>> 7) * 0x107);
+                temp16 = (temp16 << 1) ^ ((temp16 >>> 15) * 0x18005);
+            }
+            CRC8_TABLE[i] = (byte) temp8;
+            CRC16_TABLE[i] = (char) temp16;
+        }
+    }
+
+    /*---- Constructors ----*/
+
     // Data from the underlying stream is first stored into this byte buffer before further processing.
     private long byteBufferStartPos;
+
+    /*---- Methods ----*/
+
+    /*-- Stream position --*/
     private byte[] byteBuffer;
     private int byteBufferLen;
     private int byteBufferIndex;
-
     // The buffer of next bits to return to a reader. Note that byteBufferIndex is incremented when byte
     // values are put into the bit buffer, but they might not have been consumed by the ultimate reader yet.
     private long bitBuffer; // Only the bottom bitBufferLen bits are valid; the top bits are garbage.
-    private int bitBufferLen; // Always in the range [0, 64].
 
+    /*-- Reading bitwise integers --*/
+    private int bitBufferLen; // Always in the range [0, 64].
     // Current state of the CRC calculations.
     private int crc8; // Always a uint8 value.
     private int crc16; // Always a uint16 value.
     private int crcStartIndex; // In the range [0, byteBufferLen], unless byteBufferLen = -1.
 
-    /*---- Constructors ----*/
+    /*-- Reading bytes --*/
 
     public AbstractFlacLowLevelInput() {
         byteBuffer = new byte[4096];
         positionChanged(0);
     }
-
-    /*---- Methods ----*/
-
-    /*-- Stream position --*/
 
     public long getPosition() {
         return byteBufferStartPos + byteBufferIndex - (bitBufferLen + 7) / 8;
@@ -76,12 +117,12 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         resetCrcs();
     }
 
+    /*-- CRC calculations --*/
+
     // Either returns silently or throws an exception.
     private void checkByteAligned() {
         if (bitBufferLen % 8 != 0) throw new IllegalStateException("Not at a byte boundary");
     }
-
-    /*-- Reading bitwise integers --*/
 
     public int readUint(int n) throws IOException {
         if (n < 0 || n > 32) throw new IllegalArgumentException();
@@ -154,6 +195,8 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         }
     }
 
+    /*-- Miscellaneous --*/
+
     // Appends at least 8 bits to the bit buffer, or throws EOFException.
     private void fillBitBuffer() throws IOException {
         int i = byteBufferIndex;
@@ -172,7 +215,9 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         byteBufferIndex += n;
     }
 
-    /*-- Reading bytes --*/
+    /*---- Tables of constants ----*/
+
+    // For Rice decoding
 
     public int readByte() throws IOException {
         checkByteAligned();
@@ -210,14 +255,13 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
     // Returns a value in the range [0, len] for a successful read, or -1 if the end of stream was reached.
     protected abstract int readUnderlying(byte[] buf, int off, int len) throws IOException;
 
-    /*-- CRC calculations --*/
-
     public void resetCrcs() {
         checkByteAligned();
         crcStartIndex = byteBufferIndex - bitBufferLen / 8;
         crc8 = 0;
         crc16 = 0;
     }
+    // RICE_DECODING_TABLE_BITS <= 64
 
     public int getCrc8() {
         checkByteAligned();
@@ -225,6 +269,8 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         if ((crc8 >>> 8) != 0) throw new AssertionError();
         return crc8;
     }
+
+    // For CRC calculations
 
     public int getCrc16() {
         checkByteAligned();
@@ -246,8 +292,6 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         crcStartIndex = end;
     }
 
-    /*-- Miscellaneous --*/
-
     // Note: This class only uses memory and has no native resources. It's not strictly necessary to
     // call the implementation of AbstractFlacLowLevelInput.close() here, but it's a good habit anyway.
     public void close() throws IOException {
@@ -259,53 +303,6 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         crc8 = -1;
         crc16 = -1;
         crcStartIndex = -1;
-    }
-
-    /*---- Tables of constants ----*/
-
-    // For Rice decoding
-
-    private static final int RICE_DECODING_TABLE_BITS = 13; // Configurable, must be positive
-    private static final int RICE_DECODING_TABLE_MASK = (1 << RICE_DECODING_TABLE_BITS) - 1;
-    private static final byte[][] RICE_DECODING_CONSUMED_TABLES = new byte[31][1 << RICE_DECODING_TABLE_BITS];
-    private static final int[][] RICE_DECODING_VALUE_TABLES = new int[31][1 << RICE_DECODING_TABLE_BITS];
-    private static final int RICE_DECODING_CHUNK = 4; // Configurable, must be positive, and RICE_DECODING_CHUNK *
-    // RICE_DECODING_TABLE_BITS <= 64
-
-    static {
-        for (int param = 0; param < RICE_DECODING_CONSUMED_TABLES.length; param++) {
-            byte[] consumed = RICE_DECODING_CONSUMED_TABLES[param];
-            int[] values = RICE_DECODING_VALUE_TABLES[param];
-            for (int i = 0; ; i++) {
-                int numBits = (i >>> param) + 1 + param;
-                if (numBits > RICE_DECODING_TABLE_BITS) break;
-                int bits = ((1 << param) | (i & ((1 << param) - 1)));
-                int shift = RICE_DECODING_TABLE_BITS - numBits;
-                for (int j = 0; j < (1 << shift); j++) {
-                    consumed[(bits << shift) | j] = (byte) numBits;
-                    values[(bits << shift) | j] = (i >>> 1) ^ -(i & 1);
-                }
-            }
-            if (consumed[0] != 0) throw new AssertionError();
-        }
-    }
-
-    // For CRC calculations
-
-    private static byte[] CRC8_TABLE = new byte[256];
-    private static char[] CRC16_TABLE = new char[256];
-
-    static {
-        for (int i = 0; i < CRC8_TABLE.length; i++) {
-            int temp8 = i;
-            int temp16 = i << 8;
-            for (int j = 0; j < 8; j++) {
-                temp8 = (temp8 << 1) ^ ((temp8 >>> 7) * 0x107);
-                temp16 = (temp16 << 1) ^ ((temp16 >>> 15) * 0x18005);
-            }
-            CRC8_TABLE[i] = (byte) temp8;
-            CRC16_TABLE[i] = (char) temp16;
-        }
     }
 
 }

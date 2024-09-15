@@ -90,6 +90,20 @@ public class DspState {
         window[1][1][1] = new float[2][];
     }
 
+    DspState(Info vi) {
+        this();
+        init(vi, false);
+        // Adjust centerW to allow an easier mechanism for determining output
+        pcm_returned = centerW;
+        centerW -= vi.blocksizes[W] / 4 + vi.blocksizes[lW] / 4;
+        granulepos = -1;
+        sequence = -1;
+    }
+
+    // Analysis side code, but directly related to blocking. Thus it's
+    // here and not in analysis.c (which is for analysis transforms only).
+    // The init is here because some of it is shared
+
     static float[] window(int type, int window, int left, int right) {
         float[] ret = new float[window];
         switch (type) {
@@ -128,10 +142,6 @@ public class DspState {
         }
         return (ret);
     }
-
-    // Analysis side code, but directly related to blocking. Thus it's
-    // here and not in analysis.c (which is for analysis transforms only).
-    // The init is here because some of it is shared
 
     int init(Info vi, boolean encp) {
         this.vi = vi;
@@ -211,16 +221,6 @@ public class DspState {
         granulepos = -1;
         sequence = -1;
         return (0);
-    }
-
-    DspState(Info vi) {
-        this();
-        init(vi, false);
-        // Adjust centerW to allow an easier mechanism for determining output
-        pcm_returned = centerW;
-        centerW -= vi.blocksizes[W] / 4 + vi.blocksizes[lW] / 4;
-        granulepos = -1;
-        sequence = -1;
     }
 
     // Unike in analysis, the window is only partially applied for each

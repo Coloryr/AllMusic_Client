@@ -131,6 +131,7 @@ public class AllMusic {
                     hudUtils.setPos(readString(buffer));
                     break;
             }
+            buffer.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
