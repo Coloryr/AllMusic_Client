@@ -5,10 +5,10 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "allmusic_client.refmap.json",
   "mixins": [
-    "IGuiGetter",
     "GuiMixin"
   ],
   "client": [
+    "IGuiGetter"
   ],
   "injectors": {
     "defaultRequire": 1

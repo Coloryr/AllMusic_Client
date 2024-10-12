@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'org.spongepowered:mixingradle:+'
+        classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
 
@@ -177,7 +177,7 @@ dependencies {
     // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transitive dependencies request 6.0+ 
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 
-    annotationProcessor 'org.spongepowered:mixin:+:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -208,7 +208,8 @@ tasks.named('jar', Jar).configure {
             'Specification-Version'   : '1', // We are version 1 of ourselves
             'Implementation-Title'    : project.name,
             'Implementation-Version'  : project.jar.archiveVersion,
-            'Implementation-Vendor'   : mod_authors
+            'Implementation-Vendor'   : mod_authors,
+            'MixinConfigs': "allmusic_client.mixins.json"
         ])
     }
 }
