@@ -9,6 +9,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
@@ -24,13 +25,12 @@ import java.util.Queue;
 import java.util.concurrent.*;
 
 public class HudUtils {
-
     public static final ComType[] types = ComType.values();
     public static ConfigObj config;
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
-        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         outputImage.getGraphics()
                 .drawImage(resultingImage, 0, 0, null);
         return outputImage;
@@ -39,18 +39,22 @@ public class HudUtils {
     private final Queue<String> urlList = new ConcurrentLinkedDeque<>();
     private final Semaphore semaphore = new Semaphore(0);
     private final HttpClient client;
+    private final ByteBuffer byteBuffer;
+
     public String info = "";
     public String list = "";
     public String lyric = "";
     public SaveOBJ save;
-    public boolean haveImg;
-    public boolean thisRoute;
-    private ByteBuffer byteBuffer;
+
+    private boolean haveImg;
+    private boolean thisRoute;
     private int textureID = -1;
     private HttpGet get;
     private InputStream inputStream;
     private int ang = 0;
     private int count = 0;
+    private boolean display;
+    private boolean needUpload;
 
     public HudUtils(Path path) {
         Thread thread = new Thread(this::run);
@@ -91,9 +95,24 @@ public class HudUtils {
                 e.printStackTrace();
             }
         }
+        byteBuffer = ByteBuffer.allocateDirect(config.picSize * config.picSize * 4);
+
+        AllMusic.runMain(this::texInit);
 
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::time1, 0, 1, TimeUnit.MILLISECONDS);
+    }
+
+    private void texInit() {
+        textureID = GL11.glGenTextures();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, config.picSize,
+                config.picSize, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
     }
 
     private void time1() {
@@ -133,7 +152,7 @@ public class HudUtils {
         try {
             getClose();
 
-            while (save == null) {
+            while (save == null || needUpload) {
                 Thread.sleep(200);
             }
             if (!save.pic.enable) {
@@ -145,25 +164,22 @@ public class HudUtils {
             HttpEntity entity = response.getEntity();
             inputStream = entity.getContent();
             BufferedImage image = resizeImage(ImageIO.read(inputStream), config.picSize, config.picSize);
-            int width = image.getWidth();
-            int height = image.getHeight();
-            int[] pixels = new int[width * height];
-            byteBuffer = ByteBuffer.allocateDirect(width * height * 4);
+            int[] pixels = new int[config.picSize * config.picSize];
 
             //图片旋转
             if (save.pic.shadow) {
                 // 透明底的图片
-                BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
+                BufferedImage formatAvatarImage = new BufferedImage(config.picSize, config.picSize, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics2D graphics = formatAvatarImage.createGraphics();
                 // 把图片切成一个园
                 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 // 留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
-                int border = (int) (width * 0.11);
+                int border = (int) (config.picSize * 0.11);
                 // 图片是一个圆型
-                Ellipse2D.Double shape = new Ellipse2D.Double(border, border, width - border * 2, width - border * 2);
+                Ellipse2D.Double shape = new Ellipse2D.Double(border, border, config.picSize - border * 2, config.picSize - border * 2);
                 // 需要保留的区域
                 graphics.setClip(shape);
-                graphics.drawImage(image, border, border, width - border * 2, width - border * 2, null);
+                graphics.drawImage(image, border, border, config.picSize - border * 2, config.picSize - border * 2, null);
                 graphics.dispose();
                 // 在圆图外面再画一个圆
                 // 新创建一个graphics，这样画的圆不会有锯齿
@@ -173,49 +189,43 @@ public class HudUtils {
                 // 使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
                 int border1;
 
-                border1 = (int) (width * 0.08);
+                border1 = (int) (config.picSize * 0.08);
                 BasicStroke s = new BasicStroke(border1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 graphics.setStroke(s);
                 graphics.setColor(Color.decode("#121212"));
-                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+                graphics.drawOval(border1, border1, config.picSize - border1 * 2, config.picSize - border1 * 2);
 
-                border1 = (int) (width * 0.05);
+                border1 = (int) (config.picSize * 0.05);
                 float si = (float) (border1 / 6);
                 s = new BasicStroke(si, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 graphics.setStroke(s);
                 graphics.setColor(Color.decode("#181818"));
-                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+                graphics.drawOval(border1, border1, config.picSize - border1 * 2, config.picSize - border1 * 2);
 
-                border1 = (int) (width * 0.065);
-                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+                border1 = (int) (config.picSize * 0.065);
+                graphics.drawOval(border1, border1, config.picSize - border1 * 2, config.picSize - border1 * 2);
 
-                border1 = (int) (width * 0.08);
-                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+                border1 = (int) (config.picSize * 0.08);
+                graphics.drawOval(border1, border1, config.picSize - border1 * 2, config.picSize - border1 * 2);
 
-                border1 = (int) (width * 0.095);
-                graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+                border1 = (int) (config.picSize * 0.095);
+                graphics.drawOval(border1, border1, config.picSize - border1 * 2, config.picSize - border1 * 2);
 
                 graphics.dispose();
 
-                formatAvatarImage.getRGB(
-                        0,
-                        0,
-                        formatAvatarImage.getWidth(),
-                        formatAvatarImage.getHeight(),
-                        pixels,
-                        0,
-                        formatAvatarImage.getWidth());
+                formatAvatarImage.getRGB(0, 0, formatAvatarImage.getWidth(),
+                        formatAvatarImage.getHeight(), pixels, 0, formatAvatarImage.getWidth());
                 getClose();
                 thisRoute = true;
             } else {
-                image.getRGB(0, 0, width, height, pixels, 0, width);
+                image.getRGB(0, 0, config.picSize, config.picSize, pixels, 0, config.picSize);
                 getClose();
                 thisRoute = false;
             }
 
-            for (int h = 0; h < height; h++) {
-                for (int w = 0; w < width; w++) {
-                    int pixel = pixels[h * width + w];
+            for (int h = 0; h < config.picSize; h++) {
+                for (int w = 0; w < config.picSize; w++) {
+                    int pixel = pixels[h * config.picSize + w];
 
                     byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
                     byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
@@ -226,32 +236,28 @@ public class HudUtils {
 
             byteBuffer.flip();
 
-            AllMusic.runMain(() -> {
-                if (textureID == -1) {
-                    textureID = GL11.glGenTextures();
-                }
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-                GL11.glTexImage2D(
-                        GL11.GL_TEXTURE_2D,
-                        0,
-                        GL11.GL_RGBA8,
-                        width,
-                        height,
-                        0,
-                        GL11.GL_RGBA,
-                        GL11.GL_UNSIGNED_BYTE,
-                        byteBuffer);
-                GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-                GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
-                haveImg = true;
-            });
+            AllMusic.runMain(this::upload);
         } catch (Exception e) {
             e.printStackTrace();
             AllMusic.sendMessage("[AllMusic客户端]图片解析错误");
             haveImg = false;
         }
+    }
+
+    private void upload() {
+        needUpload = true;
+        if (display) {
+            AllMusic.runMain(this::upload);
+            return;
+        }
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+        GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
+        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, config.picSize,
+                config.picSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        byteBuffer.clear();
+        haveImg = true;
+        needUpload = false;
     }
 
     private void run() {
@@ -302,17 +308,17 @@ public class HudUtils {
             String[] temp = lyric.split("\n");
             int offset = 0;
             for (String item : temp) {
-                drawText(item,
-                        save.lyric.x,
-                        save.lyric.y + offset,
-                        save.lyric.dir,
-                        save.lyric.color,
-                        save.lyric.shadow);
+                drawText(item, save.lyric.x, save.lyric.y + offset, save.lyric.dir,
+                        save.lyric.color, save.lyric.shadow);
                 offset += 10;
             }
         }
-        if (save.pic.enable && haveImg) {
+        if (save.pic.enable && haveImg && !needUpload) {
+            display = true;
             drawPic(textureID, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
+            display = false;
+        } else if (display) {
+            display = false;
         }
     }
 
