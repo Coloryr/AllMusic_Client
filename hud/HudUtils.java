@@ -236,7 +236,7 @@ public class HudUtils {
 
             byteBuffer.flip();
 
-            AllMusic.runMain(this::upload);
+            needUpload = true;
         } catch (Exception e) {
             e.printStackTrace();
             AllMusic.sendMessage("[AllMusic客户端]图片解析错误");
@@ -245,11 +245,6 @@ public class HudUtils {
     }
 
     private void upload() {
-        needUpload = true;
-        if (display) {
-            AllMusic.runMain(this::upload);
-            return;
-        }
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
         GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, config.picSize,
@@ -257,7 +252,6 @@ public class HudUtils {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
         byteBuffer.clear();
         haveImg = true;
-        needUpload = false;
     }
 
     private void run() {
@@ -313,11 +307,17 @@ public class HudUtils {
                 offset += 10;
             }
         }
-        if (save.pic.enable && haveImg && !needUpload) {
+        if (needUpload) {
+            if (display) {
+                display = false;
+                return;
+            }
+            upload();
+            needUpload = false;
+        }
+        if (save.pic.enable && haveImg) {
             display = true;
             drawPic(textureID, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
-            display = false;
-        } else if (display) {
             display = false;
         }
     }
