@@ -25,15 +25,15 @@ import java.util.Queue;
 import java.util.concurrent.*;
 
 public class HudUtils {
-    public static final ComType[] types = ComType.values();
+//    public static final ComType[] types = ComType.values();
     public static ConfigObj config;
 
-    public static final int GL_CLAMP_TO_EDGE = 0x812F;
-    public static final int
-            GL_TEXTURE_MIN_LOD    = 0x813A,
-            GL_TEXTURE_MAX_LOD    = 0x813B,
-            GL_TEXTURE_BASE_LEVEL = 0x813C,
-            GL_TEXTURE_MAX_LEVEL  = 0x813D;
+//    public static final int GL_CLAMP_TO_EDGE = 0x812F;
+//    public static final int
+//            GL_TEXTURE_MIN_LOD    = 0x813A,
+//            GL_TEXTURE_MAX_LOD    = 0x813B,
+//            GL_TEXTURE_BASE_LEVEL = 0x813C,
+//            GL_TEXTURE_MAX_LEVEL  = 0x813D;
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
