@@ -62,8 +62,10 @@ public class HudUtils {
     private int count = 0;
     private boolean display;
     private boolean needUpload;
+    private final Path path;
 
     public HudUtils(Path path) {
+        this.path = path;
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
@@ -102,6 +104,7 @@ public class HudUtils {
                 e.printStackTrace();
             }
         }
+
         byteBuffer = ByteBuffer.allocateDirect(config.picSize * config.picSize * 4);
 
         AllMusic.runMain(this::texInit);
@@ -115,9 +118,9 @@ public class HudUtils {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAX_LEVEL, 0);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, config.picSize,
                 config.picSize, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
@@ -177,7 +180,7 @@ public class HudUtils {
             //图片旋转
             if (save.pic.shadow) {
                 // 透明底的图片
-                BufferedImage formatAvatarImage = new BufferedImage(config.picSize, config.picSize, BufferedImage.TYPE_4BYTE_ABGR);
+                BufferedImage formatAvatarImage = new BufferedImage(config.picSize, config.picSize, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D graphics = formatAvatarImage.createGraphics();
                 // 把图片切成一个园
                 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -221,8 +224,10 @@ public class HudUtils {
 
                 graphics.dispose();
 
-                formatAvatarImage.getRGB(0, 0, formatAvatarImage.getWidth(),
-                        formatAvatarImage.getHeight(), pixels, 0, formatAvatarImage.getWidth());
+                ImageIO.write(formatAvatarImage, "png", new File(path.toFile(), "output.png"));
+
+                formatAvatarImage.getRGB(0, 0, config.picSize,
+                        config.picSize, pixels, 0, config.picSize);
                 getClose();
                 thisRoute = true;
             } else {
@@ -231,18 +236,20 @@ public class HudUtils {
                 thisRoute = false;
             }
 
-            for (int h = 0; h < config.picSize; h++) {
-                for (int w = 0; w < config.picSize; w++) {
-                    int pixel = pixels[h * config.picSize + w];
+            synchronized (byteBuffer) {
+                for (int h = 0; h < config.picSize; h++) {
+                    for (int w = 0; w < config.picSize; w++) {
+                        int pixel = pixels[h * config.picSize + w];
 
-                    byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
-                    byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
-                    byteBuffer.put((byte) (pixel & 0xFF));
-                    byteBuffer.put((byte) ((pixel >> 24) & 0xFF));
+                        byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
+                        byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
+                        byteBuffer.put((byte) (pixel & 0xFF));
+                        byteBuffer.put((byte) ((pixel >> 24) & 0xFF));
+                    }
                 }
-            }
 
-            byteBuffer.flip();
+                byteBuffer.flip();
+            }
 
             needUpload = true;
         } catch (Exception e) {
@@ -253,12 +260,15 @@ public class HudUtils {
     }
 
     private void upload() {
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-        GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, config.picSize,
-                config.picSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-        byteBuffer.clear();
+        synchronized (byteBuffer) {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+            GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
+            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
+            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
+            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, config.picSize,
+                    config.picSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        }
         haveImg = true;
     }
 
@@ -316,12 +326,13 @@ public class HudUtils {
             }
         }
         if (needUpload) {
+            needUpload = false;
             if (display) {
                 display = false;
+                needUpload = true;
                 return;
             }
             upload();
-            needUpload = false;
         }
         if (save.pic.enable && haveImg) {
             display = true;
