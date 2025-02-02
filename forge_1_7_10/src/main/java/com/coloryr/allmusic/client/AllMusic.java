@@ -181,7 +181,11 @@ public class AllMusic {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void onTick(final TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) nowPlaying.tick();
+        if (event.phase == TickEvent.Phase.END) {
+            if (nowPlaying != null) {
+                nowPlaying.tick();
+            }
+        }
     }
 
     public static float getVolume() {

@@ -195,7 +195,6 @@ public class AllMusic implements LayeredDraw.Layer {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        hudUtils.close();
         hudUtils.save = null;
     }
 
@@ -246,7 +245,9 @@ public class AllMusic implements LayeredDraw.Layer {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        nowPlaying.tick();
+        if (nowPlaying != null) {
+            nowPlaying.tick();
+        }
     }
 
     private void stopPlaying() {

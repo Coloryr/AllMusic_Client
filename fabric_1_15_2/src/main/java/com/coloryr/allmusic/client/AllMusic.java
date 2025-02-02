@@ -29,7 +29,6 @@ public class AllMusic implements ModInitializer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        hudUtils.close();
         hudUtils.save = null;
     }
 

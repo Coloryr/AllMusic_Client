@@ -27,17 +27,17 @@ public class AllMusic implements ModInitializer {
     private static DrawContext context;
 
     public static void onServerQuit() {
-        stopPlaying();
+        try {
+            stopPlaying();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         hudUtils.save = null;
     }
 
     private static void stopPlaying() {
-        try {
-            nowPlaying.closePlayer();
-            hudUtils.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        nowPlaying.closePlayer();
+        hudUtils.close();
     }
 
     public static int getScreenWidth() {

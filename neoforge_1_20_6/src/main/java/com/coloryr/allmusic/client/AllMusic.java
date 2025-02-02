@@ -194,7 +194,6 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        hudUtils.close();
         hudUtils.save = null;
     }
 
@@ -254,7 +253,9 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     @SubscribeEvent
     public void onTick(ClientTickEvent.Post event) {
-        nowPlaying.tick();
+        if (nowPlaying != null) {
+            nowPlaying.tick();
+        }
     }
 
     private void stopPlaying() {

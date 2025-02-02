@@ -12,6 +12,8 @@ public class Tick {
 
     @Inject(method = "tick", at = @At("TAIL"))
     public void tick(CallbackInfo info) {
-        AllMusic.nowPlaying.tick();
+        if (AllMusic.nowPlaying != null) {
+            AllMusic.nowPlaying.tick();
+        }
     }
 }

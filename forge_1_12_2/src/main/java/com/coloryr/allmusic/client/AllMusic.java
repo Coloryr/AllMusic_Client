@@ -124,7 +124,6 @@ public class AllMusic {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        hudUtils.close();
         hudUtils.save = null;
     }
 
@@ -145,8 +144,10 @@ public class AllMusic {
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event){
-        nowPlaying.tick();
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (nowPlaying != null) {
+            nowPlaying.tick();
+        }
     }
 
     private void stopPlaying() {

@@ -232,7 +232,6 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        hudUtils.close();
         hudUtils.save = null;
     }
 
@@ -246,7 +245,9 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        nowPlaying.tick();
+        if (nowPlaying != null) {
+            nowPlaying.tick();
+        }
     }
 
     private void stopPlaying() {

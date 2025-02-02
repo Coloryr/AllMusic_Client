@@ -225,7 +225,9 @@ public class AllMusic {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        nowPlaying.tick();
+        if (nowPlaying != null) {
+            nowPlaying.tick();
+        }
     }
 
     private void stopPlaying() {
