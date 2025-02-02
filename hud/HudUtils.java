@@ -224,7 +224,7 @@ public class HudUtils {
 
                 graphics.dispose();
 
-                ImageIO.write(formatAvatarImage, "png", new File(path.toFile(), "output.png"));
+//                ImageIO.write(formatAvatarImage, "png", new File(path.toFile(), "output.png"));
 
                 formatAvatarImage.getRGB(0, 0, config.picSize,
                         config.picSize, pixels, 0, config.picSize);
