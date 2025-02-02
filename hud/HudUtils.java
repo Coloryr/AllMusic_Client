@@ -25,7 +25,7 @@ import java.util.Queue;
 import java.util.concurrent.*;
 
 public class HudUtils {
-//    public static final ComType[] types = ComType.values();
+    public static final ComType[] types = ComType.values();
     public static ConfigObj config;
 
 //    public static final int GL_CLAMP_TO_EDGE = 0x812F;
