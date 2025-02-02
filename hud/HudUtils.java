@@ -28,6 +28,13 @@ public class HudUtils {
     public static final ComType[] types = ComType.values();
     public static ConfigObj config;
 
+    public static final int GL_CLAMP_TO_EDGE = 0x812F;
+    public static final int
+            GL_TEXTURE_MIN_LOD    = 0x813A,
+            GL_TEXTURE_MAX_LOD    = 0x813B,
+            GL_TEXTURE_BASE_LEVEL = 0x813C,
+            GL_TEXTURE_MAX_LEVEL  = 0x813D;
+
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
@@ -108,9 +115,9 @@ public class HudUtils {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL20.GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL20.GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAX_LEVEL, 0);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, config.picSize,
                 config.picSize, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
