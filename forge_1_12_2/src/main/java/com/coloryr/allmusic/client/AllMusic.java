@@ -107,6 +107,9 @@ public class AllMusic {
 
     @SubscribeEvent
     public void onSound(final PlaySoundEvent e) {
+        if (nowPlaying == null) {
+            return;
+        }
         if (!nowPlaying.isPlay())
             return;
         SoundCategory data = e.getSound().getCategory();

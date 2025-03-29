@@ -122,7 +122,7 @@ public class HudUtils {
 //        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 //        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAX_LEVEL, 0);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, config.picSize,
-                config.picSize, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0);
+                config.picSize, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) null);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
     }
 

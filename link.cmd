@@ -1,6 +1,6 @@
 @echo off
 
-mkdir "build"
+mkdir "build\libs"
 mkdir ".gradle"
 
 setlocal enabledelayedexpansion
@@ -20,7 +20,7 @@ for %%i in (%array%) do (
     if not exist "%%i\src\main\resources\com\coloryr\allmusic\client\player\decoder\mp3" mklink /j "%%i\src\main\resources\com\coloryr\allmusic\client\player\decoder\mp3" "mp3"
     if not exist "%%i\src\main\java\com\coloryr\allmusic\client\player" mklink /j "%%i\src\main\java\com\coloryr\allmusic\client\player" "player"
     if not exist "%%i\src\main\java\com\coloryr\allmusic\client\hud" mklink /j "%%i\src\main\java\com\coloryr\allmusic\client\hud" "hud"
-    if not exist "%%i\build" mklink /j "%%i\build" "build"
+    if not exist "%%i\build" mkdir "%%i\build" && mklink /j "%%i\build\libs" "build\libs"
     if not exist "%%i\.gradle" mklink /j "%%i\.gradle" ".gradle"
 )
 
