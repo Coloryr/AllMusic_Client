@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.client.mixin;
 
 import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundSystem;
 import net.minecraft.sound.SoundCategory;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class SoundEvent {
     @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)V", at = @At("HEAD"), cancellable = true)
     public void play(SoundInstance soundInstance, CallbackInfo info) {
-        if (AllMusic.nowPlaying.isPlay()) {
+        if (AllMusicHelper.isPlay()) {
             SoundCategory data = soundInstance.getCategory();
             switch (data) {
                 case RECORDS, MUSIC -> info.cancel();
@@ -23,6 +24,6 @@ public class SoundEvent {
 
     @Inject(method = "reloadSounds", at = @At("RETURN"))
     public void reload(CallbackInfo info){
-        AllMusic.reload();
+        AllMusicHelper.reload();
     }
 }

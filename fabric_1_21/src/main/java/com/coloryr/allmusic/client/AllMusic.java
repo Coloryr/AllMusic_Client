@@ -1,9 +1,12 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.hud.AllMusicBridge;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -21,53 +24,48 @@ import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-public class AllMusic implements ModInitializer {
+public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = Identifier.of("allmusic", "channel");
-    public static APlayer nowPlaying;
-    public static HudUtils hudUtils;
     private static DrawContext context;
 
-    public static void onServerQuit() {
-        try {
-            stopPlaying();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        hudUtils.save = null;
+    @Override
+    public Object genTexture(int size) {
+        return AllMusicHelper.gen(size);
     }
 
-    private static void stopPlaying() {
-        nowPlaying.closePlayer();
-        hudUtils.close();
+    @Override
+    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
+        AllMusicHelper.update((int) tex, size, byteBuffer);
     }
 
-    public static int getScreenWidth() {
+    public int getScreenWidth() {
         return MinecraftClient.getInstance().getWindow().getScaledWidth();
     }
 
-    public static int getScreenHeight() {
+    public int getScreenHeight() {
         return MinecraftClient.getInstance().getWindow().getScaledHeight();
     }
 
-    public static int getTextWidth(String item) {
+    public int getTextWidth(String item) {
         return MinecraftClient.getInstance().textRenderer.getWidth(item);
     }
 
-    public static int getFontHeight() {
+    public int getFontHeight() {
         return MinecraftClient.getInstance().textRenderer.fontHeight;
     }
 
-    public static void drawText(String item, int x, int y, int color, boolean shadow) {
+    public void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = MinecraftClient.getInstance().textRenderer;
         context.drawText(hud, item, x, y, color, shadow);
     }
 
-    public static void drawPic(int textureID, int size, int x, int y, int ang) {
+    public void drawPic(Object texture, int size, int x, int y, int ang) {
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, textureID);
+        RenderSystem.setShaderTexture(0, (int) texture);
 
         MatrixStack stack = new MatrixStack();
         Matrix4f matrix = stack.peek().getPositionMatrix();
@@ -100,27 +98,17 @@ public class AllMusic implements ModInitializer {
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
     }
 
-    public static void sendMessage(String data) {
+    public void sendMessage(String data) {
         MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(data)));
     }
 
-    public static void runMain(Runnable runnable) {
-        RenderSystem.recordRenderCall(runnable::run);
-    }
-
-    public static float getVolume() {
+    public float getVolume() {
         return MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.RECORDS);
-    }
-
-    public static void reload() {
-        if (nowPlaying != null) {
-            nowPlaying.setReload();
-        }
     }
 
     public static void update(DrawContext draw) {
         context = draw;
-        hudUtils.update();
+        AllMusicHelper.hudUpdate();
     }
 
     private static String readString(PacketByteBuf buf) {
@@ -156,31 +144,21 @@ public class AllMusic implements ModInitializer {
     }
 
     @Override
-    public void onInitialize() {
+    public void onInitializeClient() {
         PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
             try {
-                switch (pack.type) {
-                    case lyric -> hudUtils.lyric = pack.data;
-                    case info -> hudUtils.info = pack.data;
-                    case list -> hudUtils.list = pack.data;
-                    case play -> {
-                        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
-                        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
-                        stopPlaying();
-                        nowPlaying.setMusic(pack.data);
-                    }
-                    case img -> hudUtils.setImg(pack.data);
-                    case stop -> stopPlaying();
-                    case clear -> hudUtils.close();
-                    case pos -> nowPlaying.set(pack.data1);
-                    case hud -> hudUtils.setPos(pack.data);
+                if (pack.type == ComType.play) {
+                    MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
+                    MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
                 }
+                AllMusicHelper.hudState(pack.type, pack.data, pack.data1);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        hudUtils = new HudUtils(FabricLoader.getInstance().getConfigDir());
-        nowPlaying = new APlayer();
+
+        AllMusicHelper.init(this);
+        RenderSystem.recordRenderCall(()-> AllMusicHelper.hudInit(FabricLoader.getInstance().getConfigDir()));
     }
 }

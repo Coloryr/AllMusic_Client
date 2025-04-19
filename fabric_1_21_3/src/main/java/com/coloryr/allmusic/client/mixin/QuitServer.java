@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.client.mixin;
 
 import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class QuitServer {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("TAIL"))
     public void Quit(CallbackInfo info) {
-        AllMusic.onServerQuit();
+        AllMusicHelper.onServerQuit();
     }
 }

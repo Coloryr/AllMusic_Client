@@ -1,5 +1,7 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.hud.AllMusicBridge;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.APlayer;
@@ -35,14 +37,13 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 @Mod("allmusic_client")
-public class AllMusic implements IPlayPayloadHandler<PackData> {
+public class AllMusic implements IPlayPayloadHandler<PackData>, AllMusicBridge {
     public static final ResourceLocation channel =
             new ResourceLocation("allmusic", "channel");
-    private static APlayer nowPlaying;
-    private static HudUtils hudUtils;
     private static GuiGraphics gui;
 
     public AllMusic(IEventBus modEventBus) {
@@ -54,7 +55,7 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         NeoForge.EVENT_BUS.register(this);
     }
 
-    public static void sendMessage(String data) {
+    public void sendMessage(String data) {
         Minecraft.getInstance().execute(() ->
                 Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
     }
@@ -67,30 +68,30 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         return new String(temp, StandardCharsets.UTF_8);
     }
 
-    public static int getScreenWidth() {
+    public int getScreenWidth() {
         return Minecraft.getInstance().getWindow().getGuiScaledWidth();
     }
 
-    public static int getScreenHeight() {
+    public int getScreenHeight() {
         return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
 
-    public static int getTextWidth(String item) {
+    public int getTextWidth(String item) {
         return Minecraft.getInstance().font.width(item);
     }
 
-    public static int getFontHeight() {
+    public int getFontHeight() {
         return Minecraft.getInstance().font.lineHeight;
     }
 
-    public static float getVolume() {
+    public float getVolume() {
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
-    public static void drawPic(int textureID, int size, int x, int y, int ang) {
+    public void drawPic(Object textureID, int size, int x, int y, int ang) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, textureID);
+        RenderSystem.setShaderTexture(0, (int)textureID);
 
         PoseStack stack = new PoseStack();
         Matrix4f matrix = stack.last().pose();
@@ -126,17 +127,13 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         //GuiComponent.blit(stack, x, y, 0, 0, 0, size, size, size, size);
     }
 
-    public static void drawText(String item, int x, int y, int color, boolean shadow) {
+    public void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = Minecraft.getInstance().font;
         gui.drawString(hud, item, x, y, color, shadow);
     }
 
-    public static void runMain(Runnable runnable) {
-        RenderSystem.recordRenderCall(runnable::run);
-    }
-
     private void setup(final FMLClientSetupEvent event) {
-        hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
+        AllMusicHelper.hudInit(FMLPaths.CONFIGDIR.get());
     }
 
     public void register(final RegisterPayloadHandlerEvent event) {
@@ -157,38 +154,26 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
                 return;
             }
             ComType type1 = ComType.values()[type];
+            String data = null;
+            int data1 = 0;
             switch (type1) {
                 case lyric:
-                    hudUtils.lyric = readString(buffer);
-                    break;
                 case info:
-                    hudUtils.info = readString(buffer);
-                    break;
                 case list:
-                    hudUtils.list = readString(buffer);
-                    break;
                 case play:
-                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
-                    Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
-                    stopPlaying();
-                    nowPlaying.setMusic(readString(buffer));
-                    break;
                 case img:
-                    hudUtils.setImg(readString(buffer));
-                    break;
-                case stop:
-                    stopPlaying();
-                    break;
-                case clear:
-                    hudUtils.close();
+                case hud:
+                    data = readString(buffer);
                     break;
                 case pos:
-                    nowPlaying.set(buffer.readInt());
-                    break;
-                case hud:
-                    hudUtils.setPos(readString(buffer));
+                    data1 = buffer.readInt();
                     break;
             }
+            if (type1 == ComType.play) {
+                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
+            }
+            AllMusicHelper.hudState(type1, data, data1);
             buffer.clear();
         } catch (Exception e) {
             e.printStackTrace();
@@ -196,19 +181,16 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
     }
 
     private void setup1(final FMLCommonSetupEvent event) {
-        nowPlaying = new APlayer();
+        AllMusicHelper.init(this);
     }
 
     public void onLoad(final SoundEngineLoadEvent e) {
-        if (nowPlaying != null) {
-            nowPlaying.setReload();
-        }
+        AllMusicHelper.reload();
     }
 
     @SubscribeEvent
     public void onSound(final PlayStreamingSourceEvent e) {
-        if (!nowPlaying.isPlay())
-            return;
+        if (!AllMusicHelper.isPlay()) return;
         SoundSource data = e.getSound().getSource();
         switch (data) {
             case MUSIC, RECORDS -> e.getChannel().stop();
@@ -217,8 +199,7 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
 
     @SubscribeEvent
     public void onSound(final PlaySoundSourceEvent e) {
-        if (!nowPlaying.isPlay())
-            return;
+        if (!AllMusicHelper.isPlay()) return;
         SoundSource data = e.getSound().getSource();
         switch (data) {
             case MUSIC, RECORDS -> e.getChannel().stop();
@@ -227,32 +208,20 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
 
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
-        try {
-            stopPlaying();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
-        hudUtils.save = null;
+        AllMusicHelper.onServerQuit();
     }
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
             gui = e.getGuiGraphics();
-            hudUtils.update();
+            AllMusicHelper.hudUpdate();
         }
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (nowPlaying != null) {
-            nowPlaying.tick();
-        }
-    }
-
-    private void stopPlaying() {
-        nowPlaying.closePlayer();
-        hudUtils.close();
+        AllMusicHelper.tick();
     }
 
     public static class DataReader implements FriendlyByteBuf.Reader<PackData> {
@@ -260,5 +229,15 @@ public class AllMusic implements IPlayPayloadHandler<PackData> {
         public PackData apply(FriendlyByteBuf buf) {
             return new PackData(buf);
         }
+    }
+
+    @Override
+    public Object genTexture(int size) {
+        return AllMusicHelper.gen(size);
+    }
+
+    @Override
+    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
+        AllMusicHelper.update((int) tex, size, byteBuffer);
     }
 }

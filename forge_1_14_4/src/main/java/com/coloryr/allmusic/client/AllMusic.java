@@ -1,5 +1,7 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.hud.AllMusicBridge;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.APlayer;
@@ -31,6 +33,7 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,9 +42,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mod("allmusic_client")
-public class AllMusic {
-    private static APlayer nowPlaying;
-    private static HudUtils hudUtils;
+public class AllMusic implements AllMusicBridge {
     private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
 
     public AllMusic() {
@@ -54,7 +55,7 @@ public class AllMusic {
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        hudUtils = new HudUtils(FMLPaths.CONFIGDIR.get());
+        AllMusicHelper.hudInit(FMLPaths.CONFIGDIR.get());
         NetworkRegistry.ChannelBuilder.named(channel)
                 .networkProtocolVersion(() -> "1.0")
                 .clientAcceptedVersions(((status) -> true))
@@ -71,38 +72,26 @@ public class AllMusic {
                 return;
             }
             ComType type1 = ComType.values()[type];
+            String data = null;
+            int data1 = 0;
             switch (type1) {
                 case lyric:
-                    hudUtils.lyric = readString(buffer);
-                    break;
                 case info:
-                    hudUtils.info = readString(buffer);
-                    break;
                 case list:
-                    hudUtils.list = readString(buffer);
-                    break;
                 case play:
-                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
-                    Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
-                    stopPlaying();
-                    nowPlaying.setMusic(readString(buffer));
-                    break;
                 case img:
-                    hudUtils.setImg(readString(buffer));
-                    break;
-                case stop:
-                    stopPlaying();
-                    break;
-                case clear:
-                    hudUtils.close();
+                case hud:
+                    data = readString(buffer);
                     break;
                 case pos:
-                    nowPlaying.set(buffer.readInt());
-                    break;
-                case hud:
-                    hudUtils.setPos(readString(buffer));
+                    data1 = buffer.readInt();
                     break;
             }
+            if (type1 == ComType.play) {
+                Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.MUSIC);
+                Minecraft.getInstance().getSoundHandler().stop(null, SoundCategory.RECORDS);
+            }
+            AllMusicHelper.hudState(type1, data, data1);
             event.getSource().get().setPacketHandled(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -118,29 +107,28 @@ public class AllMusic {
     }
 
     private void setup1(final FMLLoadCompleteEvent event) {
-        nowPlaying = new APlayer();
+        AllMusicHelper.init(this);
     }
 
-    public static int getScreenWidth() {
+    public int getScreenWidth() {
         return Minecraft.getInstance().mainWindow.getScaledWidth();
     }
 
-    public static int getScreenHeight() {
+    public int getScreenHeight() {
         return Minecraft.getInstance().mainWindow.getScaledHeight();
     }
 
-    public static int getTextWidth(String item) {
+    public int getTextWidth(String item) {
         return Minecraft.getInstance().fontRenderer.getStringWidth(item);
     }
 
-    public static int getFontHeight() {
+    public int getFontHeight() {
         return Minecraft.getInstance().fontRenderer.FONT_HEIGHT;
     }
 
     @SubscribeEvent
     public void onSound(final SoundEvent.SoundSourceEvent e) {
-        if (!nowPlaying.isPlay())
-            return;
+        if (!AllMusicHelper.isPlay()) return;
         SoundCategory data = e.getSound().getCategory();
         switch (data) {
             case MUSIC:
@@ -151,36 +139,31 @@ public class AllMusic {
 
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
-        try {
-            stopPlaying();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
-        hudUtils.save = null;
+        AllMusicHelper.onServerQuit();
     }
 
     @SubscribeEvent
     public void onRed(final RenderGameOverlayEvent.Pre e) {
         if (e.getType() == RenderGameOverlayEvent.ElementType.PORTAL) {
-            hudUtils.update();
+            AllMusicHelper.hudUpdate();
         }
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event){
-        if (nowPlaying != null) {
-            nowPlaying.tick();
+        if (event.phase == TickEvent.Phase.END) {
+            AllMusicHelper.tick();
         }
     }
 
-    public static float getVolume() {
+    public float getVolume() {
         return Minecraft.getInstance().gameSettings.getSoundLevel(SoundCategory.RECORDS);
     }
 
-    public static void drawPic(int textureID, int size, int x, int y, int ang) {
+    public void drawPic(Object textureID, int size, int x, int y, int ang) {
         int a = size / 2;
 
-        GlStateManager.bindTexture(textureID);
+        GlStateManager.bindTexture((int)textureID);
         GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         GlStateManager.enableAlphaTest();
         GL11.glPushMatrix();
@@ -211,7 +194,7 @@ public class AllMusic {
         GlStateManager.enableAlphaTest();
     }
 
-    public static void drawText(String item, int x, int y, int color, boolean shadow) {
+    public void drawText(String item, int x, int y, int color, boolean shadow) {
         FontRenderer hud = Minecraft.getInstance().fontRenderer;
 
         if (shadow) {
@@ -220,19 +203,19 @@ public class AllMusic {
             hud.drawString(item, x, y, color);
         }
     }
-
-    private void stopPlaying() {
-        nowPlaying.closePlayer();
-        hudUtils.close();
-    }
-
-    public static void runMain(Runnable runnable){
-        Minecraft.getInstance().execute(runnable);
-    }
-
-    public static void sendMessage(String data) {
+    public void sendMessage(String data) {
         Minecraft.getInstance().execute(() -> {
             Minecraft.getInstance().ingameGUI.getChatGUI().addToSentMessages(data);
         });
+    }
+
+    @Override
+    public Object genTexture(int size) {
+        return AllMusicHelper.gen(size);
+    }
+
+    @Override
+    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
+        AllMusicHelper.update((int) tex, size, byteBuffer);
     }
 }

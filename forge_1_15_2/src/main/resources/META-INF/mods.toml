@@ -14,7 +14,7 @@ issueTrackerURL="https://github.com/Coloryr/AllMusic_Client/issues" #optional
 # The modid of the mod
 modId="allmusic_client" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-version="3.0.3" #mandatory
+version="3.1.0" #mandatory
  # A display name for the mod
 displayName="AllMusic Client" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>

@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
-@Mod(modid = "allmusic_client", version = "3.0.0", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(modid = "allmusic_client", version = "3.1.0", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
 @SideOnly(Side.CLIENT)
 public class AllMusic implements AllMusicBridge {
     public void sendMessage(String data) {

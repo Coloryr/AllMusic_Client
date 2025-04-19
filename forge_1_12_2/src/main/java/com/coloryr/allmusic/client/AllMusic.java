@@ -34,7 +34,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-@Mod(modid = "allmusic_client", version = "3.0.0", acceptedMinecraftVersions = "[1.12,)")
+@Mod(modid = "allmusic_client", version = "3.1.0", acceptedMinecraftVersions = "[1.12,)")
 @SideOnly(Side.CLIENT)
 public class AllMusic implements AllMusicBridge {
     @SubscribeEvent
@@ -62,12 +62,8 @@ public class AllMusic implements AllMusicBridge {
                     break;
             }
             if (type1 == ComType.play) {
-                Minecraft.getMinecraft()
-                        .getSoundHandler()
-                        .stopSounds();
-                Minecraft.getMinecraft()
-                        .getSoundHandler()
-                        .stopSounds();
+                Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
+                Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
             }
             AllMusicHelper.hudState(type1, data, data1);
         } catch (Exception e) {

@@ -6,6 +6,7 @@
   "client": [
     "GuiShow",
     "QuitServer",
+    "Register",
     "SoundEvent",
     "Tick"
   ],
