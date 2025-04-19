@@ -1,5 +1,7 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.hud.AllMusicBridge;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import com.coloryr.allmusic.client.hud.ComType;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.APlayer;
@@ -27,15 +29,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
+import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 @Mod(modid = "allmusic_client", version = "3.0.0", acceptedMinecraftVersions = "[1.12,)")
 @SideOnly(Side.CLIENT)
-public class AllMusic {
-    private static APlayer nowPlaying;
-    private static HudUtils hudUtils;
-
+public class AllMusic implements AllMusicBridge {
     @SubscribeEvent
     public void onMessage(FMLNetworkEvent.ClientCustomPacketEvent message) {
         try {
@@ -45,38 +46,30 @@ public class AllMusic {
                 return;
             }
             ComType type1 = ComType.values()[type];
+            String data = null;
+            int data1 = 0;
             switch (type1) {
                 case lyric:
-                    hudUtils.lyric = readString(buffer);
-                    break;
                 case info:
-                    hudUtils.info = readString(buffer);
-                    break;
                 case list:
-                    hudUtils.list = readString(buffer);
-                    break;
                 case play:
-                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
-                    Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
-                    stopPlaying();
-                    nowPlaying.setMusic(readString(buffer));
-                    break;
                 case img:
-                    hudUtils.setImg(readString(buffer));
-                    break;
-                case stop:
-                    stopPlaying();
-                    break;
-                case clear:
-                    hudUtils.close();
+                case hud:
+                    data = readString(buffer);
                     break;
                 case pos:
-                    nowPlaying.set(buffer.readInt());
-                    break;
-                case hud:
-                    hudUtils.setPos(readString(buffer));
+                    data1 = buffer.readInt();
                     break;
             }
+            if (type1 == ComType.play) {
+                Minecraft.getMinecraft()
+                        .getSoundHandler()
+                        .stopSounds();
+                Minecraft.getMinecraft()
+                        .getSoundHandler()
+                        .stopSounds();
+            }
+            AllMusicHelper.hudState(type1, data, data1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,7 +77,7 @@ public class AllMusic {
 
     @Mod.EventHandler
     public void test(final FMLPostInitializationEvent event) {
-        nowPlaying = new APlayer();
+        AllMusicHelper.init(this);
     }
 
     @Mod.EventHandler
@@ -92,7 +85,7 @@ public class AllMusic {
         if (!evt.getModConfigurationDirectory().exists()) {
             evt.getModConfigurationDirectory().mkdirs();
         }
-        hudUtils = new HudUtils(evt.getModConfigurationDirectory().toPath());
+        AllMusicHelper.hudInit(evt.getModConfigurationDirectory().toPath());
         MinecraftForge.EVENT_BUS.register(this);
         try {
             Class<?> server = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
@@ -107,11 +100,7 @@ public class AllMusic {
 
     @SubscribeEvent
     public void onSound(final PlaySoundEvent e) {
-        if (nowPlaying == null) {
-            return;
-        }
-        if (!nowPlaying.isPlay())
-            return;
+        if (!AllMusicHelper.isPlay()) return;
         SoundCategory data = e.getSound().getCategory();
         switch (data) {
             case MUSIC:
@@ -122,12 +111,7 @@ public class AllMusic {
 
     @SubscribeEvent
     public void onServerQuit(final FMLNetworkEvent.ClientDisconnectionFromServerEvent e) {
-        try {
-            stopPlaying();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
-        hudUtils.save = null;
+        AllMusicHelper.onServerQuit();
     }
 
     private static String readString(ByteBuf buf) {
@@ -142,44 +126,39 @@ public class AllMusic {
     @SideOnly(Side.CLIENT)
     public void onRenderOverlay(RenderGameOverlayEvent.Pre e) {
         if (e.getType() == RenderGameOverlayEvent.ElementType.PORTAL) {
-            hudUtils.update();
+            AllMusicHelper.hudUpdate();
         }
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (nowPlaying != null) {
-            nowPlaying.tick();
+        if (event.phase == TickEvent.Phase.END) {
+            AllMusicHelper.tick();
         }
     }
 
-    private void stopPlaying() {
-        nowPlaying.closePlayer();
-        hudUtils.close();
-    }
-
-    public static int getScreenWidth() {
+    public int getScreenWidth() {
         return Minecraft.getMinecraft().displayWidth;
     }
 
-    public static int getScreenHeight() {
+    public int getScreenHeight() {
         return Minecraft.getMinecraft().displayHeight;
     }
 
-    public static int getTextWidth(String item) {
+    public int getTextWidth(String item) {
         return Minecraft.getMinecraft().fontRenderer.getStringWidth(item);
     }
 
-    public static int getFontHeight() {
+    public int getFontHeight() {
         return Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT;
     }
 
-    public static float getVolume() {
+    public float getVolume() {
         return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS);
     }
 
-    public static void drawPic(int textureID, int size, int x, int y, int ang) {
-        GlStateManager.bindTexture(textureID);
+    public void drawPic(Object textureID, int size, int x, int y, int ang) {
+        GlStateManager.bindTexture((int)textureID);
         GlStateManager.enableAlpha();
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -212,18 +191,24 @@ public class AllMusic {
         GlStateManager.enableAlpha();
     }
 
-    public static void drawText(String item, int x, int y, int color, boolean shadow) {
+    public void drawText(String item, int x, int y, int color, boolean shadow) {
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;
         font.drawString(item, x, y, color, shadow);
     }
 
-    public static void runMain(Runnable runnable){
-        Minecraft.getMinecraft().addScheduledTask(runnable);
-    }
-
-    public static void sendMessage(String data) {
+    public void sendMessage(String data) {
         Minecraft.getMinecraft().addScheduledTask(() -> {
             Minecraft.getMinecraft().ingameGUI.getChatGUI().addToSentMessages(data);
         });
+    }
+
+    @Override
+    public Object genTexture(int size) {
+        return AllMusicHelper.gen(size);
+    }
+
+    @Override
+    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
+        AllMusicHelper.update((int) tex, size, byteBuffer);
     }
 }

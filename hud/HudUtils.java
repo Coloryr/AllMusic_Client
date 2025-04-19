@@ -8,9 +8,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -27,13 +24,6 @@ import java.util.concurrent.*;
 public class HudUtils {
     public static final ComType[] types = ComType.values();
     public static ConfigObj config;
-
-//    public static final int GL_CLAMP_TO_EDGE = 0x812F;
-//    public static final int
-//            GL_TEXTURE_MIN_LOD    = 0x813A,
-//            GL_TEXTURE_MAX_LOD    = 0x813B,
-//            GL_TEXTURE_BASE_LEVEL = 0x813C,
-//            GL_TEXTURE_MAX_LEVEL  = 0x813D;
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
@@ -55,17 +45,15 @@ public class HudUtils {
 
     private boolean haveImg;
     private boolean thisRoute;
-    private int textureID = -1;
+    private Object texture;
     private HttpGet get;
     private InputStream inputStream;
     private int ang = 0;
     private int count = 0;
     private boolean display;
     private boolean needUpload;
-    private final Path path;
 
     public HudUtils(Path path) {
-        this.path = path;
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
@@ -107,23 +95,14 @@ public class HudUtils {
 
         byteBuffer = ByteBuffer.allocateDirect(config.picSize * config.picSize * 4);
 
-        AllMusic.runMain(this::texInit);
+        texInit();
 
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::time1, 0, 1, TimeUnit.MILLISECONDS);
     }
 
     private void texInit() {
-        textureID = GL11.glGenTextures();
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL20.GL_TEXTURE_MAX_LEVEL, 0);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, config.picSize,
-                config.picSize, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) null);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        texture = AllMusicHelper.INSTANCE.genTexture(config.picSize);
     }
 
     private void time1() {
@@ -254,20 +233,14 @@ public class HudUtils {
             needUpload = true;
         } catch (Exception e) {
             e.printStackTrace();
-            AllMusic.sendMessage("[AllMusic客户端]图片解析错误");
+            AllMusicHelper.INSTANCE.sendMessage("[AllMusic客户端]图片解析错误");
             haveImg = false;
         }
     }
 
     private void upload() {
         synchronized (byteBuffer) {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-            GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
-            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
-            GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, config.picSize,
-                    config.picSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+            AllMusicHelper.INSTANCE.updateTexture(texture, config.picSize, byteBuffer);
         }
         haveImg = true;
     }
@@ -336,18 +309,18 @@ public class HudUtils {
         }
         if (save.pic.enable && haveImg) {
             display = true;
-            drawPic(textureID, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
+            drawPic(texture, save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
             display = false;
         }
     }
 
-    private void drawPic(int textureID, int size, int x, int y, HudDirType dir, int ang) {
+    private void drawPic(Object texture, int size, int x, int y, HudDirType dir, int ang) {
         if (dir == null) {
             return;
         }
 
-        int screenWidth = AllMusic.getScreenWidth();
-        int screenHeight = AllMusic.getScreenHeight();
+        int screenWidth = AllMusicHelper.INSTANCE.getScreenWidth();
+        int screenHeight = AllMusicHelper.INSTANCE.getScreenHeight();
 
         int x1 = x;
         int y1 = y;
@@ -383,15 +356,15 @@ public class HudUtils {
                 break;
         }
 
-        AllMusic.drawPic(textureID, size, x1, y1, (save.pic.shadow && thisRoute) ? ang : 0);
+        AllMusicHelper.INSTANCE.drawPic(texture, size, x1, y1, (save.pic.shadow && thisRoute) ? ang : 0);
     }
 
     private void drawText(String item, int x, int y, HudDirType dir, int color, boolean shadow) {
-        int width = AllMusic.getTextWidth(item);
-        int height = AllMusic.getFontHeight();
+        int width = AllMusicHelper.INSTANCE.getTextWidth(item);
+        int height = AllMusicHelper.INSTANCE.getFontHeight();
 
-        int screenWidth = AllMusic.getScreenWidth();
-        int screenHeight = AllMusic.getScreenHeight();
+        int screenWidth = AllMusicHelper.INSTANCE.getScreenWidth();
+        int screenHeight = AllMusicHelper.INSTANCE.getScreenHeight();
 
         int x1 = x;
         int y1 = y;
@@ -427,6 +400,6 @@ public class HudUtils {
                 break;
         }
 
-        AllMusic.drawText(item, x1, y1, color, shadow);
+        AllMusicHelper.INSTANCE.drawText(item, x1, y1, color, shadow);
     }
 }

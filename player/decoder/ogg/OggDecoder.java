@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.client.player.decoder.ogg;
 
 import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import com.coloryr.allmusic.client.player.APlayer;
 import com.coloryr.allmusic.client.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.player.decoder.IDecoder;
@@ -362,6 +363,6 @@ public class OggDecoder implements IDecoder {
 
     @Override
     public void set(int time) {
-        AllMusic.sendMessage("[AllMusic客户端]不支持中间播放");
+        AllMusicHelper.INSTANCE.sendMessage("[AllMusic客户端]不支持中间播放");
     }
 }

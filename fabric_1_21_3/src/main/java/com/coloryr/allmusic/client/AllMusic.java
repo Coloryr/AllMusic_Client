@@ -95,10 +95,10 @@ public class AllMusic implements ModInitializer {
 
         RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX);
         BufferBuilder bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).texture(u0, v0);
         bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).texture(u0, v1);
         bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).texture(u1, v1);
         bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).texture(u1, v0);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).texture(u0, v0);
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
     }
 

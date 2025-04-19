@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.client.player;
 
 import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.hud.AllMusicHelper;
 import com.coloryr.allmusic.client.hud.HudUtils;
 import com.coloryr.allmusic.client.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.player.decoder.IDecoder;
@@ -133,7 +134,7 @@ public class APlayer extends InputStream {
                     connect();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    AllMusic.sendMessage("[AllMusic客户端]获取音乐失败");
+                    AllMusicHelper.INSTANCE.sendMessage("[AllMusic客户端]获取音乐失败");
                     continue;
                 }
 
@@ -147,7 +148,7 @@ public class APlayer extends InputStream {
                         connect();
                         decoder = new Mp3Decoder(this);
                         if (!decoder.set()) {
-                            AllMusic.sendMessage("[AllMusic客户端]不支持这样的文件播放");
+                            AllMusicHelper.INSTANCE.sendMessage("[AllMusic客户端]不支持这样的文件播放");
                             continue;
                         }
                     }
@@ -181,10 +182,10 @@ public class APlayer extends InputStream {
                             ((Buffer) byteBuffer).flip();
                             queue.add(byteBuffer);
 
-                            AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
+                            AL10.alSourcef(index, AL10.AL_GAIN, AllMusicHelper.INSTANCE.getVolume());
                         }
 
-                        AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
+                        AL10.alSourcef(index, AL10.AL_GAIN, AllMusicHelper.INSTANCE.getVolume());
 
                         if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED) > 0) {
                             int temp = AL10.alSourceUnqueueBuffers(index);
@@ -203,7 +204,7 @@ public class APlayer extends InputStream {
                 streamClose();
                 decodeClose();
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
-                    AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
+                    AL10.alSourcef(index, AL10.AL_GAIN, AllMusicHelper.INSTANCE.getVolume());
                     Thread.sleep(50);
                 }
                 if (!reload) {
@@ -258,7 +259,7 @@ public class APlayer extends InputStream {
                     channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
                     byteBuffer,
                     frequency);
-            AL10.alSourcef(index, AL10.AL_GAIN, AllMusic.getVolume());
+            AL10.alSourcef(index, AL10.AL_GAIN, AllMusicHelper.INSTANCE.getVolume());
 
             AL10.alSourceQueueBuffers(index, intBuffer);
             if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
