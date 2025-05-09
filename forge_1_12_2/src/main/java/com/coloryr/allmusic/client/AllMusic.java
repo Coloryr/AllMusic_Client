@@ -71,16 +71,17 @@ public class AllMusic implements AllMusicBridge {
         }
     }
 
-    @Mod.EventHandler
-    public void test(final FMLPostInitializationEvent event) {
-        AllMusicHelper.init(this);
-    }
+//    @Mod.EventHandler
+//    public void test(final FMLPostInitializationEvent event) {
+//
+//    }
 
     @Mod.EventHandler
     public void preload(final FMLPreInitializationEvent evt) {
         if (!evt.getModConfigurationDirectory().exists()) {
             evt.getModConfigurationDirectory().mkdirs();
         }
+        AllMusicHelper.init(this);
         AllMusicHelper.hudInit(evt.getModConfigurationDirectory().toPath());
         MinecraftForge.EVENT_BUS.register(this);
         try {
