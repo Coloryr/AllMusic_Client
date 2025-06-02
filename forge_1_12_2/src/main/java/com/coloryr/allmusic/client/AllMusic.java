@@ -96,11 +96,11 @@ public class AllMusic implements AllMusicBridge {
     }
 
     public int getScreenWidth() {
-        return Minecraft.getMinecraft().displayWidth;
+        return Minecraft.getMinecraft().displayWidth / 2;
     }
 
     public int getScreenHeight() {
-        return Minecraft.getMinecraft().displayHeight;
+        return Minecraft.getMinecraft().displayHeight / 2;
     }
 
     public int getTextWidth(String item) {
