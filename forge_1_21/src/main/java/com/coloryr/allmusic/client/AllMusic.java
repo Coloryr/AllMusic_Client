@@ -127,7 +127,7 @@ public class AllMusic implements LayeredDraw.Layer, AllMusicBridge {
     }
 
     public void onLoad(final SoundEngineLoadEvent e) {
-        AllMusicHelper.reload();
+        AllMusicCore.reload();
     }
 
     @SubscribeEvent
@@ -197,7 +197,7 @@ public class AllMusic implements LayeredDraw.Layer, AllMusicBridge {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        AllMusicHelper.tick();
+        AllMusicCore.tick();
     }
 
     @Override
