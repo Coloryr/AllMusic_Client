@@ -60,7 +60,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        AllMusicCore.glInit();
+        event.enqueueWork(AllMusicCore::glInit);
     }
 
     public void register(final RegisterPayloadHandlersEvent event) {
