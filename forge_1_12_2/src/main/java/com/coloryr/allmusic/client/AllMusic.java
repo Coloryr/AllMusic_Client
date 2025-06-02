@@ -5,6 +5,7 @@ import com.coloryr.allmusic.client.core.AllMusicCore;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -96,11 +97,13 @@ public class AllMusic implements AllMusicBridge {
     }
 
     public int getScreenWidth() {
-        return Minecraft.getMinecraft().displayWidth / 2;
+        ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft());
+        return scaledresolution.getScaledWidth();
     }
 
     public int getScreenHeight() {
-        return Minecraft.getMinecraft().displayHeight / 2;
+        ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft());
+        return scaledresolution.getScaledHeight();
     }
 
     public int getTextWidth(String item) {
