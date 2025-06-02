@@ -26,7 +26,5 @@ forge*changelog.txt
 
 workspace.xml
 
-**/allmusic/client/player/
-**/allmusic/client/player/decoder/mp3/
-**/allmusic/client/hud/
-**/allmusic/client/player/decoder/
+**/allmusic/client/core/
+**/allmusic/client/core/player/decoder/mp3/

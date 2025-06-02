@@ -11,14 +11,11 @@ neoforge_1_21_3 fabric_1_21_3 neoforge_1_21_5 fabric_1_21_5
 
 :: 遍历数组
 for %%a in (%array%) do (
-    if exist "%%a\src\main\resources\com\coloryr\allmusic\client\player\decoder\mp3" (
-        rmdir "%%a\src\main\resources\com\coloryr\allmusic\client\player\decoder\mp3"
+    if exist "%%a\src\main\resources\com\coloryr\allmusic\client\core\player\decoder\mp3" (
+        rmdir "%%a\src\main\resources\com\coloryr\allmusic\client\core\player\decoder\mp3"
     )
-    if exist "%%a\src\main\java\com\coloryr\allmusic\client\player" (
-        rmdir "%%a\src\main\java\com\coloryr\allmusic\client\player"
-    )
-    if exist "%%a\src\main\java\com\coloryr\allmusic\client\hud" (
-        rmdir "%%a\src\main\java\com\coloryr\allmusic\client\hud"
+    if exist "%%a\src\main\java\com\coloryr\allmusic\client\core" (
+        rmdir "%%a\src\main\java\com\coloryr\allmusic\client\core"
     )
     if exist "%%a\build" (
         rmdir /s /q "%%a\build"
