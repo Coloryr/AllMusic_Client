@@ -19,7 +19,8 @@ import java.nio.file.Path;
  * AllMusic核心
  */
 public class AllMusicCore {
-    private static final CommandType[] types = CommandType.values();
+    public static final CommandType[] types = CommandType.values();
+
     private static final Gson gson = new Gson();
 
     /**

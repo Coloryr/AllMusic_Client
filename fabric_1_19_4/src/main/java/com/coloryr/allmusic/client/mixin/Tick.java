@@ -1,7 +1,6 @@
 package com.coloryr.allmusic.client.mixin;
 
-import com.coloryr.allmusic.client.AllMusic;
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
+import com.coloryr.allmusic.client.core.AllMusicCore;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,6 +12,6 @@ public class Tick {
 
     @Inject(method = "tick", at = @At("TAIL"))
     public void tick(CallbackInfo info) {
-        AllMusicHelper.tick();
+        AllMusicCore.tick();
     }
 }

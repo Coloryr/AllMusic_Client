@@ -1,10 +1,7 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.client.hud.AllMusicBridge;
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
-import com.coloryr.allmusic.client.hud.ComType;
-import com.coloryr.allmusic.client.hud.HudUtils;
-import com.coloryr.allmusic.client.player.APlayer;
+import com.coloryr.allmusic.client.core.AllMusicBridge;
+import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
@@ -14,7 +11,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -87,7 +83,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        AllMusicHelper.hudInit(FMLPaths.CONFIGDIR.get());
+        AllMusicCore.glInit();
     }
 
     public void register(final RegisterPayloadHandlersEvent event) {
@@ -113,48 +109,22 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     }
 
+    @Override
+    public void stopPlayMusic() {
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
+    }
+
     public void handle(ByteBuf buffer) {
         try {
-            byte type = buffer.readByte();
-            if (type >= HudUtils.types.length || type < 0) {
-                return;
-            }
-            ComType type1 = ComType.values()[type];
-            String data = null;
-            int data1 = 0;
-            switch (type1) {
-                case lyric:
-                case info:
-                case list:
-                case play:
-                case img:
-                case hud:
-                    data = readString(buffer);
-                    break;
-                case pos:
-                    data1 = buffer.readInt();
-                    break;
-            }
-            if (type1 == ComType.play) {
-                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
-                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
-            }
-            AllMusicHelper.hudState(type1, data, data1);
+            AllMusicCore.packRead(buffer);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static String readString(ByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
     private void setup1(final FMLCommonSetupEvent event) {
-        AllMusicHelper.init(this);
+        AllMusicCore.init(FMLPaths.CONFIGDIR.get(), this);
     }
 
     public int getScreenWidth() {
@@ -174,12 +144,12 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     public void onLoad(final SoundEngineLoadEvent e) {
-        AllMusicHelper.reload();
+        AllMusicCore.reload();
     }
 
     @SubscribeEvent
     public void onSound(final PlaySoundSourceEvent e) {
-        if (!AllMusicHelper.isPlay()) return;
+        if (!AllMusicCore.isPlay()) return;
         SoundSource data = e.getSound().getSource();
         switch (data) {
             case MUSIC, RECORDS -> e.getChannel().stop();
@@ -188,7 +158,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     @SubscribeEvent
     public void onSound(final PlayStreamingSourceEvent e) {
-        if (!AllMusicHelper.isPlay()) return;
+        if (!AllMusicCore.isPlay()) return;
         SoundSource data = e.getSound().getSource();
         switch (data) {
             case MUSIC, RECORDS -> e.getChannel().stop();
@@ -197,7 +167,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
-        AllMusicHelper.onServerQuit();
+        AllMusicCore.onServerQuit();
     }
 
     public float getVolume() {
@@ -231,13 +201,13 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     public void onRenderOverlay(RenderGuiLayerEvent.Post e) {
         if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
             gui = e.getGuiGraphics();
-            AllMusicHelper.hudUpdate();
+            AllMusicCore.hudUpdate();
         }
     }
 
     @SubscribeEvent
     public void onTick(ClientTickEvent.Post event) {
-        AllMusicHelper.tick();
+        AllMusicCore.tick();
     }
 
     @Override
@@ -255,7 +225,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     @Override
     public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
         if (tex instanceof Tex tex1) {
-            AllMusicHelper.update(tex1.glId(), size, byteBuffer);
+            AllMusicCore.updateGLTexture(tex1.glId(), size, byteBuffer);
         }
     }
 }

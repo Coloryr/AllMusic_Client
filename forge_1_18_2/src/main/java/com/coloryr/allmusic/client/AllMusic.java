@@ -1,17 +1,12 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.client.hud.AllMusicBridge;
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
-import com.coloryr.allmusic.client.hud.ComType;
-import com.coloryr.allmusic.client.hud.HudUtils;
-import com.coloryr.allmusic.client.player.APlayer;
+import com.coloryr.allmusic.client.core.AllMusicBridge;
+import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -31,17 +26,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.event.EventNetworkChannel;
-import net.minecraftforge.network.simple.SimpleChannel;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @Mod("allmusic_client")
 public class AllMusic implements AllMusicBridge {
@@ -58,7 +45,7 @@ public class AllMusic implements AllMusicBridge {
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        AllMusicHelper.hudInit(FMLPaths.CONFIGDIR.get());
+        AllMusicCore.glInit();
         NetworkRegistry.ChannelBuilder.named(channel)
                 .networkProtocolVersion(() -> "1.0")
                 .clientAcceptedVersions(((status) -> true))
@@ -67,34 +54,15 @@ public class AllMusic implements AllMusicBridge {
                 .addListener(this::handle);
     }
 
+    @Override
+    public void stopPlayMusic() {
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
+    }
+
     public void handle(NetworkEvent.ServerCustomPayloadEvent event) {
         try {
-            FriendlyByteBuf buffer = event.getPayload();
-            byte type = buffer.readByte();
-            if (type >= HudUtils.types.length || type < 0) {
-                return;
-            }
-            ComType type1 = ComType.values()[type];
-            String data = null;
-            int data1 = 0;
-            switch (type1) {
-                case lyric:
-                case info:
-                case list:
-                case play:
-                case img:
-                case hud:
-                    data = readString(buffer);
-                    break;
-                case pos:
-                    data1 = buffer.readInt();
-                    break;
-            }
-            if (type1 == ComType.play) {
-                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
-                Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
-            }
-            AllMusicHelper.hudState(type1, data, data1);
+            AllMusicCore.packRead(event.getPayload());
             event.getSource().get().setPacketHandled(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,7 +70,7 @@ public class AllMusic implements AllMusicBridge {
     }
 
     private void setup1(final FMLLoadCompleteEvent event) {
-        AllMusicHelper.init(this);
+        AllMusicCore.init(FMLPaths.CONFIGDIR.get(), this);
     }
 
     public int getScreenWidth() {
@@ -123,7 +91,7 @@ public class AllMusic implements AllMusicBridge {
 
     @SubscribeEvent
     public void onSound(final SoundEvent.SoundSourceEvent e) {
-        if (!AllMusicHelper.isPlay()) return;
+        if (!AllMusicCore.isPlay()) return;
         SoundSource data = e.getSound().getSource();
         switch (data) {
             case MUSIC, RECORDS -> e.getChannel().stop();
@@ -132,7 +100,7 @@ public class AllMusic implements AllMusicBridge {
 
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
-        AllMusicHelper.onServerQuit();
+        AllMusicCore.onServerQuit();
     }
 
     private static String readString(FriendlyByteBuf buf) {
@@ -146,13 +114,13 @@ public class AllMusic implements AllMusicBridge {
     @SubscribeEvent
     public void onRenderOverlay(final RenderGameOverlayEvent.Pre e) {
         if (e.getType() == RenderGameOverlayEvent.ElementType.ALL) {
-            AllMusicHelper.hudUpdate();
+            AllMusicCore.hudUpdate();
         }
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event){
-        AllMusicHelper.tick();
+        AllMusicCore.tick();
     }
 
     public float getVolume() {
@@ -215,11 +183,11 @@ public class AllMusic implements AllMusicBridge {
 
     @Override
     public Object genTexture(int size) {
-        return AllMusicHelper.gen(size);
+        return AllMusicCore.genGLTexture(size);
     }
 
     @Override
     public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicHelper.update((int) tex, size, byteBuffer);
+        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
     }
 }

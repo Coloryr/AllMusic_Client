@@ -1,10 +1,7 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.client.hud.AllMusicBridge;
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
-import com.coloryr.allmusic.client.hud.ComType;
-import com.coloryr.allmusic.client.hud.HudUtils;
-import com.coloryr.allmusic.client.player.APlayer;
+import com.coloryr.allmusic.client.core.AllMusicBridge;
+import com.coloryr.allmusic.client.core.AllMusicCore;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -14,22 +11,16 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -40,49 +31,19 @@ public class AllMusic implements AllMusicBridge {
     @SubscribeEvent
     public void onMessage(FMLNetworkEvent.ClientCustomPacketEvent message) {
         try {
-            final ByteBuf buffer = message.getPacket().payload();
-            byte type = buffer.readByte();
-            if (type >= HudUtils.types.length || type < 0) {
-                return;
-            }
-            ComType type1 = ComType.values()[type];
-            String data = null;
-            int data1 = 0;
-            switch (type1) {
-                case lyric:
-                case info:
-                case list:
-                case play:
-                case img:
-                case hud:
-                    data = readString(buffer);
-                    break;
-                case pos:
-                    data1 = buffer.readInt();
-                    break;
-            }
-            if (type1 == ComType.play) {
-                Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
-                Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
-            }
-            AllMusicHelper.hudState(type1, data, data1);
+            AllMusicCore.packRead(message.getPacket().payload());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-//    @Mod.EventHandler
-//    public void test(final FMLPostInitializationEvent event) {
-//
-//    }
 
     @Mod.EventHandler
     public void preload(final FMLPreInitializationEvent evt) {
         if (!evt.getModConfigurationDirectory().exists()) {
             evt.getModConfigurationDirectory().mkdirs();
         }
-        AllMusicHelper.init(this);
-        AllMusicHelper.hudInit(evt.getModConfigurationDirectory().toPath());
+        AllMusicCore.init(evt.getModConfigurationDirectory().toPath(), this);
+        AllMusicCore.glInit();
         MinecraftForge.EVENT_BUS.register(this);
         try {
             Class<?> server = Class.forName("com.coloryr.allmusic.server.AllMusicForge");
@@ -97,7 +58,7 @@ public class AllMusic implements AllMusicBridge {
 
     @SubscribeEvent
     public void onSound(final PlaySoundEvent e) {
-        if (!AllMusicHelper.isPlay()) return;
+        if (!AllMusicCore.isPlay()) return;
         SoundCategory data = e.getSound().getCategory();
         switch (data) {
             case MUSIC:
@@ -108,7 +69,7 @@ public class AllMusic implements AllMusicBridge {
 
     @SubscribeEvent
     public void onServerQuit(final FMLNetworkEvent.ClientDisconnectionFromServerEvent e) {
-        AllMusicHelper.onServerQuit();
+        AllMusicCore.onServerQuit();
     }
 
     private static String readString(ByteBuf buf) {
@@ -123,14 +84,14 @@ public class AllMusic implements AllMusicBridge {
     @SideOnly(Side.CLIENT)
     public void onRenderOverlay(RenderGameOverlayEvent.Pre e) {
         if (e.getType() == RenderGameOverlayEvent.ElementType.PORTAL) {
-            AllMusicHelper.hudUpdate();
+            AllMusicCore.hudUpdate();
         }
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            AllMusicHelper.tick();
+            AllMusicCore.tick();
         }
     }
 
@@ -152,6 +113,12 @@ public class AllMusic implements AllMusicBridge {
 
     public float getVolume() {
         return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS);
+    }
+
+    @Override
+    public void stopPlayMusic() {
+        Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.MUSIC);
+        Minecraft.getMinecraft().getSoundHandler().stop("", SoundCategory.RECORDS);
     }
 
     public void drawPic(Object textureID, int size, int x, int y, int ang) {
@@ -201,11 +168,11 @@ public class AllMusic implements AllMusicBridge {
 
     @Override
     public Object genTexture(int size) {
-        return AllMusicHelper.gen(size);
+        return AllMusicCore.genGLTexture(size);
     }
 
     @Override
     public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicHelper.update((int) tex, size, byteBuffer);
+        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
     }
 }

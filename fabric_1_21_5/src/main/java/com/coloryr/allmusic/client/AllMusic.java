@@ -1,15 +1,15 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
-import com.coloryr.allmusic.client.hud.ComType;
-import com.coloryr.allmusic.client.hud.AllMusicBridge;
-import com.coloryr.allmusic.client.hud.HudUtils;
+import com.coloryr.allmusic.client.core.AllMusicBridge;
+import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.CommandType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
@@ -51,7 +51,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     }
 
     public Object genTexture(int size) {
-        int textureID = AllMusicHelper.gen(size);
+        int textureID = AllMusicCore.genGLTexture(size);
 
         Tex tex = new Tex(textureID, size, size);
         tex.setTextureFilter(FilterMode.NEAREST, false);
@@ -63,7 +63,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
 
     public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
         if (tex instanceof Tex tex1) {
-            AllMusicHelper.update(tex1.getGlId(), size, byteBuffer);
+            AllMusicCore.updateGLTexture(tex1.getGlId(), size, byteBuffer);
         }
     }
 
@@ -114,9 +114,15 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         return MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.RECORDS);
     }
 
+    @Override
+    public void stopPlayMusic() {
+        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
+        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
+    }
+
     public static void update(DrawContext draw) {
         context = draw;
-        AllMusicHelper.hudUpdate();
+        AllMusicCore.hudUpdate();
     }
 
     private static String readString(PacketByteBuf buf) {
@@ -127,20 +133,20 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         return new String(temp, StandardCharsets.UTF_8);
     }
 
-    public record PackPayload(ComType type, String data, int data1) implements CustomPayload {
+    public record PackPayload(CommandType type, String data, int data1) implements CustomPayload {
         public static final Id<PackPayload> ID = new CustomPayload.Id<>(AllMusic.ID);
         public static final PacketCodec<PacketByteBuf, PackPayload> CODEC = PacketCodec.of((value, buf) -> {
         }, buffer -> {
             byte type = buffer.readByte();
-            if (type >= HudUtils.types.length || type < 0) {
+            if (type >= AllMusicCore.types.length || type < 0) {
                 return null;
             }
-            ComType type1 = ComType.values()[type];
-            PackPayload payload = new PackPayload(ComType.clear, null, 0);
+            CommandType type1 = CommandType.values()[type];
+            PackPayload payload = new PackPayload(CommandType.CLEAR, null, 0);
             switch (type1) {
-                case lyric, info, list, play, img, hud -> payload = new PackPayload(type1, readString(buffer), 0);
-                case stop, clear -> payload = new PackPayload(type1, null, 0);
-                case pos -> payload = new PackPayload(type1, null, buffer.readInt());
+                case LYRIC, INFO, LIST, PLAY, IMG, HUD_DATA -> payload = new PackPayload(type1, readString(buffer), 0);
+                case STOP, CLEAR -> payload = new PackPayload(type1, null, 0);
+                case POS -> payload = new PackPayload(type1, null, buffer.readInt());
             }
             buffer.clear();
             return payload;
@@ -157,16 +163,12 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
             try {
-                if (pack.type == ComType.play) {
-                    MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
-                    MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
-                }
-                AllMusicHelper.hudState(pack.type, pack.data, pack.data1);
+                AllMusicCore.hudState(pack.type, pack.data, pack.data1);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
-        AllMusicHelper.init(this);
+        AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
     }
 }

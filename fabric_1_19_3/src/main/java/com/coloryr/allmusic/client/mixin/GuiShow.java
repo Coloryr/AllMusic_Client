@@ -1,6 +1,6 @@
 package com.coloryr.allmusic.client.mixin;
 
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
+import com.coloryr.allmusic.client.core.AllMusicCore;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class GuiShow {
     @Inject(method = {"render"}, at = {@At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderStatusEffectOverlay(Lnet/minecraft/client/util/math/MatrixStack;)V")})
     public void Gui(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
-        AllMusicHelper.hudUpdate();
+        AllMusicCore.hudUpdate();
     }
 }

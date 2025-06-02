@@ -1,6 +1,6 @@
 package com.coloryr.allmusic.client.mixin;
 
-import com.coloryr.allmusic.client.hud.AllMusicHelper;
+import com.coloryr.allmusic.client.core.AllMusicCore;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class Register {
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;registerTextures(Lnet/minecraft/client/texture/TextureManager;)V"))
     public void register(CallbackInfo info) {
-        AllMusicHelper.hudInit(FabricLoader.getInstance().getConfigDir());
+        AllMusicCore.glInit();
     }
 }
