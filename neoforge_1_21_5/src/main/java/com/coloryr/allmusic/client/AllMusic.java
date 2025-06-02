@@ -212,7 +212,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     @Override
     public Object genTexture(int size) {
-        int textureID = AllMusicHelper.gen(size);
+        int textureID = AllMusicCore.genGLTexture(size);
 
         Tex tex = new Tex(textureID, size, size);
         tex.setTextureFilter(FilterMode.NEAREST, false);
