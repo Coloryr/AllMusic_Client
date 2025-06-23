@@ -1,7 +1,6 @@
 package com.coloryr.allmusic.client.core.player;
 
 import com.coloryr.allmusic.client.core.AllMusicCore;
-import com.coloryr.allmusic.client.core.hud.AllMusicHud;
 import com.coloryr.allmusic.client.core.player.decoder.flac.FlacDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.mp3.Mp3Decoder;
 import com.coloryr.allmusic.client.player.decoder.BuffPack;
@@ -113,6 +112,7 @@ public class AllMusicPlayer extends InputStream {
         getClose();
         streamClose();
         get = new HttpGet(url);
+        get.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
         get.setHeader("Range", "bytes=" + local + "-");
         HttpResponse response = this.client.execute(get);
         HttpEntity entity = response.getEntity();
