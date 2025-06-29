@@ -213,8 +213,6 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     @Override
     public Object genTexture(int size) {
         var device = RenderSystem.getDevice();
-
-        //var tex = device.createTexture("allmusic:gui_textured", 0, TextureFormat.RGBA8, size, size, 1, 1);
         var tex = device.createTexture("allmusic:gui_textured", 5, TextureFormat.RGBA8, size, size, 1, 1);
         tex.setTextureFilter(FilterMode.NEAREST, false);
 
@@ -224,7 +222,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
         Minecraft.getInstance().getTextureManager().register(channel, tex1);
 
-        return tex1;
+        return tex;
     }
 
     @Override
