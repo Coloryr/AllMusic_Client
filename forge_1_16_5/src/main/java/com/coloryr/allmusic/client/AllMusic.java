@@ -42,13 +42,13 @@ public class AllMusic implements AllMusicBridge {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::setup);
-        modEventBus.addListener(this::setup1);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void setup(final FMLClientSetupEvent event) {
-        AllMusicCore.glInit();
+        AllMusicCore.init(FMLPaths.CONFIGDIR.get(), this);
+        event.enqueueWork(AllMusicCore::glInit);
         NetworkRegistry.ChannelBuilder.named(channel)
                 .networkProtocolVersion(() -> "1.0")
                 .clientAcceptedVersions(((status) -> true))
@@ -70,10 +70,6 @@ public class AllMusic implements AllMusicBridge {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void setup1(final FMLLoadCompleteEvent event) {
-        AllMusicCore.init(FMLPaths.CONFIGDIR.get(), this);
     }
 
     public int getScreenWidth() {

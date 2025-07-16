@@ -19,8 +19,8 @@
 package com.coloryr.allmusic.client.core.player.decoder.mp3;
 
 import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
-import com.coloryr.allmusic.client.player.decoder.BuffPack;
-import com.coloryr.allmusic.client.player.decoder.IDecoder;
+import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
+import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
 
 /**
  * The <code>Decoder</code> class encapsulates the details of

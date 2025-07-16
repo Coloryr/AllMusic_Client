@@ -1,10 +1,10 @@
 package com.coloryr.allmusic.client.core.player;
 
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
+import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.flac.FlacDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.mp3.Mp3Decoder;
-import com.coloryr.allmusic.client.player.decoder.BuffPack;
-import com.coloryr.allmusic.client.player.decoder.IDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.ogg.OggDecoder;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;

@@ -1,4 +1,4 @@
-package com.coloryr.allmusic.client.player.decoder;
+package com.coloryr.allmusic.client.core.player.decoder;
 
 public class BuffPack {
 
