@@ -2,6 +2,8 @@
 AllMusic配套mod  
 AllMusic插件：https://github.com/Coloryr/AllMusic_Server
 
+**不要问为什么xxx游戏版本没有，自己找个临近的版本测试**
+
 ## 构建
 **需要在Windows系统下**  
 安装JDK21
