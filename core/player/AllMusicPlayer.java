@@ -46,7 +46,7 @@ public class AllMusicPlayer extends InputStream {
     private int frequency;
     private int channels;
 
-    public AllMusicPlayer() {
+    public AllMusicPlayer(IntBuffer source) {
         try {
             new Thread(this::run, "allmusic_run").start();
             client = HttpClientBuilder.create()
@@ -54,6 +54,14 @@ public class AllMusicPlayer extends InputStream {
                     .build();
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
+            if (source == null) {
+                index = AL10.alGenSources();
+                if (index == 0) {
+                    index = 2;
+                }
+            } else {
+                index = source.get(0);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -154,7 +162,6 @@ public class AllMusicPlayer extends InputStream {
                 }
 
                 isPlay = true;
-                index = AL10.alGenSources();
                 int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
                 while (m_numqueued > 0) {
                     int temp = AL10.alSourceUnqueueBuffers(index);
@@ -223,7 +230,6 @@ public class AllMusicPlayer extends InputStream {
                         AL10.alDeleteBuffers(temp);
                         m_numqueued--;
                     }
-                    AL10.alDeleteSources(index);
                 } else {
                     urls.add(url);
                     semaphore.release();

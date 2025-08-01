@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,12 +62,7 @@ public class AllMusicCore {
         return player.isPlay();
     }
 
-    /**
-     * 初始化核心
-     * @param file 配置文件
-     * @param bridge 游戏桥
-     */
-    public static void init(Path file, AllMusicBridge bridge) {
+    public static void init(Path file, AllMusicBridge bridge, IntBuffer source) {
         File configFile = new File(file.toFile(), "allmusic.json");
         if (configFile.exists()) {
             try {
@@ -101,7 +97,16 @@ public class AllMusicCore {
         }
 
         AllMusicCore.bridge = bridge;
-        player = new AllMusicPlayer();
+        player = new AllMusicPlayer(source);
+    }
+
+    /**
+     * 初始化核心
+     * @param file 配置文件
+     * @param bridge 游戏桥
+     */
+    public static void init(Path file, AllMusicBridge bridge) {
+        init(file, bridge, null);
     }
 
     /**

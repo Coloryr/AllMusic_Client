@@ -2,6 +2,7 @@ package com.coloryr.allmusic.client;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
@@ -26,10 +27,16 @@ import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import paulscode.sound.Channel;
+import paulscode.sound.Library;
+import paulscode.sound.SoundSystem;
+import paulscode.sound.libraries.ChannelLWJGLOpenAL;
 
 @Mod(modid = "allmusic_client", version = "3.1.1", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
 @SideOnly(Side.CLIENT)
 public class AllMusic implements AllMusicBridge {
+    public static SoundSystem sound;
+
     public void sendMessage(String data) {
         FMLClientHandler.instance()
             .getClient()
@@ -41,7 +48,13 @@ public class AllMusic implements AllMusicBridge {
 
     @Mod.EventHandler
     public void test(final FMLLoadCompleteEvent event) {
-        AllMusicCore.init(new File("config").toPath(), this);
+        Minecraft.getMinecraft().getSoundHandler();
+
+        Library library = ((IGetSoundHandler)sound).allMusic_Client$getSoundLibrary();
+        IGetSound sound1 = (IGetSound)library;
+        List<Channel> list = sound1.allMusic_Client$getStreamingChannels();
+        ChannelLWJGLOpenAL channel = (ChannelLWJGLOpenAL)list.get(list.size() - 1);
+        AllMusicCore.init(new File("config").toPath(), this, channel.ALSource);
         AllMusicCore.glInit();
     }
 
