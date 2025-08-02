@@ -42,7 +42,7 @@ public class AllMusicPlayer extends InputStream {
     private long local = 0;
     private boolean isPlay = false;
     private boolean wait = false;
-    private int index;
+    private int index = -1;
     private int frequency;
     private int channels;
 
@@ -54,12 +54,7 @@ public class AllMusicPlayer extends InputStream {
                     .build();
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
-            if (source == null) {
-                index = AL10.alGenSources();
-                if (index == 0) {
-                    index = 2;
-                }
-            } else {
+            if (source != null) {
                 index = source.get(0);
             }
         } catch (Exception e) {
@@ -180,6 +175,9 @@ public class AllMusicPlayer extends InputStream {
                 while (true) {
                     try {
                         if (isClose) break;
+                        if (index == -1) {
+                            index = AL10.alGenSources();
+                        }
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;

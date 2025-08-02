@@ -8,7 +8,6 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
@@ -21,14 +20,12 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 @Mod("allmusic_client")
 public class AllMusic implements AllMusicBridge {
@@ -97,14 +94,6 @@ public class AllMusic implements AllMusicBridge {
     @SubscribeEvent
     public void onServerQuit(final ClientPlayerNetworkEvent.LoggedOutEvent e) {
         AllMusicCore.onServerQuit();
-    }
-
-    private static String readString(FriendlyByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
     }
 
     @SubscribeEvent
