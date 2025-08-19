@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InGameHud.class)
 public class GuiShow {
-    @Inject(method = {"renderStatusEffectOverlay"}, at = {@At(value = "HEAD")})
+    @Inject(method = {"renderMiscOverlays"}, at = {@At(value = "RETURN")})
     public void guiShow(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         AllMusic.update(context);
     }

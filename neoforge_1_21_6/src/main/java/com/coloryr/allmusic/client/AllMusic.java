@@ -45,12 +45,8 @@ import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2fStack;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
 @Mod("allmusic_client")
 public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<RegistryFriendlyByteBuf, PackData>, AllMusicBridge {

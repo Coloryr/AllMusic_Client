@@ -9,8 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftClient.class)
 public class Tick {
-
-    @Inject(method = "tick", at = @At("TAIL"))
+    @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo info) {
         AllMusicCore.tick();
     }
