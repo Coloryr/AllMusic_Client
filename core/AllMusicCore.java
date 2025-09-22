@@ -174,7 +174,7 @@ public class AllMusicCore {
         if (type >= types.length || type < 0) {
             return;
         }
-        CommandType type1 = CommandType.values()[type];
+        CommandType type1 = types[type];
         String data = null;
         int data1 = 0;
         switch (type1) {
@@ -190,10 +190,7 @@ public class AllMusicCore {
                 data1 = buffer.readInt();
                 break;
         }
-        if (type1 == CommandType.PLAY) {
-            bridge.stopPlayMusic();
-        }
-        hudState(type1, data, data1);
+        packDo(type1, data, data1);
         buffer.clear();
     }
 
@@ -203,7 +200,11 @@ public class AllMusicCore {
      * @param data 数据
      * @param data1 数据
      */
-    public static void hudState(CommandType type, String data, int data1) {
+    public static void packDo(CommandType type, String data, int data1) {
+        if (type == CommandType.PLAY) {
+            bridge.stopPlayMusic();
+        }
+
         switch (type) {
             case LYRIC:
                 hud.lyric = data;
