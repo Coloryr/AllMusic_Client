@@ -63,7 +63,7 @@ public class AllMusicCore {
     }
 
     public static void init(Path file, AllMusicBridge bridge, IntBuffer source) {
-        File configFile = new File(file.toFile(), "allmusic.json");
+        File configFile = new File(file.toFile(), "allmusic_client.json");
         if (configFile.exists()) {
             try {
                 InputStreamReader reader = new InputStreamReader(
