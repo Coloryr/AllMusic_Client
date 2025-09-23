@@ -235,7 +235,7 @@ public class AllMusicHud {
             needUpload = true;
         } catch (Exception e) {
             e.printStackTrace();
-            AllMusicCore.bridge.sendMessage("[AllMusic客户端]图片解析错误");
+            AllMusicCore.bridge.sendMessage("图片解析错误");
             haveImg = false;
         }
     }

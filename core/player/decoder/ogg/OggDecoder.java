@@ -356,6 +356,6 @@ public class OggDecoder implements IDecoder {
 
     @Override
     public void set(int time) {
-        AllMusicCore.bridge.sendMessage("[AllMusic客户端]不支持中间播放");
+        AllMusicCore.bridge.sendMessage("不支持中间播放");
     }
 }
