@@ -125,6 +125,18 @@ public class AllMusicPlayer extends InputStream {
         while (true) {
             try {
                 semaphore.acquire();
+
+                if (index == -1) {
+                    index = AL10.alGenSources();
+                    if (index == 0 && source != null) {
+                        index = source.get(0);
+                        if (index == 0) {
+                            AllMusicCore.bridge.sendMessage("音频源创建失败");
+                            return;
+                        }
+                    }
+                }
+
                 url = urls.poll();
                 if (url == null || url.isEmpty()) continue;
                 urls.clear();
@@ -174,16 +186,6 @@ public class AllMusicPlayer extends InputStream {
                 while (true) {
                     try {
                         if (isClose) break;
-                        if (index == -1) {
-                            index = AL10.alGenSources();
-                            if (index == 0 && source != null) {
-                                index = source.get(0);
-                                if (index == 0) {
-                                    AllMusicCore.bridge.sendMessage("音频源创建失败");
-                                    return;
-                                }
-                            }
-                        }
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;
