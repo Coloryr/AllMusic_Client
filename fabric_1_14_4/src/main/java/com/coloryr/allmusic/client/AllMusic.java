@@ -10,14 +10,17 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.SelectorText;
 import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
 
 public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = new Identifier("allmusic", "channel");
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     @Override
     public Object genTexture(int size) {
@@ -91,7 +94,14 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     }
 
     public void sendMessage(String data) {
-        MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new SelectorText(data)));
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+        MinecraftClient.getInstance().execute(() -> {
+            if (MinecraftClient.getInstance().player == null)
+                return;
+            MinecraftClient.getInstance().player.sendChatMessage(finalData);
+        });
     }
 
     public float getVolume() {

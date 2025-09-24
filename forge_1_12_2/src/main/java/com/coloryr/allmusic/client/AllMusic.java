@@ -8,6 +8,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,6 +22,8 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Field;
@@ -29,6 +33,8 @@ import java.nio.charset.StandardCharsets;
 @Mod(modid = "allmusic_client", version = "3.1.0", acceptedMinecraftVersions = "[1.12,)")
 @SideOnly(Side.CLIENT)
 public class AllMusic implements AllMusicBridge {
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+
     @SubscribeEvent
     public void onMessage(FMLNetworkEvent.ClientCustomPacketEvent message) {
         try {
@@ -164,8 +170,14 @@ public class AllMusic implements AllMusicBridge {
     }
 
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+
         Minecraft.getMinecraft().addScheduledTask(() -> {
-            Minecraft.getMinecraft().ingameGUI.getChatGUI().addToSentMessages(data);
+            if (Minecraft.getMinecraft().player != null) {
+                Minecraft.getMinecraft().player.sendMessage(new TextComponentString(finalData));
+            }
         });
     }
 

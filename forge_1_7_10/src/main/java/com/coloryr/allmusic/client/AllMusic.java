@@ -14,6 +14,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.common.MinecraftForge;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.client.FMLClientHandler;
@@ -37,13 +39,18 @@ import paulscode.sound.libraries.ChannelLWJGLOpenAL;
 public class AllMusic implements AllMusicBridge {
     public static SoundSystem sound;
 
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
         FMLClientHandler.instance()
             .getClient()
             .func_152344_a(
                 () -> FMLClientHandler.instance()
                     .getClient().ingameGUI.getChatGUI()
-                        .addToSentMessages(data));
+                        .addToSentMessages(finalData));
     }
 
     @Mod.EventHandler

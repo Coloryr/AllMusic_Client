@@ -12,6 +12,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -19,6 +21,8 @@ import java.nio.ByteBuffer;
 
 public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = new Identifier("allmusic", "channel");
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     private static final MatrixStack stack = new MatrixStack();
 
@@ -96,8 +100,13 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     }
 
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
         MinecraftClient.getInstance().execute(() -> {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(data));
+            if (MinecraftClient.getInstance().player == null)
+                return;
+            MinecraftClient.getInstance().player.sendChatMessage(Text.of(finalData));
         });
     }
 

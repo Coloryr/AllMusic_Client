@@ -15,17 +15,19 @@ import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = new Identifier("allmusic", "channel");
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     private static final MatrixStack stack = new MatrixStack();
 
@@ -101,10 +103,13 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     }
 
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
         MinecraftClient.getInstance().execute(() -> {
             if (MinecraftClient.getInstance().player == null)
                 return;
-            MinecraftClient.getInstance().player.sendChatMessage(data);
+            MinecraftClient.getInstance().player.sendChatMessage(finalData);
         });
     }
 

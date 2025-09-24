@@ -18,6 +18,8 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -27,6 +29,8 @@ import java.nio.charset.StandardCharsets;
 public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = new Identifier("allmusic", "channel");
     private static DrawContext context;
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     @Override
     public Object genTexture(int size) {
@@ -98,7 +102,14 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     }
 
     public void sendMessage(String data) {
-        MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(data)));
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+        MinecraftClient.getInstance().execute(() -> {
+            if (MinecraftClient.getInstance().player == null)
+                return;
+            MinecraftClient.getInstance().player.sendMessage(Text.of(finalData));
+        });
     }
 
     public float getVolume() {
@@ -154,7 +165,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
             try {
-                AllMusicCore.hudState(pack.type, pack.data, pack.data1);
+                AllMusicCore.packDo(pack.type, pack.data, pack.data1);
             } catch (Exception e) {
                 e.printStackTrace();
             }

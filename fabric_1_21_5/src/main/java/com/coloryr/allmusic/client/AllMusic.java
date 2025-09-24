@@ -23,6 +23,8 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -36,6 +38,8 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     private static DrawContext context;
 
     private static Function<Identifier, RenderLayer> GUI_TEXTURED;
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     public static class Tex extends GlTexture {
         protected Tex(int id, int width, int height) {
@@ -107,7 +111,14 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     }
 
     public void sendMessage(String data) {
-        MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(data)));
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+        MinecraftClient.getInstance().execute(() -> {
+            if (MinecraftClient.getInstance().player == null)
+                return;
+            MinecraftClient.getInstance().player.sendMessage(Text.of(finalData), false);
+        });
     }
 
     public float getVolume() {
@@ -163,7 +174,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
             try {
-                AllMusicCore.hudState(pack.type, pack.data, pack.data1);
+                AllMusicCore.packDo(pack.type, pack.data, pack.data1);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -45,12 +46,16 @@ import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2fStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
-@Mod("allmusic_client")
+@Mod(value = "allmusic_client", dist = Dist.CLIENT)
 public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<RegistryFriendlyByteBuf, PackData>, AllMusicBridge {
     private static GuiGraphics gui;
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("AllMusic Client");
 
     public static final ResourceLocation channel =
             ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
@@ -72,8 +77,11 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
         Minecraft.getInstance().execute(() ->
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
+                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(finalData)));
     }
 
     private void setup(final FMLClientSetupEvent event) {
