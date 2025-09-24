@@ -25,13 +25,18 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @Mod("allmusic_client")
 public class AllMusic implements AllMusicBridge {
     private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     public AllMusic() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -162,8 +167,13 @@ public class AllMusic implements AllMusicBridge {
     }
 
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
         Minecraft.getInstance().execute(() -> {
-            Minecraft.getInstance().gui.getChat().addMessage(Component.nullToEmpty(data));
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.sendMessage(Component.nullToEmpty(finalData), UUID.randomUUID());
         });
     }
 

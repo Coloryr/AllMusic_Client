@@ -32,6 +32,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -42,8 +44,9 @@ import java.nio.ByteBuffer;
 public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<RegistryFriendlyByteBuf, PackData>, AllMusicBridge {
     private static GuiGraphics gui;
 
-    public static final ResourceLocation channel =
-            ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
+    public static final ResourceLocation channel = ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     public AllMusic(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::setup);
@@ -55,8 +58,14 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     }
 
     public void sendMessage(String data) {
-        Minecraft.getInstance().execute(() ->
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.displayClientMessage(Component.literal(finalData), false);
+        });
     }
 
     private void setup(final FMLClientSetupEvent event) {

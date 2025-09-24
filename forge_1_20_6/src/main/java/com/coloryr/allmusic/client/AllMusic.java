@@ -37,6 +37,8 @@ public class AllMusic implements AllMusicBridge {
     private static GuiGraphics gui;
     private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
 
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+
     public AllMusic() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
@@ -47,7 +49,14 @@ public class AllMusic implements AllMusicBridge {
     }
 
     public void sendMessage(String data) {
-        Minecraft.getInstance().execute(() -> Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(finalData));
+        });
     }
 
     private void setup(final FMLClientSetupEvent event) {

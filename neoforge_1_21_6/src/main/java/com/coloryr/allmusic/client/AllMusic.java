@@ -80,8 +80,11 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
         data = "[AllMusic Client]" + data;
         LOGGER.warn(data);
         String finalData = data;
-        Minecraft.getInstance().execute(() ->
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(finalData)));
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.displayClientMessage(Component.literal(finalData), false);
+        });
     }
 
     private void setup(final FMLClientSetupEvent event) {

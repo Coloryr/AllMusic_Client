@@ -30,6 +30,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
 import net.neoforged.neoforge.network.handling.IPlayPayloadHandler;
 import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -38,9 +40,10 @@ import java.nio.ByteBuffer;
 
 @Mod("allmusic_client")
 public class AllMusic implements IPlayPayloadHandler<PackData>, AllMusicBridge {
-    public static final ResourceLocation channel =
-            new ResourceLocation("allmusic", "channel");
+    public static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
     private static GuiGraphics gui;
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     public AllMusic(IEventBus modEventBus) {
         modEventBus.addListener(this::setup);
@@ -52,8 +55,14 @@ public class AllMusic implements IPlayPayloadHandler<PackData>, AllMusicBridge {
     }
 
     public void sendMessage(String data) {
-        Minecraft.getInstance().execute(() ->
-                Minecraft.getInstance().gui.getChat().addMessage(Component.literal(data)));
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(finalData));
+        });
     }
 
     public int getScreenWidth() {

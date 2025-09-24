@@ -8,6 +8,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
@@ -26,6 +27,8 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.event.EventNetworkChannel;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
@@ -33,6 +36,8 @@ import java.nio.ByteBuffer;
 @Mod("allmusic_client")
 public class AllMusic implements AllMusicBridge {
     private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
+
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     public AllMusic() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -162,8 +167,13 @@ public class AllMusic implements AllMusicBridge {
         }
     }
     public void sendMessage(String data) {
+        data = "[AllMusic Client]" + data;
+        LOGGER.warn(data);
+        String finalData = data;
         Minecraft.getInstance().execute(() -> {
-            Minecraft.getInstance().ingameGUI.getChatGUI().addToSentMessages(data);
+            if (Minecraft.getInstance().player == null)
+                return;
+            Minecraft.getInstance().player.sendMessage(new StringTextComponent(finalData));
         });
     }
 
