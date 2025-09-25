@@ -106,7 +106,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         MinecraftClient.getInstance().execute(() -> {
             if (MinecraftClient.getInstance().player == null)
                 return;
-            MinecraftClient.getInstance().player.sendChatMessage(Text.of(finalData));
+            MinecraftClient.getInstance().player.sendMessage(Text.of(finalData));
         });
     }
 

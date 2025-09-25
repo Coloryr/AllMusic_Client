@@ -45,7 +45,6 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 @Mod("allmusic_client")
