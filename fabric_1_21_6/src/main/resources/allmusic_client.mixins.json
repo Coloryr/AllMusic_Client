@@ -2,7 +2,7 @@
 	"required": true,
 	"package": "com.coloryr.allmusic.client.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [
+	"client": [
 		"GuiShow",
 		"QuitServer",
 		"Register",
