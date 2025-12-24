@@ -2,11 +2,10 @@ package com.coloryr.allmusic.client.core.hud;
 
 import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.objs.SaveOBJ;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -32,7 +31,7 @@ public class AllMusicHud {
     /**
      * 获取Http客户端
      */
-    private final HttpClient client;
+    private final OkHttpClient client;
     /**
      * 图片buffer
      */
@@ -54,7 +53,7 @@ public class AllMusicHud {
     private boolean thisRoute;
 
     //请求
-    private HttpGet get;
+    private Response response;
     private InputStream inputStream;
 
     /**
@@ -87,7 +86,7 @@ public class AllMusicHud {
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
-        client = HttpClientBuilder.create().useSystemProperties().build();
+        client = new OkHttpClient();
         byteBuffer = ByteBuffer.allocateDirect(size * size * 4);
         texture = AllMusicCore.bridge.genTexture(size);
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
@@ -122,9 +121,9 @@ public class AllMusicHud {
      */
     private void getClose() {
         try {
-            if (get != null && !get.isAborted()) {
-                get.abort();
-                get = null;
+            if (response != null) {
+                response.close();
+                response = null;
             }
             if (inputStream != null) {
                 inputStream.close();
@@ -151,10 +150,12 @@ public class AllMusicHud {
                 return;
             }
 
-            get = new HttpGet(picUrl);
-            HttpResponse response = client.execute(get);
-            HttpEntity entity = response.getEntity();
-            inputStream = entity.getContent();
+            Request request = new Request.Builder()
+                    .url(picUrl)
+                    .build();
+            Call call = client.newCall(request);
+            response = call.execute();
+            inputStream = response.body().byteStream();
             BufferedImage image = resizeImage(ImageIO.read(inputStream), size, size);
             int[] pixels = new int[size * size];
 

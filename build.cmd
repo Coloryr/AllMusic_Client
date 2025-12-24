@@ -29,14 +29,15 @@ set "PROJECTS[23]=fabric_1_21"
 set "PROJECTS[24]=fabric_1_21_3"
 set "PROJECTS[25]=fabric_1_21_5"
 set "PROJECTS[26]=fabric_1_21_6"
-set "PROJECTS[27]=neoforge_1_20_4"
-set "PROJECTS[28]=neoforge_1_20_6"
-set "PROJECTS[29]=neoforge_1_21"
-set "PROJECTS[30]=neoforge_1_21_3"
-set "PROJECTS[31]=neoforge_1_21_5"
-set "PROJECTS[32]=neoforge_1_21_6"
+set "PROJECTS[27]=fabric_26_1"
+set "PROJECTS[28]=neoforge_1_20_4"
+set "PROJECTS[29]=neoforge_1_20_6"
+set "PROJECTS[30]=neoforge_1_21"
+set "PROJECTS[31]=neoforge_1_21_3"
+set "PROJECTS[32]=neoforge_1_21_5"
+set "PROJECTS[33]=neoforge_1_21_6"
 
-set /a ARRAY_LENGTH=32
+set /a ARRAY_LENGTH=33
 
 cls
 

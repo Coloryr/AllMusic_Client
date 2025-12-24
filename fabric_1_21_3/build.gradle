@@ -37,6 +37,8 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+	include modImplementation("com.squareup.okio:okio-jvm:3.16.4")
+	include modImplementation("com.squareup.okhttp3:okhttp:5.3.2")
 }
 
 processResources {
