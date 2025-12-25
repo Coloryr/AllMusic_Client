@@ -34,4 +34,22 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
+    shadowImplementation("com.squareup.okio:okio-jvm:3.16.4")
+    shadowImplementation("com.squareup.okhttp3:okhttp:5.3.2")
+}
+
+shadowJar {
+    exclude 'META-INF/versions/9/org/sqlite/nativeimage/*'
+    exclude 'META-INF/versions/9/*'
+//    relocate 'okhttp3', 'com.coloryr.allmusic.server.lib.okhttp3'
+//    relocate 'okio', 'com.coloryr.allmusic.server.lib.okio'
+//    relocate 'kotlin', 'com.coloryr.allmusic.server.lib.kotlin'
+//    relocate 'org.intellij', 'com.coloryr.allmusic.server.lib.org.intellij'
+//    relocate 'org.jetbrains', 'com.coloryr.allmusic.server.lib.org.jetbrains'
+//    configurations = [project.configurations.shadow]
+//    archiveClassifier.set('')
+    dependencies {
+        include(dependency('com.squareup.okhttp3:okhttp:5.3.2'))
+        include(dependency('com.squareup.okio:okio-jvm:3.16.4'))
+    }
 }

@@ -145,6 +145,12 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    implementation('com.squareup.okhttp3:okhttp:5.3.2')
+    implementation('com.squareup.okio:okio-jvm:3.16.4')
+
+    jarJar(group: 'com.squareup.okhttp3', name: 'okhttp', version: '[5.3.2,6.0)')
+    jarJar(group: 'com.squareup.okio', name: 'okio-jvm', version: '[3.16.4,4.0)')
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

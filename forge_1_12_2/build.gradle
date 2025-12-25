@@ -154,6 +154,8 @@ dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
+
+    embed('com.squareup.okhttp3:okhttp:5.3.2')
 }
 
 apply from: 'gradle/scripts/dependencies.gradle'
@@ -212,6 +214,9 @@ processResources {
 }
 
 jar {
+    exclude 'META-INF/versions/9/org/sqlite/nativeimage/*'
+    exclude 'META-INF/versions/9/*'
+
     manifest {
         def attribute_map = [:]
         if (propertyBool('is_coremod')) {
