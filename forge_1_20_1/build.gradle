@@ -24,6 +24,8 @@ base {
     archivesName = file_name
 }
 
+jarJar.enable()
+
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -164,11 +166,6 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
-
-    maven {
-        name = 'Kotlin for Forge'
-        url = 'https://thedarkcolour.github.io/KotlinForForge/'
-    }
 }
 
 dependencies {
@@ -179,13 +176,9 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    implementation "thedarkcolour:kotlinforforge:$kff_version"
+    jarJar(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '[5.6,6.0)')
 
-    jarJar(group: 'com.squareup.okhttp3', name: 'okhttp', version: '[5.3.2,6.0)')
-    jarJar(group: 'com.squareup.okio', name: 'okio-jvm', version: '[3.16.4,4.0)')
-
-    implementation('com.squareup.okhttp3:okhttp:5.3.2')
-    implementation('com.squareup.okio:okio-jvm:3.16.4')
+    implementation('org.apache.httpcomponents.client5:httpclient5:5.6')
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

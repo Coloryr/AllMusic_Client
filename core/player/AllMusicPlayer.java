@@ -6,7 +6,14 @@ import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.flac.FlacDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.mp3.Mp3Decoder;
 import com.coloryr.allmusic.client.core.player.decoder.ogg.OggDecoder;
-import okhttp3.*;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import java.net.SocketTimeoutException;
 import org.lwjgl.BufferUtils;
@@ -27,10 +34,10 @@ public class AllMusicPlayer extends InputStream {
     private final Semaphore semaphore = new Semaphore(0);
     private final Semaphore semaphore1 = new Semaphore(0);
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
-    private OkHttpClient client;
+    private CloseableHttpClient client;
     private String url;
-    private Request request;
-    private Response response;
+    private HttpGet request;
+    private CloseableHttpResponse response;
     private InputStream content;
     private boolean isClose = false;
     private boolean reload = false;
@@ -48,8 +55,7 @@ public class AllMusicPlayer extends InputStream {
         try {
             this.source = source;
             new Thread(this::run, "allmusic_run").start();
-            client = new OkHttpClient.Builder()
-                    .build();
+            client = HttpClients.createDefault();
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
@@ -71,21 +77,18 @@ public class AllMusicPlayer extends InputStream {
         if (url.contains("https://music.163.com/song/media/outer/url?id=")
                 || url.contains("http://music.163.com/song/media/outer/url?id=")) {
             try {
-                Request request = new Request.Builder()
-                        .url(url)
-                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52")
-                        .header("Host", "music.163.com")
-                        .build();
-                Call call = client.newCall(request);
-                Response response = call.execute();
-                if (response.code() == 302) {
-                    String location = response.header("Location");
-                    if (location != null) {
-                        response.close();
-                        return location;
+                HttpGet request = new HttpGet(url);
+                request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
+                request.setHeader("Host", "music.163.com");
+                try (CloseableHttpResponse response = client.execute(request)) {
+                    int statusCode = response.getCode();
+                    if (statusCode == 302) {
+                        Header locationHeader = response.getFirstHeader("Location");
+                        if (locationHeader != null) {
+                            return locationHeader.getValue();
+                        }
                     }
                 }
-                response.close();
                 return url;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -116,20 +119,19 @@ public class AllMusicPlayer extends InputStream {
     public void connect() throws IOException {
         getClose();
         streamClose();
-        request = new Request.Builder()
-                .url(url)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52")
-                .header("Range", "bytes=" + local + "-")
-                .build();
-        response = client.newCall(request).execute();
-        if (!response.isSuccessful()) {
-            throw new IOException("Unexpected code " + response);
+        request = new HttpGet(url);
+        request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
+        request.setHeader("Range", "bytes=" + local + "-");
+        response = client.execute(request);
+        int statusCode = response.getCode();
+        if (statusCode < 200 || statusCode >= 300) {
+            throw new IOException("Unexpected code " + statusCode);
         }
-        ResponseBody body = response.body();
-        if (body == null) {
-            throw new IOException("Response body is null");
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            throw new IOException("Response entity is null");
         }
-        content = body.byteStream();
+        content = entity.getContent();
     }
 
     private void run() {
@@ -302,10 +304,13 @@ public class AllMusicPlayer extends InputStream {
     }
 
     private void getClose() {
-        // OkHttp doesn't have an abort method for requests, but we can cancel the call
-        // Since we store the response, we can close it
+        // Close the HTTP response if it exists
         if (response != null) {
-            response.close();
+            try {
+                response.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             response = null;
         }
         request = null;

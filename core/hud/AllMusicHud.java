@@ -2,10 +2,14 @@ package com.coloryr.allmusic.client.core.hud;
 
 import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.objs.SaveOBJ;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpEntityContainer;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -31,7 +35,7 @@ public class AllMusicHud {
     /**
      * 获取Http客户端
      */
-    private final OkHttpClient client;
+    private final HttpClient client;
     /**
      * 图片buffer
      */
@@ -51,10 +55,6 @@ public class AllMusicHud {
      * 是否为旋转图片
      */
     private boolean thisRoute;
-
-    //请求
-    private Response response;
-    private InputStream inputStream;
 
     /**
      * 旋转角度
@@ -86,7 +86,7 @@ public class AllMusicHud {
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
-        client = new OkHttpClient();
+        client = HttpClients.createDefault();
         byteBuffer = ByteBuffer.allocateDirect(size * size * 4);
         texture = AllMusicCore.bridge.genTexture(size);
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
@@ -113,25 +113,6 @@ public class AllMusicHud {
     public void close() {
         haveImg = false;
         info = list = lyric = "";
-        getClose();
-    }
-
-    /**
-     * 网络请求取消
-     */
-    private void getClose() {
-        try {
-            if (response != null) {
-                response.close();
-                response = null;
-            }
-            if (inputStream != null) {
-                inputStream.close();
-                inputStream = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -141,8 +122,6 @@ public class AllMusicHud {
     private void loadPic(String picUrl) {
         haveImg = false;
         try {
-            getClose();
-
             while (save == null || needUpload) {
                 Thread.sleep(200);
             }
@@ -150,12 +129,9 @@ public class AllMusicHud {
                 return;
             }
 
-            Request request = new Request.Builder()
-                    .url(picUrl)
-                    .build();
-            Call call = client.newCall(request);
-            response = call.execute();
-            inputStream = response.body().byteStream();
+            HttpGet request = new HttpGet(picUrl);
+            HttpEntity entity = client.execute(request, HttpEntityContainer::getEntity);
+            InputStream inputStream = entity.getContent();
             BufferedImage image = resizeImage(ImageIO.read(inputStream), size, size);
             int[] pixels = new int[size * size];
 
@@ -210,13 +186,15 @@ public class AllMusicHud {
 
                 formatAvatarImage.getRGB(0, 0, size,
                         size, pixels, 0, size);
-                getClose();
                 thisRoute = true;
             } else {
                 image.getRGB(0, 0, size, size, pixels, 0, size);
-                getClose();
                 thisRoute = false;
             }
+
+            inputStream.close();
+            entity.close();
+            request.clear();
 
             synchronized (byteBuffer) {
                 for (int h = 0; h < size; h++) {
