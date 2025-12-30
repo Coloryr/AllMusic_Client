@@ -4,7 +4,6 @@ import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
@@ -17,7 +16,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -52,8 +51,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
 
     public static final Logger LOGGER = LoggerFactory.getLogger("AllMusic Client");
 
-    public static final ResourceLocation channel =
-            ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
+    public static final Identifier channel = Identifier.fromNamespaceAndPath("allmusic", "channel");
 
     public static class Tex extends AbstractTexture {
         public Tex(GpuTexture tex, GpuTextureView view) {
@@ -216,7 +214,7 @@ public class AllMusic implements IPayloadHandler<PackData>, StreamCodec<Registry
     public Object genTexture(int size) {
         var device = RenderSystem.getDevice();
         var tex = device.createTexture("allmusic:gui_textured", 5, TextureFormat.RGBA8, size, size, 1, 1);
-        tex.setTextureFilter(FilterMode.NEAREST, false);
+//        tex.setTextureFilter(FilterMode.NEAREST, false);
 
         var view = device.createTextureView(tex);
 
