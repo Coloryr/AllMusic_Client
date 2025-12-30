@@ -177,6 +177,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     jarJar(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '[5.6,6.0)')
+    jarJar(group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: '[5.4,6.0)')
+    jarJar(group: 'org.apache.httpcomponents.core5', name: 'httpcore5-h2', version: '[5.4,6.0)')
 
     implementation('org.apache.httpcomponents.client5:httpclient5:5.6')
 

@@ -6,15 +6,16 @@ set "PROJECTS[0]=fabric_1_16_5"
 set "PROJECTS[1]=fabric_1_20_1"
 set "PROJECTS[2]=fabric_1_21"
 set "PROJECTS[3]=fabric_1_21_6"
-set "PROJECTS[4]=fabric_26_1"
-set "PROJECTS[5]=forge_1_7_10"
-set "PROJECTS[6]=forge_1_12_2"
-set "PROJECTS[7]=forge_1_16_5"
-set "PROJECTS[8]=forge_1_20_1"
-set "PROJECTS[9]=neoforge_1_21"
-set "PROJECTS[10]=neoforge_1_21_6"
+set "PROJECTS[4]=fabric_1_21_11"
+set "PROJECTS[5]=fabric_26_1"
+set "PROJECTS[6]=forge_1_7_10"
+set "PROJECTS[7]=forge_1_12_2"
+set "PROJECTS[8]=forge_1_16_5"
+set "PROJECTS[9]=forge_1_20_1"
+set "PROJECTS[10]=neoforge_1_21"
+set "PROJECTS[11]=neoforge_1_21_6"
 
-set /a ARRAY_LENGTH=10
+set /a ARRAY_LENGTH=11
 
 cls
 
