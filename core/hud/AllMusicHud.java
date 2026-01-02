@@ -130,9 +130,11 @@ public class AllMusicHud {
             }
 
             HttpGet request = new HttpGet(picUrl);
-            HttpEntity entity = client.execute(request, HttpEntityContainer::getEntity);
-            InputStream inputStream = entity.getContent();
-            BufferedImage image = resizeImage(ImageIO.read(inputStream), size, size);
+            BufferedImage image = client.execute(request, (response -> {
+                InputStream inputStream = response.getEntity().getContent();
+                return resizeImage(ImageIO.read(inputStream), size, size);
+            }));
+
             int[] pixels = new int[size * size];
 
             //图片旋转
@@ -192,8 +194,6 @@ public class AllMusicHud {
                 thisRoute = false;
             }
 
-            inputStream.close();
-            entity.close();
             request.clear();
 
             synchronized (byteBuffer) {
