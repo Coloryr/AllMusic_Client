@@ -16,6 +16,7 @@ set "PROJECTS[10]=neoforge_1_21"
 set "PROJECTS[11]=neoforge_1_21_6"
 
 set /a ARRAY_LENGTH=11
+set /a LENGTH="%ARRAY_LENGTH%"+1
 
 cls
 
@@ -54,8 +55,8 @@ if not "%SELECTION%" == "" (
         pause
         goto :menu
     )
-    if %SELECTION% GEQ %ARRAY_LENGTH%+1 (
-        echo 错误：输入超过最大索引%ARRAY_LENGTH%
+    if %SELECTION% GEQ %LENGTH% (
+        echo 错误：输入超过最大索引%LENGTH%
         pause
         goto :menu
     )
