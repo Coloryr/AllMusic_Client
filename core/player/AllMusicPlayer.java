@@ -211,11 +211,7 @@ public class AllMusicPlayer extends InputStream {
                                     .put(output.buff, 0, output.len);
                             ((Buffer) byteBuffer).flip();
                             queue.add(byteBuffer);
-
-                            AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
                         }
-
-                        AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
 
                         if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED) > 0) {
                             int temp = AL10.alSourceUnqueueBuffers(index);
@@ -234,7 +230,6 @@ public class AllMusicPlayer extends InputStream {
                 streamClose();
                 decodeClose();
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
-                    AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
                     Thread.sleep(50);
                 }
                 if (!reload) {
@@ -271,7 +266,6 @@ public class AllMusicPlayer extends InputStream {
             semaphore1.release();
         }
         if (isClose) {
-            queue.clear();
             return;
         }
         while (!queue.isEmpty()) {
