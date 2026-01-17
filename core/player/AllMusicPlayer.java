@@ -15,6 +15,7 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 
+import java.io.BufferedInputStream;
 import java.net.SocketTimeoutException;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
@@ -38,7 +39,7 @@ public class AllMusicPlayer extends InputStream {
     private String url;
     private HttpGet request;
     private CloseableHttpResponse response;
-    private InputStream content;
+    private BufferedInputStream content;
     private boolean isClose = false;
     private boolean reload = false;
     private IDecoder decoder;
@@ -131,7 +132,7 @@ public class AllMusicPlayer extends InputStream {
         if (entity == null) {
             throw new IOException("Response entity is null");
         }
-        content = entity.getContent();
+        content = new BufferedInputStream(entity.getContent());
     }
 
     private void run() {
@@ -164,20 +165,24 @@ public class AllMusicPlayer extends InputStream {
                     continue;
                 }
 
-                decoder = new FlacDecoder(this);
-                if (!decoder.set()) {
-                    local = 0;
-                    connect();
+                byte[] head = new byte[4];
+                content.mark(4);
+                content.read(head);
+                content.reset();
+
+                if (head[0] == 'f' && head[1] == 'L' && head[2] == 'a' && head[3] == 'C') {
+                    decoder = new FlacDecoder(this);
+                } else if (head[0] == 'I' && head[1] == 'D' && head[2] == '3') {
+                    decoder = new Mp3Decoder(this);
+                } else if (head[0] == (byte) 0xFF && head[1] == (byte) 0xFB) {
+                    decoder = new Mp3Decoder(this);
+                } else {
                     decoder = new OggDecoder(this);
-                    if (!decoder.set()) {
-                        local = 0;
-                        connect();
-                        decoder = new Mp3Decoder(this);
-                        if (!decoder.set()) {
-                            AllMusicCore.bridge.sendMessage("不支持这样的文件播放");
-                            continue;
-                        }
-                    }
+                }
+
+                if (!decoder.set()) {
+                    AllMusicCore.bridge.sendMessage("不支持这样的文件播放");
+                    continue;
                 }
 
                 isPlay = true;
