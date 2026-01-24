@@ -265,6 +265,9 @@ public class AllMusicPlayer extends InputStream {
             wait = false;
             semaphore1.release();
         }
+
+        AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
+
         if (isClose) {
             return;
         }
