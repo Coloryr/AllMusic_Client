@@ -1,7 +1,9 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.codec.MusicPack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -131,21 +133,16 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         AllMusicCore.hudUpdate();
     }
 
-    private static String readString(PacketByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
+    public static class MusicCodec implements CustomPayload {
+        public static final Id<MusicCodec> ID = new CustomPayload.Id<>(AllMusic.ID);
+        public static final PacketCodec<PacketByteBuf, MusicCodec> CODEC = PacketCodec.of((value, buf) -> {
+        }, buffer -> new MusicCodec(MusicPacketCodec.decode(buffer)));
 
-        return new String(temp, StandardCharsets.UTF_8);
-    }
+        private final MusicPack payload;
 
-    public record PackPayload() implements CustomPayload {
-        public static final Id<PackPayload> ID = new CustomPayload.Id<>(AllMusic.ID);
-        public static final PacketCodec<PacketByteBuf, PackPayload> CODEC = PacketCodec.of((value, buf) -> {
-        }, buffer -> {
-            AllMusicCore.packRead(buffer);
-            return new PackPayload();
-        });
+        public MusicCodec(MusicPack payload) {
+            this.payload = payload;
+        }
 
         @Override
         public Id<? extends CustomPayload> getId() {
@@ -155,9 +152,9 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
 
     @Override
     public void onInitializeClient() {
-        PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
-        ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
-
+        PayloadTypeRegistry.playS2C().register(MusicCodec.ID, MusicCodec.CODEC);
+        ClientPlayNetworking.registerGlobalReceiver(MusicCodec.ID, (pack, handler) -> {
+            AllMusicCore.packDo(pack.payload.type, pack.payload.data, pack.payload.data1);
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);

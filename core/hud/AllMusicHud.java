@@ -1,15 +1,11 @@
 package com.coloryr.allmusic.client.core.hud;
 
 import com.coloryr.allmusic.client.core.AllMusicCore;
-import com.coloryr.allmusic.client.core.objs.SaveOBJ;
+import com.coloryr.allmusic.codec.HudDirType;
+import com.coloryr.allmusic.codec.HudPosObj;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpEntityContainer;
-import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -45,7 +41,7 @@ public class AllMusicHud {
     public String info = "";
     public String list = "";
     public String lyric = "";
-    public SaveOBJ save;
+    public HudPosObj save;
 
     /**
      * 是否有图片
@@ -261,7 +257,7 @@ public class AllMusicHud {
      * 设置位置信息
      * @param save 位置信息
      */
-    public void setPos(SaveOBJ save) {
+    public void setPos(HudPosObj save) {
         this.save = save;
     }
 
@@ -270,7 +266,7 @@ public class AllMusicHud {
      */
     public void update() {
         //复制一份防止突然替换
-        SaveOBJ save = this.save;
+        HudPosObj save = this.save;
         if (save == null) return;
         if (save.info.enable && !info.isEmpty()) {
             int offset = 0;

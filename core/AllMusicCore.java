@@ -1,9 +1,10 @@
 package com.coloryr.allmusic.client.core;
 
 import com.coloryr.allmusic.client.core.hud.AllMusicHud;
-import com.coloryr.allmusic.client.core.objs.SaveOBJ;
 import com.coloryr.allmusic.client.core.objs.ConfigObj;
 import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
+import com.coloryr.allmusic.codec.CommandType;
+import com.coloryr.allmusic.codec.HudPosObj;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
@@ -232,7 +233,7 @@ public class AllMusicCore {
                 player.set(data1);
                 break;
             case HUD_DATA:
-                hud.setPos(gson.fromJson(data, SaveOBJ.class));
+                hud.setPos(gson.fromJson(data, HudPosObj.class));
                 break;
         }
     }

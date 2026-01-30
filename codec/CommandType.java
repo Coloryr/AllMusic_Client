@@ -1,4 +1,4 @@
-package com.coloryr.allmusic.client.core;
+package com.coloryr.allmusic.codec;
 
 public enum CommandType {
     LYRIC,

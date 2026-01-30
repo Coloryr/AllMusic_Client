@@ -11,6 +11,8 @@ forge_1_7_10 forge_1_12_2 forge_1_16_5 forge_1_20_1 ^
 neoforge_1_21 neoforge_1_21_6 neoforge_1_21_11
 
 for %%i in (%array%) do (
+    if not exist "%%i\src\main\java\com\coloryr\allmusic\codec" mklink /j "%%i\src\main\java\com\coloryr\allmusic\codec" "codec"
+    if not exist "%%i\src\main\java\com\coloryr\allmusic\buffercodec" mklink /j "%%i\src\main\java\com\coloryr\allmusic\buffercodec" "buffercodec"
     if not exist "%%i\src\main\java\com\coloryr\allmusic\client\core" mklink /j "%%i\src\main\java\com\coloryr\allmusic\client\core" "core"
     if not exist "%%i\src\main\resources\com\coloryr\allmusic\client\core\player\decoder" mkdir "%%i\src\main\resources\com\coloryr\allmusic\client\core\player\decoder"
     if not exist "%%i\src\main\resources\com\coloryr\allmusic\client\core\player\decoder\mp3" mklink /j "%%i\src\main\resources\com\coloryr\allmusic\client\core\player\decoder\mp3" "mp3"
