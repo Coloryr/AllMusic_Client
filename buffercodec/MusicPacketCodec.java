@@ -4,11 +4,12 @@ import com.coloryr.allmusic.codec.CommandType;
 import com.coloryr.allmusic.codec.MusicPack;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.PacketByteBuf;
 
 import java.nio.charset.StandardCharsets;
 
 public class MusicPacketCodec {
+    public static boolean isRegisterCodec;
+
     public static final CommandType[] types = CommandType.values();
 
     public static ByteBuf pack(CommandType type, String data, int data1) {
@@ -86,7 +87,7 @@ public class MusicPacketCodec {
         return new MusicPack(type1, data, data1);
     }
 
-    public static void pack(PacketByteBuf buf, MusicPack value) {
+    public static void pack(ByteBuf buf, MusicPack value) {
         pack(buf, value.type, value.data, value.data1);
     }
 }

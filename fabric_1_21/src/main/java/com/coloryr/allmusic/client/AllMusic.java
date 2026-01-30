@@ -1,8 +1,9 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
-import com.coloryr.allmusic.client.core.CommandType;
+import com.coloryr.allmusic.codec.MusicPack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -133,23 +134,9 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         return new String(temp, StandardCharsets.UTF_8);
     }
 
-    public record PackPayload(CommandType type, String data, int data1) implements CustomPayload {
+    public record PackPayload(MusicPack pack) implements CustomPayload {
         public static final Id<PackPayload> ID = new CustomPayload.Id<>(AllMusic.ID);
-        public static final PacketCodec<PacketByteBuf, PackPayload> CODEC = PacketCodec.of((value, buf) -> {}, buffer -> {
-            byte type = buffer.readByte();
-            if (type >= AllMusicCore.types.length || type < 0) {
-                return null;
-            }
-            CommandType type1 = CommandType.values()[type];
-            PackPayload payload = new PackPayload(CommandType.CLEAR, null, 0);
-            switch (type1) {
-                case LYRIC, INFO, LIST, PLAY, IMG, HUD_DATA -> payload = new PackPayload(type1, readString(buffer), 0);
-                case STOP, CLEAR -> payload = new PackPayload(type1, null, 0);
-                case POS -> payload = new PackPayload(type1, null, buffer.readInt());
-            }
-            buffer.clear();
-            return payload;
-        });
+        public static final PacketCodec<PacketByteBuf, PackPayload> CODEC = PacketCodec.of((value, buf) -> MusicPacketCodec.pack(buf, value.pack), buffer -> new PackPayload(MusicPacketCodec.decode(buffer)));
 
         @Override
         public Id<? extends CustomPayload> getId() {
@@ -159,16 +146,19 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
 
     @Override
     public void onInitializeClient() {
-        PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
+        if (!MusicPacketCodec.isRegisterCodec) {
+            PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
+            MusicPacketCodec.isRegisterCodec = true;
+        }
         ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
             try {
-                AllMusicCore.packDo(pack.type, pack.data, pack.data1);
+                AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
-        RenderSystem.recordRenderCall(()-> AllMusicCore.glInit());
+        RenderSystem.recordRenderCall(() -> AllMusicCore.glInit());
     }
 }
