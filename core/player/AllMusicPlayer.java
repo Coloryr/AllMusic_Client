@@ -51,6 +51,7 @@ public class AllMusicPlayer extends InputStream {
     private int frequency;
     private int channels;
     private IntBuffer source;
+    private float lastVolume;
 
     public AllMusicPlayer(IntBuffer source) {
         try {
@@ -266,10 +267,15 @@ public class AllMusicPlayer extends InputStream {
             semaphore1.release();
         }
 
-        AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
-
         if (isClose) {
             return;
+        }
+        if (isPlay) {
+            float temp = AllMusicCore.bridge.getVolume();
+            if (lastVolume != temp) {
+                lastVolume = temp;
+                AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
+            }
         }
         while (!queue.isEmpty()) {
             count++;
@@ -285,7 +291,6 @@ public class AllMusicPlayer extends InputStream {
                     channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
                     byteBuffer,
                     frequency);
-            AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
 
             AL10.alSourceQueueBuffers(index, intBuffer);
             if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {

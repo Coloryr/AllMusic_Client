@@ -10,7 +10,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -121,14 +120,6 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static void update(DrawContext draw) {
         context = draw;
         AllMusicCore.hudUpdate();
-    }
-
-    private static String readString(PacketByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
     }
 
     @Override
