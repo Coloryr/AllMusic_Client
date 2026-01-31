@@ -81,6 +81,7 @@ public class MusicPacketCodec {
                 data1 = buf.readInt();
                 break;
         }
+        buf.clear();
 
         return new MusicPack(type1, data, data1);
     }
