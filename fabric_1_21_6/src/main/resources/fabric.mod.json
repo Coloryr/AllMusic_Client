@@ -18,6 +18,9 @@
 
 	"environment": "*",
 	"entrypoints": {
+		"main": [
+			"com.coloryr.allmusic.comm.AllMusicInit"
+		],
 		"client" : [
 			"com.coloryr.allmusic.client.AllMusic"
 		]

@@ -24,7 +24,14 @@ public class AllMusicCore {
     public static final CommandType[] types = CommandType.values();
 
     private static final Gson gson = new Gson();
-
+    /**
+     * 与游戏链接的桥
+     */
+    public static AllMusicBridge bridge;
+    /**
+     * 配置文件
+     */
+    public static ConfigObj config;
     /**
      * 音频解码器与播放器
      */
@@ -33,15 +40,6 @@ public class AllMusicCore {
      * 界面显示内容
      */
     private static AllMusicHud hud;
-    /**
-     * 与游戏链接的桥
-     */
-    public static AllMusicBridge bridge;
-
-    /**
-     * 配置文件
-     */
-    public static ConfigObj config;
 
     /**
      * 更新音频缓存
@@ -54,6 +52,7 @@ public class AllMusicCore {
 
     /**
      * 是否正在播放音乐
+     *
      * @return 是否在播放
      */
     public static boolean isPlay() {
@@ -103,7 +102,8 @@ public class AllMusicCore {
 
     /**
      * 初始化核心
-     * @param file 配置文件
+     *
+     * @param file   配置文件
      * @param bridge 游戏桥
      */
     public static void init(Path file, AllMusicBridge bridge) {
@@ -155,6 +155,7 @@ public class AllMusicCore {
 
     /**
      * 从数据包中读文字
+     *
      * @param buf 数据包
      * @return 文字
      */
@@ -168,6 +169,7 @@ public class AllMusicCore {
 
     /**
      * 读取数据包
+     *
      * @param buffer 数据包
      */
     public static void packRead(ByteBuf buffer) {
@@ -197,8 +199,9 @@ public class AllMusicCore {
 
     /**
      * 解析数据包
-     * @param type 命令
-     * @param data 数据
+     *
+     * @param type  命令
+     * @param data  数据
      * @param data1 数据
      */
     public static void packDo(CommandType type, String data, int data1) {
@@ -240,6 +243,7 @@ public class AllMusicCore {
 
     /**
      * 创建GL材质
+     *
      * @param size 大小
      * @return 材质号
      */
@@ -259,8 +263,9 @@ public class AllMusicCore {
 
     /**
      * 更新GL材质
-     * @param id 材质id
-     * @param size 大小
+     *
+     * @param id         材质id
+     * @param size       大小
      * @param byteBuffer 数据
      */
     public static void updateGLTexture(int id, int size, ByteBuffer byteBuffer) {

@@ -4,8 +4,14 @@ import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
 import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
-import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jogg.*;
-import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jorbis.*;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jogg.Packet;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jogg.Page;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jogg.StreamState;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jogg.SyncState;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jorbis.Block;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jorbis.Comment;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jorbis.DspState;
+import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.jorbis.Info;
 import com.coloryr.allmusic.client.core.player.decoder.ogg.jcraft.oggdecoder.OggData;
 
 import java.io.IOException;

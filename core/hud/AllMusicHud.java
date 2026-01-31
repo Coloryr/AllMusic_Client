@@ -6,12 +6,17 @@ import com.coloryr.allmusic.codec.HudPosObj;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -36,13 +41,19 @@ public class AllMusicHud {
      * 图片buffer
      */
     private final ByteBuffer byteBuffer;
-
+    /**
+     * 游戏内贴图
+     */
+    private final Object texture;
+    /**
+     * 图片大小
+     */
+    private final int size;
     //显示信息
     public String info = "";
     public String list = "";
     public String lyric = "";
     public HudPosObj save;
-
     /**
      * 是否有图片
      */
@@ -51,13 +62,11 @@ public class AllMusicHud {
      * 是否为旋转图片
      */
     private boolean thisRoute;
-
     /**
      * 旋转角度
      */
     private int ang = 0;
     private int count = 0;
-
     /**
      * 是否显示
      */
@@ -67,18 +76,9 @@ public class AllMusicHud {
      */
     private boolean needUpload;
 
-    /**
-     * 游戏内贴图
-     */
-    private final Object texture;
-    /**
-     * 图片大小
-     */
-    private final int size;
-    
     public AllMusicHud(int size) {
         this.size = size;
-        
+
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
@@ -87,6 +87,25 @@ public class AllMusicHud {
         texture = AllMusicCore.bridge.genTexture(size);
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::picRotateTick, 0, 1, TimeUnit.MILLISECONDS);
+
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+
+        LoggerConfig loggerConfig = config.getLoggerConfig("org.apache.hc.client5");
+        loggerConfig.setLevel(Level.INFO);
+
+        LoggerConfig coreConfig = config.getLoggerConfig("org.apache.hc.core5");
+        coreConfig.setLevel(Level.INFO);
+
+        ctx.updateLoggers(config);
+    }
+
+    public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        outputImage.getGraphics()
+                .drawImage(resultingImage, 0, 0, null);
+        return outputImage;
     }
 
     /**
@@ -113,6 +132,7 @@ public class AllMusicHud {
 
     /**
      * 加载图片
+     *
      * @param picUrl 加载地址
      */
     private void loadPic(String picUrl) {
@@ -246,6 +266,7 @@ public class AllMusicHud {
 
     /**
      * 设置下一张图片
+     *
      * @param picUrl 图片链接
      */
     public void setImg(String picUrl) {
@@ -255,6 +276,7 @@ public class AllMusicHud {
 
     /**
      * 设置位置信息
+     *
      * @param save 位置信息
      */
     public void setPos(HudPosObj save) {
@@ -314,11 +336,12 @@ public class AllMusicHud {
 
     /**
      * 绘制图片
+     *
      * @param size 渲染大小
-     * @param x X坐标
-     * @param y Y坐标
-     * @param dir 对齐方式
-     * @param ang 旋转角度
+     * @param x    X坐标
+     * @param y    Y坐标
+     * @param dir  对齐方式
+     * @param ang  旋转角度
      */
     private void drawPic(int size, int x, int y, HudDirType dir, int ang) {
         if (dir == null) {
@@ -368,11 +391,12 @@ public class AllMusicHud {
 
     /**
      * 显示文字内容
-     * @param item 内容
-     * @param x X坐标
-     * @param y Y坐标
-     * @param dir 对齐方式
-     * @param color 显示颜色
+     *
+     * @param item   内容
+     * @param x      X坐标
+     * @param y      Y坐标
+     * @param dir    对齐方式
+     * @param color  显示颜色
      * @param shadow 是否带阴影
      */
     private void drawText(String item, int x, int y, HudDirType dir, int color, boolean shadow) {
@@ -417,13 +441,5 @@ public class AllMusicHud {
         }
 
         AllMusicCore.bridge.drawText(item, x1, y1, color, shadow);
-    }
-
-    public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
-        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
-        outputImage.getGraphics()
-                .drawImage(resultingImage, 0, 0, null);
-        return outputImage;
     }
 }

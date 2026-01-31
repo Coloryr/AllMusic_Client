@@ -1,9 +1,8 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
-import com.coloryr.allmusic.codec.MusicPack;
+import com.coloryr.allmusic.comm.MusicCodec;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -11,17 +10,12 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.GlTexture;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -30,20 +24,15 @@ import org.apache.logging.log4j.Logger;
 import org.joml.Matrix3x2fStack;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public class AllMusic implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = Identifier.of("allmusic", "channel");
-
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
     private static DrawContext context;
 
-    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
-
-    public static class Tex extends AbstractTexture {
-        public Tex(GpuTexture tex, GpuTextureView view) {
-            this.glTexture = tex;
-            this.glTextureView = view;
-        }
+    public static void update(DrawContext draw) {
+        context = draw;
+        AllMusicCore.hudUpdate();
     }
 
     public Object genTexture(int size) {
@@ -128,35 +117,19 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
     }
 
-    public static void update(DrawContext draw) {
-        context = draw;
-        AllMusicCore.hudUpdate();
-    }
-
-    public static class MusicCodec implements CustomPayload {
-        public static final Id<MusicCodec> ID = new CustomPayload.Id<>(AllMusic.ID);
-        public static final PacketCodec<PacketByteBuf, MusicCodec> CODEC = PacketCodec.of((value, buf) -> {
-        }, buffer -> new MusicCodec(MusicPacketCodec.decode(buffer)));
-
-        private final MusicPack payload;
-
-        public MusicCodec(MusicPack payload) {
-            this.payload = payload;
-        }
-
-        @Override
-        public Id<? extends CustomPayload> getId() {
-            return ID;
-        }
-    }
-
     @Override
     public void onInitializeClient() {
-        PayloadTypeRegistry.playS2C().register(MusicCodec.ID, MusicCodec.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(MusicCodec.ID, (pack, handler) -> {
-            AllMusicCore.packDo(pack.payload.type, pack.payload.data, pack.payload.data1);
+            AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
+    }
+
+    public static class Tex extends AbstractTexture {
+        public Tex(GpuTexture tex, GpuTextureView view) {
+            this.glTexture = tex;
+            this.glTextureView = view;
+        }
     }
 }
