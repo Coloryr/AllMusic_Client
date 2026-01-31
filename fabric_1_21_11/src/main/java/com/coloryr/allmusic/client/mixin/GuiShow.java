@@ -1,6 +1,6 @@
 package com.coloryr.allmusic.client.mixin;
 
-import com.coloryr.allmusic.client.AllMusic;
+import com.coloryr.allmusic.client.AllMusicClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class GuiShow {
     @Inject(method = {"renderChat"}, at = {@At(value = "RETURN")})
     public void guiShow(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
-        AllMusic.update(context);
+        AllMusicClient.update(context);
     }
 }

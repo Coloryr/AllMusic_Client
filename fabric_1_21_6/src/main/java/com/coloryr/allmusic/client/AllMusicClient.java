@@ -25,7 +25,7 @@ import org.joml.Matrix3x2fStack;
 
 import java.nio.ByteBuffer;
 
-public class AllMusic implements ClientModInitializer, AllMusicBridge {
+public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = Identifier.of("allmusic", "channel");
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
     private static DrawContext context;

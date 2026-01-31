@@ -8,6 +8,11 @@ import com.coloryr.allmusic.codec.HudPosObj;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -98,6 +103,17 @@ public class AllMusicCore {
 
         AllMusicCore.bridge = bridge;
         player = new AllMusicPlayer(source);
+
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+
+        LoggerConfig loggerConfig = config.getLoggerConfig("org.apache.hc.client5");
+        loggerConfig.setLevel(Level.INFO);
+
+        LoggerConfig coreConfig = config.getLoggerConfig("org.apache.hc.core5");
+        coreConfig.setLevel(Level.INFO);
+
+        ctx.updateLoggers(config);
     }
 
     /**

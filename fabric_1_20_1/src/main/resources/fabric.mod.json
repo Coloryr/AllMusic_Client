@@ -19,7 +19,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"client": [
-			"com.coloryr.allmusic.client.AllMusic"
+          "com.coloryr.allmusic.client.AllMusicClient"
 		]
 	},
 	"mixins": [

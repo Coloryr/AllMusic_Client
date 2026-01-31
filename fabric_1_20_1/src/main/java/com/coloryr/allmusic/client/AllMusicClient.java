@@ -1,21 +1,15 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
-import com.coloryr.allmusic.codec.MusicPack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -25,10 +19,9 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
-public class AllMusic implements ClientModInitializer, AllMusicBridge {
-    public static final Identifier ID = Identifier.of("allmusic", "channel");
+public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
+    public static final Identifier ID = new Identifier("allmusic", "channel");
     private static DrawContext context;
 
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
@@ -92,11 +85,13 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         float v1 = 1;
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        BufferBuilder bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).texture(u0, v1);
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).texture(u1, v1);
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).texture(u1, v0);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).texture(u0, v0);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).texture(u0, v1).next();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).texture(u1, v1).next();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).texture(u1, v0).next();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).texture(u0, v0).next();
+
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
     }
 
@@ -126,39 +121,17 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         AllMusicCore.hudUpdate();
     }
 
-    private static String readString(PacketByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
-    public record PackPayload(MusicPack pack) implements CustomPayload {
-        public static final Id<PackPayload> ID = new CustomPayload.Id<>(AllMusic.ID);
-        public static final PacketCodec<PacketByteBuf, PackPayload> CODEC = PacketCodec.of((value, buf) -> MusicPacketCodec.pack(buf, value.pack), buffer -> new PackPayload(MusicPacketCodec.decode(buffer)));
-
-        @Override
-        public Id<? extends CustomPayload> getId() {
-            return ID;
-        }
-    }
-
     @Override
     public void onInitializeClient() {
-        if (!MusicPacketCodec.isRegisterCodec) {
-            PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
-            MusicPacketCodec.isRegisterCodec = true;
-        }
-        ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
+        ClientPlayNetworking.registerGlobalReceiver(ID, (client, handler, buffer, responseSender) -> {
             try {
-                AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
+                AllMusicCore.packRead(buffer);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
-        RenderSystem.recordRenderCall(() -> AllMusicCore.glInit());
+        RenderSystem.recordRenderCall(AllMusicCore::glInit);
     }
 }

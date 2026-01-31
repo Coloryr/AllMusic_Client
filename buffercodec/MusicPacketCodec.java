@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 
 public class MusicPacketCodec {
     public static final CommandType[] types = CommandType.values();
-    public static boolean isRegisterCodec;
 
     public static ByteBuf pack(CommandType type, String data, int data1) {
         ByteBuf buf = Unpooled.buffer(0);

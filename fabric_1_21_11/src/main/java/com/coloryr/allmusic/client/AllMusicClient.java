@@ -2,6 +2,7 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.comm.MusicCodec;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -9,7 +10,6 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,8 +17,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +26,7 @@ import org.joml.Matrix3x2fStack;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-public class AllMusic implements ClientModInitializer, AllMusicBridge {
+public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = Identifier.fromNamespaceAndPath("allmusic", "channel");
 
     private static GuiGraphics context;
@@ -137,25 +135,10 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         return new String(temp, StandardCharsets.UTF_8);
     }
 
-    public record PackPayload() implements CustomPacketPayload {
-        public static final Type<PackPayload> ID = new CustomPacketPayload.Type<>(AllMusic.ID);
-        public static final StreamCodec<FriendlyByteBuf, PackPayload> CODEC = StreamCodec.of((value, buf) -> {
-        }, buffer -> {
-            AllMusicCore.packRead(buffer);
-            return new PackPayload();
-        });
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return ID;
-        }
-    }
-
     @Override
     public void onInitializeClient() {
-        PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
-        ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
-
+        ClientPlayNetworking.registerGlobalReceiver(MusicCodec.ID, (pack, handler) -> {
+            AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);

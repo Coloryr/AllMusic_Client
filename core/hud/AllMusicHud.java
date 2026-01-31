@@ -6,11 +6,6 @@ import com.coloryr.allmusic.codec.HudPosObj;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -87,17 +82,6 @@ public class AllMusicHud {
         texture = AllMusicCore.bridge.genTexture(size);
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::picRotateTick, 0, 1, TimeUnit.MILLISECONDS);
-
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        Configuration config = ctx.getConfiguration();
-
-        LoggerConfig loggerConfig = config.getLoggerConfig("org.apache.hc.client5");
-        loggerConfig.setLevel(Level.INFO);
-
-        LoggerConfig coreConfig = config.getLoggerConfig("org.apache.hc.core5");
-        coreConfig.setLevel(Level.INFO);
-
-        ctx.updateLoggers(config);
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {

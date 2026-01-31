@@ -22,7 +22,7 @@
 			"com.coloryr.allmusic.comm.AllMusicInit"
 		],
 		"client" : [
-			"com.coloryr.allmusic.client.AllMusic"
+			"com.coloryr.allmusic.client.AllMusicClient"
 		]
 	},
 	"mixins": [
