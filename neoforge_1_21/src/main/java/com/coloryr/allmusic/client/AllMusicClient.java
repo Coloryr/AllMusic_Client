@@ -45,7 +45,7 @@ import org.joml.Quaternionf;
 
 import java.nio.ByteBuffer;
 
-@EventBusSubscriber(modid = AllMusicInit.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = AllMusicInit.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBridge {
     private static GuiGraphics gui;
 
@@ -62,44 +62,48 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
     }
 
     @SubscribeEvent
-    public static void onSound(final PlaySoundSourceEvent e) {
-        if (!AllMusicCore.isPlay()) return;
-        SoundSource data = e.getSound().getSource();
-        switch (data) {
-            case MUSIC, RECORDS -> e.getChannel().stop();
-        }
-    }
-
-    @SubscribeEvent
-    public static void onSound(final PlayStreamingSourceEvent e) {
-        if (!AllMusicCore.isPlay()) return;
-        SoundSource data = e.getSound().getSource();
-        switch (data) {
-            case MUSIC, RECORDS -> e.getChannel().stop();
-        }
-    }
-
-    @SubscribeEvent
-    public static void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
-        AllMusicCore.onServerQuit();
-    }
-
-    @SubscribeEvent
     public static void onLoad(final SoundEngineLoadEvent e) {
         AllMusicCore.reload();
     }
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiLayerEvent.Post e) {
-        if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
-            gui = e.getGuiGraphics();
-            AllMusicCore.hudUpdate();
+    @EventBusSubscriber(modid = AllMusicInit.MODID, value = Dist.CLIENT)
+    public static class MusicEvent
+    {
+        @SubscribeEvent
+        public static void onTick(ClientTickEvent.Post event) {
+            AllMusicCore.tick();
         }
-    }
 
-    @SubscribeEvent
-    public static void onTick(ClientTickEvent.Post event) {
-        AllMusicCore.tick();
+        @SubscribeEvent
+        public static void onSound(final PlaySoundSourceEvent e) {
+            if (!AllMusicCore.isPlay()) return;
+            SoundSource data = e.getSound().getSource();
+            switch (data) {
+                case MUSIC, RECORDS -> e.getChannel().stop();
+            }
+        }
+
+        @SubscribeEvent
+        public static void onSound(final PlayStreamingSourceEvent e) {
+            if (!AllMusicCore.isPlay()) return;
+            SoundSource data = e.getSound().getSource();
+            switch (data) {
+                case MUSIC, RECORDS -> e.getChannel().stop();
+            }
+        }
+
+        @SubscribeEvent
+        public static void onServerQuit(final ClientPlayerNetworkEvent.LoggingOut e) {
+            AllMusicCore.onServerQuit();
+        }
+
+        @SubscribeEvent
+        public static void onRenderOverlay(RenderGuiLayerEvent.Post e) {
+            if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
+                gui = e.getGuiGraphics();
+                AllMusicCore.hudUpdate();
+            }
+        }
     }
 
     public void sendMessage(String data) {
