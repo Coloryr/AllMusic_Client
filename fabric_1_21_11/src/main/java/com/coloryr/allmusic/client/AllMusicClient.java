@@ -28,16 +28,20 @@ import java.nio.charset.StandardCharsets;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = Identifier.fromNamespaceAndPath("allmusic", "channel");
-
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
     private static GuiGraphics context;
 
-    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+    public static void update(GuiGraphics draw) {
+        context = draw;
+        AllMusicCore.hudUpdate();
+    }
 
-    public static class Tex extends AbstractTexture {
-        public Tex(GpuTexture tex, GpuTextureView view) {
-            this.texture = tex;
-            this.textureView = view;
-        }
+    private static String readString(FriendlyByteBuf buf) {
+        int size = buf.readInt();
+        byte[] temp = new byte[size];
+        buf.readBytes(temp);
+
+        return new String(temp, StandardCharsets.UTF_8);
     }
 
     public Object genTexture(int size) {
@@ -122,19 +126,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
     }
 
-    public static void update(GuiGraphics draw) {
-        context = draw;
-        AllMusicCore.hudUpdate();
-    }
-
-    private static String readString(FriendlyByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(MusicCodec.ID, (pack, handler) -> {
@@ -142,5 +133,12 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
+    }
+
+    public static class Tex extends AbstractTexture {
+        public Tex(GpuTexture tex, GpuTextureView view) {
+            this.texture = tex;
+            this.textureView = view;
+        }
     }
 }

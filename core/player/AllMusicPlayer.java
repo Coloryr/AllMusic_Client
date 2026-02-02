@@ -4,6 +4,7 @@ import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.flac.FlacDecoder;
+import com.coloryr.allmusic.client.core.player.decoder.m4a.M4ADecoder;
 import com.coloryr.allmusic.client.core.player.decoder.mp3.Mp3Decoder;
 import com.coloryr.allmusic.client.core.player.decoder.ogg.OggDecoder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -170,6 +171,8 @@ public class AllMusicPlayer extends InputStream {
 
                 if (head[0] == 'f' && head[1] == 'L' && head[2] == 'a' && head[3] == 'C') {
                     decoder = new FlacDecoder(this);
+                } else if (head[0] == 0 && head[1] == 0 && head[2] == 0 && head[3] == 0x1c) {
+                    decoder = new M4ADecoder(this);
                 } else if (head[0] == 'I' && head[1] == 'D' && head[2] == '3') {
                     decoder = new Mp3Decoder(this);
                 } else if (head[0] == (byte) 0xFF && head[1] == (byte) 0xFB) {
