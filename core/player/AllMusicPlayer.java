@@ -301,6 +301,7 @@ public class AllMusicPlayer extends InputStream {
 
     public void closePlayer() {
         isClose = true;
+        queue.clear();
     }
 
     public void setMusic(String url) {
