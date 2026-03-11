@@ -8,10 +8,7 @@ import com.coloryr.allmusic.client.core.player.decoder.m4a.M4ADecoder;
 import com.coloryr.allmusic.client.core.player.decoder.mp3.Mp3Decoder;
 import com.coloryr.allmusic.client.core.player.decoder.ogg.OggDecoder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
@@ -33,7 +30,6 @@ public class AllMusicPlayer extends InputStream {
     private final Semaphore semaphore = new Semaphore(0);
     private final Semaphore semaphore1 = new Semaphore(0);
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
-    private CloseableHttpClient client;
     private String url;
     private HttpGet request;
     private CloseableHttpResponse response;
@@ -55,7 +51,6 @@ public class AllMusicPlayer extends InputStream {
         try {
             this.source = source;
             new Thread(this::run, "allmusic_run").start();
-            client = HttpClients.createDefault();
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
@@ -71,30 +66,6 @@ public class AllMusicPlayer extends InputStream {
 
     public boolean isPlay() {
         return isPlay;
-    }
-
-    public String Get(String url) {
-        if (url.contains("https://music.163.com/song/media/outer/url?id=")
-                || url.contains("http://music.163.com/song/media/outer/url?id=")) {
-            try {
-                HttpGet request = new HttpGet(url);
-                request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
-                request.setHeader("Host", "music.163.com");
-                try (CloseableHttpResponse response = client.execute(request)) {
-                    int statusCode = response.getCode();
-                    if (statusCode == 302) {
-                        Header locationHeader = response.getFirstHeader("Location");
-                        if (locationHeader != null) {
-                            return locationHeader.getValue();
-                        }
-                    }
-                }
-                return url;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return url;
     }
 
     public void set(String time) {
@@ -120,9 +91,8 @@ public class AllMusicPlayer extends InputStream {
         getClose();
         streamClose();
         request = new HttpGet(url);
-        request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36 Edg/84.0.522.52");
         request.setHeader("Range", "bytes=" + local + "-");
-        response = client.execute(request);
+        response = AllMusicCore.client.execute(request);
         int statusCode = response.getCode();
         if (statusCode < 200 || statusCode >= 300) {
             throw new IOException("Unexpected code " + statusCode);
@@ -153,7 +123,6 @@ public class AllMusicPlayer extends InputStream {
                 url = urls.poll();
                 if (url == null || url.isEmpty()) continue;
                 urls.clear();
-                url = Get(url);
                 if (url == null) continue;
                 try {
                     local = 0;

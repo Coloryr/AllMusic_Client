@@ -29,10 +29,6 @@ public class AllMusicHud {
      */
     private final Semaphore semaphore = new Semaphore(0);
     /**
-     * 获取Http客户端
-     */
-    private final HttpClient client;
-    /**
      * 图片buffer
      */
     private final ByteBuffer byteBuffer;
@@ -77,7 +73,6 @@ public class AllMusicHud {
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
-        client = HttpClients.createDefault();
         byteBuffer = ByteBuffer.allocateDirect(size * size * 4);
         texture = AllMusicCore.bridge.genTexture(size);
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
@@ -130,7 +125,7 @@ public class AllMusicHud {
             }
 
             HttpGet request = new HttpGet(picUrl);
-            BufferedImage image = client.execute(request, (response -> {
+            BufferedImage image = AllMusicCore.client.execute(request, (response -> {
                 InputStream inputStream = response.getEntity().getContent();
                 return resizeImage(ImageIO.read(inputStream), size, size);
             }));
