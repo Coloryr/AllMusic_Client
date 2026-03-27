@@ -2,6 +2,7 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.comm.MusicCodec;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -9,38 +10,38 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix3x2fStack;
-import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-public class AllMusic implements ClientModInitializer, AllMusicBridge {
+public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final Identifier ID = Identifier.fromNamespaceAndPath("allmusic", "channel");
-
-    private static GuiGraphics context;
-
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+    private static GuiGraphicsExtractor context;
 
-    public static class Tex extends AbstractTexture {
-        public Tex(GpuTexture tex, GpuTextureView view) {
-            this.texture = tex;
-            this.textureView = view;
-        }
+    public static void update(GuiGraphicsExtractor draw) {
+        context = draw;
+        AllMusicCore.hudUpdate();
+    }
+
+    private static String readString(FriendlyByteBuf buf) {
+        int size = buf.readInt();
+        byte[] temp = new byte[size];
+        buf.readBytes(temp);
+
+        return new String(temp, StandardCharsets.UTF_8);
     }
 
     public Object genTexture(int size) {
@@ -81,7 +82,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
 
     public void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = Minecraft.getInstance().font;
-        context.drawString(hud, item, x, y, color, shadow);
+        context.text(hud, item, x, y, color, shadow);
     }
 
     public void drawPic(Object texture, int size, int x, int y, int ang) {
@@ -111,7 +112,7 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         Minecraft.getInstance().execute(() -> {
             if (Minecraft.getInstance().player == null)
                 return;
-            Minecraft.getInstance().player.displayClientMessage(Component.literal(finalData), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(finalData));
         });
     }
 
@@ -125,40 +126,19 @@ public class AllMusic implements ClientModInitializer, AllMusicBridge {
         Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
     }
 
-    public static void update(GuiGraphics draw) {
-        context = draw;
-        AllMusicCore.hudUpdate();
-    }
-
-    private static String readString(FriendlyByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
-    public record PackPayload() implements CustomPacketPayload {
-        public static final Type<PackPayload> ID = new CustomPacketPayload.Type<>(AllMusic.ID);
-        public static final StreamCodec<FriendlyByteBuf, PackPayload> CODEC = StreamCodec.of((value, buf) -> {
-        }, buffer -> {
-            AllMusicCore.packRead(buffer);
-            return new PackPayload();
-        });
-
-        @Override
-        public @NonNull Type<? extends CustomPacketPayload> type() {
-            return ID;
-        }
-    }
-
     @Override
     public void onInitializeClient() {
-        PayloadTypeRegistry.playS2C().register(PackPayload.ID, PackPayload.CODEC);
-        ClientPlayNetworking.registerGlobalReceiver(PackPayload.ID, (pack, handler) -> {
-
+        ClientPlayNetworking.registerGlobalReceiver(MusicCodec.ID, (pack, handler) -> {
+            AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
+    }
+
+    public static class Tex extends AbstractTexture {
+        public Tex(GpuTexture tex, GpuTextureView view) {
+            this.texture = tex;
+            this.textureView = view;
+        }
     }
 }
