@@ -35,9 +35,11 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	include implementation("org.apache.httpcomponents.client5:httpclient5:5.6")
+	include implementation('org.apache.httpcomponents.client5:httpclient5:5.6')
+	include implementation('org.apache.httpcomponents.core5:httpcore5:5.4')
+	include implementation('org.apache.httpcomponents.core5:httpcore5-h2:5.4')
 }
 
 processResources {

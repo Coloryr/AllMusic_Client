@@ -10,6 +10,7 @@ import com.coloryr.allmusic.client.core.player.decoder.ogg.OggDecoder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.io.CloseMode;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 
@@ -138,9 +139,10 @@ public class AllMusicPlayer extends InputStream {
                 content.read(head);
                 content.reset();
 
-                if (head[0] == 'f' && head[1] == 'L' && head[2] == 'a' && head[3] == 'C') {
-                    decoder = new FlacDecoder(this);
-                } else if (head[0] == 0 && head[1] == 0 && head[2] == 0 && head[3] == 0x1c) {
+//                if (head[0] == 'f' && head[1] == 'L' && head[2] == 'a' && head[3] == 'C') {
+//                    decoder = new FlacDecoder(this);
+//                }
+                if (head[0] == 0 && head[1] == 0 && head[2] == 0 && head[3] == 0x1c) {
                     decoder = new M4ADecoder(this);
                 } else if (head[0] == 'I' && head[1] == 'D' && head[2] == '3') {
                     decoder = new Mp3Decoder(this);
@@ -283,11 +285,7 @@ public class AllMusicPlayer extends InputStream {
     private void getClose() {
         // Close the HTTP response if it exists
         if (response != null) {
-            try {
-                response.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            response.close(CloseMode.IMMEDIATE);
             response = null;
         }
         request = null;
