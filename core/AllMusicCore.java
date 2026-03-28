@@ -78,15 +78,9 @@ public class AllMusicCore {
     }
 
     public static void init(Path file, AllMusicBridge bridge, IntBuffer source) {
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
         List<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"));
-        client = HttpClients.custom()
-                .setConnectionManager(connManager)
-                .evictExpiredConnections()
-                .setDefaultHeaders(headers)
-                .evictIdleConnections(TimeValue.ofSeconds(30))
-                .build();
+        client = HttpClients.custom().setDefaultHeaders(headers).build();
 
         File configFile = new File(file.toFile(), "allmusic_client.json");
         if (configFile.exists()) {

@@ -171,12 +171,14 @@ public class AllMusicPlayer extends InputStream {
                     decoder.set(time);
                 }
                 queue.clear();
+                lastVolume = Float.NaN;
                 reload = false;
                 isClose = false;
                 while (true) {
                     try {
                         if (isClose) break;
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
+                            if (isClose) break;
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
@@ -186,6 +188,7 @@ public class AllMusicPlayer extends InputStream {
                         }
 
                         if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED) > 0) {
+                            if (isClose) break;
                             int temp = AL10.alSourceUnqueueBuffers(index);
                             AL10.alDeleteBuffers(temp);
                         }

@@ -82,7 +82,8 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
 
     public void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = Minecraft.getInstance().font;
-        context.drawString(hud, item, x, y, color, shadow);
+        Component component = MiniMessage.parse(item);
+        context.drawString(hud, component, x, y, color, shadow);
     }
 
     public void drawPic(Object texture, int size, int x, int y, int ang) {

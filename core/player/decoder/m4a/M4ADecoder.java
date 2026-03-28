@@ -71,6 +71,8 @@ public class M4ADecoder implements IDecoder {
 
     @Override
     public void set(int time) {
-
+        if (track != null) {
+            track.seek(time / 1000d);
+        }
     }
 }
