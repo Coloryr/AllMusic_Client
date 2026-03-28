@@ -13,9 +13,11 @@ public class GainControl implements GCConstants {
     private final IPQF ipqf;
     private final float[] buffer1, function;
     private final float[][] buffer2, overlap;
+    private final int[][][] levelPrev;
+    private final int[][][] locationPrev;
     private int maxBand;
-    private int[][][] level, levelPrev;
-    private int[][][] location, locationPrev;
+    private int[][][] level;
+    private int[][][] location;
 
     public GainControl(int frameLen) {
         this.frameLen = frameLen;

@@ -11,9 +11,9 @@ class HFAdjustment implements Constants, NoiseTable {
     private static final int[] phi_im = {0, 1, 0, -1};
     private static final float[] limGain = {0.5f, 1.0f, 2.0f, 1e10f};
     private static final float EPS = 1e-12f;
-    private float[][] G_lim_boost = new float[MAX_L_E][MAX_M];
-    private float[][] Q_M_lim_boost = new float[MAX_L_E][MAX_M];
-    private float[][] S_M_boost = new float[MAX_L_E][MAX_M];
+    private final float[][] G_lim_boost = new float[MAX_L_E][MAX_M];
+    private final float[][] Q_M_lim_boost = new float[MAX_L_E][MAX_M];
+    private final float[][] S_M_boost = new float[MAX_L_E][MAX_M];
 
     public static int hf_adjustment(SBR sbr, float[][][] Xsbr, int ch) {
         HFAdjustment adj = new HFAdjustment();

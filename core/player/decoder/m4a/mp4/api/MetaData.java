@@ -159,6 +159,7 @@ public class MetaData {
             "credits", "rating", "label", "composer", "isrc", "mood", "tempo"
     };
     private Map<Field<?>, Object> contents;
+
     MetaData() {
         contents = new HashMap<Field<?>, Object>();
     }

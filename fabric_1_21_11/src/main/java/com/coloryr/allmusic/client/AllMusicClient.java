@@ -36,14 +36,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         AllMusicCore.hudUpdate();
     }
 
-    private static String readString(FriendlyByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
     public Object genTexture(int size) {
         var device = RenderSystem.getDevice();
         var tex = device.createTexture("allmusic:gui_textured", 5, TextureFormat.RGBA8, size, size, 1, 1);

@@ -353,7 +353,6 @@ class FBT implements Constants {
             if (nrLim < 0) // TODO: BIG FAT PROBLEM
                 return;
 
-            restart:
             while (k <= nrLim) {
                 float nOctaves;
 

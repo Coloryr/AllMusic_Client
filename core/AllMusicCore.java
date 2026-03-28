@@ -10,10 +10,8 @@ import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
-import org.apache.hc.core5.util.TimeValue;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -45,6 +43,7 @@ public class AllMusicCore {
      * 配置文件
      */
     public static ConfigObj config;
+    public static CloseableHttpClient client;
     /**
      * 音频解码器与播放器
      */
@@ -53,8 +52,6 @@ public class AllMusicCore {
      * 界面显示内容
      */
     private static AllMusicHud hud;
-
-    public static CloseableHttpClient client;
 
     /**
      * 更新音频缓存

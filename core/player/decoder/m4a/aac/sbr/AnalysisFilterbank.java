@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 class AnalysisFilterbank implements FilterbankTable {
 
-    private float[] x; //x is implemented as double ringbuffer
+    private final float[] x; //x is implemented as double ringbuffer
+    private final int channels;
     private int x_index; //ringbuffer index
-    private int channels;
 
     AnalysisFilterbank(int channels) {
         this.channels = channels;

@@ -79,14 +79,6 @@ public class AllMusic implements AllMusicBridge {
         AllMusicCore.onServerQuit();
     }
 
-    private static String readString(ByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void onRenderOverlay(RenderGameOverlayEvent.Pre e) {

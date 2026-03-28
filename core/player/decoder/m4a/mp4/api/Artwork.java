@@ -14,6 +14,7 @@ public class Artwork {
     private Type type;
     private byte[] data;
     private Image image;
+
     Artwork(Type type, byte[] data) {
         this.type = type;
         this.data = data;

@@ -159,7 +159,8 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
 
     public void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = Minecraft.getInstance().font;
-        gui.drawString(hud, item, x, y, color, shadow);
+        Component component = MiniMessage.parse(item);
+        gui.drawString(hud, component, x, y, color, shadow);
     }
 
     @Override

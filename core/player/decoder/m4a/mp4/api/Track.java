@@ -38,6 +38,7 @@ public abstract class Track {
     protected Protection protection;
     private URL location;
     private int currentFrame;
+
     Track(Box trak, MP4InputStream in) {
         this.in = in;
 

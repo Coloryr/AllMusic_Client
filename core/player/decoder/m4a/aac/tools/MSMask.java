@@ -14,9 +14,9 @@ public enum MSMask {
     TYPE_ALL_1(2),
     TYPE_RESERVED(3);
 
-    private int num;
+    private final int num;
 
-    private MSMask(int num) {
+    MSMask(int num) {
         this.num = num;
     }
 

@@ -13,6 +13,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
@@ -56,10 +57,11 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public void drawText(String item, int x, int y, int color, boolean shadow) {
         Gui hud = Minecraft.getInstance().gui;
         Font textRenderer = hud.getFont();
+        Component component = MiniMessage.parse(item);
         if (shadow) {
-            textRenderer.drawShadow(stack, item, x, y, color);
+            textRenderer.drawShadow(stack, component, x, y, color);
         } else {
-            textRenderer.draw(stack, item, x, y, color);
+            textRenderer.draw(stack, component, x, y, color);
         }
     }
 

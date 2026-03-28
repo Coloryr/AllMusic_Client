@@ -24,6 +24,7 @@ public class ITunesMetadataBox extends FullBox {
     private static final String[] TIMESTAMPS = {"yyyy", "yyyy-MM", "yyyy-MM-dd"};
     private DataType dataType;
     private byte[] data;
+
     public ITunesMetadataBox() {
         super("iTunes Metadata Box");
     }

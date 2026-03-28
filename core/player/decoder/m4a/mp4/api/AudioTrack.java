@@ -14,6 +14,7 @@ public class AudioTrack extends Track {
     private final SoundMediaHeaderBox smhd;
     private final AudioSampleEntry sampleEntry;
     private Codec codec;
+
     public AudioTrack(Box trak, MP4InputStream in) {
         super(trak, in);
 

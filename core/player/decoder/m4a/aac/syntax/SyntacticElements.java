@@ -18,7 +18,7 @@ public class SyntacticElements implements Constants {
     private final DSE[] dses;
     private final FIL[] fils;
     //global properties
-    private DecoderConfig config;
+    private final DecoderConfig config;
     private boolean sbrPresent, psPresent;
     private int bitsRead;
     private int curElem, curCCE, curDSE, curFIL;

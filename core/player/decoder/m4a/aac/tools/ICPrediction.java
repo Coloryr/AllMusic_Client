@@ -21,10 +21,10 @@ public class ICPrediction {
     private static final int MAX_PREDICTORS = 672;
     private static final float A = 0.953125f; //61.0 / 64
     private static final float ALPHA = 0.90625f;  //29.0 / 32
+    private final PredictorState[] states;
     private boolean predictorReset;
     private int predictorResetGroup;
     private boolean[] predictionUsed;
-    private PredictorState[] states;
 
     public ICPrediction() {
         states = new PredictorState[MAX_PREDICTORS];

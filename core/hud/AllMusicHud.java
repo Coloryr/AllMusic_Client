@@ -3,9 +3,7 @@ package com.coloryr.allmusic.client.core.hud;
 import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.codec.HudDirType;
 import com.coloryr.allmusic.codec.HudPosObj;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

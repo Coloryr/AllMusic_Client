@@ -16,6 +16,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
@@ -163,10 +164,11 @@ public class AllMusic implements AllMusicBridge {
 
     public void drawText(String item, int x, int y, int color, boolean shadow) {
         FontRenderer hud = Minecraft.getInstance().font;
+        TextComponent component = MiniMessage.parse(item);
         if (shadow) {
-            hud.drawShadow(stack, item, x, y, color);
+            hud.drawShadow(stack, component, x, y, color);
         } else {
-            hud.draw(stack, item, x, y, color);
+            hud.draw(stack, component, x, y, color);
         }
     }
 

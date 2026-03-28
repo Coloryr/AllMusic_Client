@@ -39,7 +39,7 @@ class SynthesisFilterbank implements FilterbankTable {
             {0.715730825283819f, -0.698376249408973f}
     };
     private final int channels;
-    private float[] v; //double ringbuffer
+    private final float[] v; //double ringbuffer
     private int v_index; //ringbuffer index
 
     public SynthesisFilterbank(int channels) {
@@ -128,7 +128,7 @@ class SynthesisFilterbank implements FilterbankTable {
             in_imag1[31] = scale * pX[1][0];
             in_real1[0] = scale * pX[0][0];
             in_imag2[31] = scale * pX[63 - 1][1];
-            in_real2[0] = scale * pX[63 - 0][1];
+            in_real2[0] = scale * pX[63][1];
             for (k = 1; k < 31; k++) {
                 in_imag1[31 - k] = scale * pX[2 * k + 1][0];
                 in_real1[k] = scale * pX[2 * k][0];
@@ -137,7 +137,7 @@ class SynthesisFilterbank implements FilterbankTable {
             }
             in_imag1[0] = scale * pX[63][0];
             in_real1[31] = scale * pX[62][0];
-            in_imag2[0] = scale * pX[63 - 63][1];
+            in_imag2[0] = scale * pX[0][1];
             in_real2[31] = scale * pX[63 - 62][1];
 
             // dct4_kernel is DCT_IV without reordering which is done before and after FFT
@@ -162,7 +162,7 @@ class SynthesisFilterbank implements FilterbankTable {
             /* calculate 64 output samples and window */
             for (k = 0; k < 64; k++) {
                 output[out++]
-                        = (v[pring_buffer_1 + k + 0] * qmf_c[k + 0])
+                        = (v[pring_buffer_1 + k] * qmf_c[k])
                         + (v[pring_buffer_1 + k + 192] * qmf_c[k + 64])
                         + (v[pring_buffer_1 + k + 256] * qmf_c[k + 128])
                         + (v[pring_buffer_1 + k + (256 + 192)] * qmf_c[k + 192])

@@ -16,9 +16,9 @@ public class ICSInfo implements Constants, ScaleFactorBands {
     public static final int PREVIOUS = 0;
     public static final int CURRENT = 1;
     private final int frameLength;
+    private final int[] windowShape;
     boolean ltpData1Present, ltpData2Present;
     private WindowSequence windowSequence;
-    private int[] windowShape;
     private int maxSFB;
     //prediction
     private boolean predictionDataPresent;
@@ -30,6 +30,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
     private int[] windowGroupLength;
     private int swbCount;
     private int[] swbOffsets;
+
     public ICSInfo(int frameLength) {
         this.frameLength = frameLength;
         windowShape = new int[2];
@@ -196,7 +197,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
         swbOffsets = Arrays.copyOf(info.swbOffsets, info.swbOffsets.length);
     }
 
-    public static enum WindowSequence {
+    public enum WindowSequence {
 
         ONLY_LONG_SEQUENCE,
         LONG_START_SEQUENCE,

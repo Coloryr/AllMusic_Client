@@ -10,9 +10,9 @@ import java.util.Arrays;
 
 public class CPE extends Element implements Constants {
 
+    private final boolean[] msUsed;
     ICStream icsL, icsR;
     private MSMask msMask;
-    private boolean[] msUsed;
     private boolean commonWindow;
 
     CPE(int frameLength) {

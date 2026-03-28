@@ -110,7 +110,7 @@ class Lookup {
         int i = (int) (a * ((float) (-(1 << FROMdB2_SHIFT))));
         return (i < 0) ? 1.f
                 : ((i >= (FROMdB_LOOKUP_SZ << FROMdB_SHIFT)) ? 0.f
-                : FROMdB_LOOKUP[i >>> FROMdB_SHIFT] * FROMdB2_LOOKUP[i & FROMdB2_MASK]);
+                   : FROMdB_LOOKUP[i >>> FROMdB_SHIFT] * FROMdB2_LOOKUP[i & FROMdB2_MASK]);
     }
 
 }

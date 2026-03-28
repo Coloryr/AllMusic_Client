@@ -272,16 +272,12 @@ public class SBR implements Constants, com.coloryr.allmusic.client.core.player.d
     void sbr_reset() {
 
         /* if these are different from the previous frame: Reset = 1 */
-        if ((this.bs_start_freq != this.bs_start_freq_prev)
+        this.Reset = (this.bs_start_freq != this.bs_start_freq_prev)
                 || (this.bs_stop_freq != this.bs_stop_freq_prev)
                 || (this.bs_freq_scale != this.bs_freq_scale_prev)
                 || (this.bs_alter_scale != this.bs_alter_scale_prev)
                 || (this.bs_xover_band != this.bs_xover_band_prev)
-                || (this.bs_noise_bands != this.bs_noise_bands_prev)) {
-            this.Reset = true;
-        } else {
-            this.Reset = false;
-        }
+                || (this.bs_noise_bands != this.bs_noise_bands_prev);
 
         this.bs_start_freq_prev = this.bs_start_freq;
         this.bs_stop_freq_prev = this.bs_stop_freq;
@@ -703,7 +699,7 @@ public class SBR implements Constants, com.coloryr.allmusic.client.core.player.d
 
     /* integer log[2](x): input range [0,10) */
     private int sbr_log2(int val) {
-        int log2tab[] = {0, 0, 1, 2, 2, 3, 3, 3, 3, 4};
+        int[] log2tab = {0, 0, 1, 2, 2, 3, 3, 3, 3, 4};
         if (val < 10 && val >= 0)
             return log2tab[val];
         else
@@ -1138,11 +1134,7 @@ public class SBR implements Constants, com.coloryr.allmusic.client.core.player.d
                 this.bs_start_freq_prev = -1;
         }
 
-        if (just_seeked) {
-            this.just_seeked = true;
-        } else {
-            this.just_seeked = false;
-        }
+        this.just_seeked = just_seeked;
 
         this.ret += sbr_process_channel(left_chan, X, 0, dont_process);
         /* subband synthesis */
@@ -1196,11 +1188,7 @@ public class SBR implements Constants, com.coloryr.allmusic.client.core.player.d
                 this.bs_start_freq_prev = -1;
         }
 
-        if (just_seeked) {
-            this.just_seeked = true;
-        } else {
-            this.just_seeked = false;
-        }
+        this.just_seeked = just_seeked;
 
         this.ret += sbr_process_channel(channel, X, 0, dont_process);
         /* subband synthesis */
@@ -1245,11 +1233,7 @@ public class SBR implements Constants, com.coloryr.allmusic.client.core.player.d
                 this.bs_start_freq_prev = -1;
         }
 
-        if (just_seeked) {
-            this.just_seeked = true;
-        } else {
-            this.just_seeked = false;
-        }
+        this.just_seeked = just_seeked;
 
         if (this.qmfs[1] == null) {
             this.qmfs[1] = new SynthesisFilterbank((downSampledSBR) ? 32 : 64);

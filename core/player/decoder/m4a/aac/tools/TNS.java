@@ -17,10 +17,11 @@ public class TNS implements Constants, TNSTables {
     private static final int TNS_MAX_ORDER = 20;
     private static final int[] SHORT_BITS = {1, 4, 3}, LONG_BITS = {2, 6, 5};
     //bitstream
-    private int[] nFilt;
-    private int[][] length, order;
-    private boolean[][] direction;
-    private float[][][] coef;
+    private final int[] nFilt;
+    private final int[][] length;
+    private final int[][] order;
+    private final boolean[][] direction;
+    private final float[][][] coef;
 
     public TNS() {
         nFilt = new int[8];

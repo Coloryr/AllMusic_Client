@@ -28,6 +28,7 @@ public abstract class Descriptor {
     protected int type, size;
     protected long start;
     private List<Descriptor> children;
+
     protected Descriptor() {
         children = new ArrayList<Descriptor>();
     }

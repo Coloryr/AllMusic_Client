@@ -19,6 +19,7 @@ public enum ChannelConfiguration {
 
     private final int chCount;
     private final String descr;
+
     private ChannelConfiguration(int chCount, String descr) {
         this.chCount = chCount;
         this.descr = descr;

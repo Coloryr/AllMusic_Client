@@ -3,6 +3,7 @@ package com.coloryr.allmusic.client;
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.comm.MusicCodec;
+import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -11,14 +12,13 @@ import com.mojang.blaze3d.textures.TextureFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.client.texture.GlTexture;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix3x2fStack;
@@ -26,11 +26,11 @@ import org.joml.Matrix3x2fStack;
 import java.nio.ByteBuffer;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
-    public static final Identifier ID = Identifier.of("allmusic", "channel");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
-    private static DrawContext context;
+    private static GuiGraphics context;
 
-    public static void update(DrawContext draw) {
+    public static void update(GuiGraphics draw) {
         context = draw;
         AllMusicCore.hudUpdate();
     }
@@ -44,40 +44,41 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
 
         Tex tex1 = new Tex(tex, view);
 
-        MinecraftClient.getInstance().getTextureManager().registerTexture(ID, tex1);
+        Minecraft.getInstance().getTextureManager().register(ID, tex1);
 
         return tex;
     }
 
     public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
         if (tex instanceof GlTexture tex1) {
-            AllMusicCore.updateGLTexture(tex1.getGlId(), size, byteBuffer);
+            AllMusicCore.updateGLTexture(tex1.glId(), size, byteBuffer);
         }
     }
 
     public int getScreenWidth() {
-        return MinecraftClient.getInstance().getWindow().getScaledWidth();
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth();
     }
 
     public int getScreenHeight() {
-        return MinecraftClient.getInstance().getWindow().getScaledHeight();
+        return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
 
     public int getTextWidth(String item) {
-        return MinecraftClient.getInstance().textRenderer.getWidth(item);
+        return Minecraft.getInstance().font.width(item);
     }
 
     public int getFontHeight() {
-        return MinecraftClient.getInstance().textRenderer.fontHeight;
+        return Minecraft.getInstance().font.lineHeight;
     }
 
     public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = MinecraftClient.getInstance().textRenderer;
-        context.drawText(hud, item, x, y, color, shadow);
+        var hud = Minecraft.getInstance().font;
+        Component component = MiniMessage.parse(item);
+        context.drawString(hud, component, x, y, color, shadow);
     }
 
     public void drawPic(Object texture, int size, int x, int y, int ang) {
-        Matrix3x2fStack stack = context.getMatrices();
+        Matrix3x2fStack stack = context.pose();
         Matrix3x2fStack matrix = stack.pushMatrix();
 
         int a = size / 2;
@@ -89,7 +90,7 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
             matrix.translation(x + a, y + a);
         }
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, ID, -a, -a, 0, 0, size, size, size, size, size, size);
+        context.blit(RenderPipelines.GUI_TEXTURED, ID, -a, -a, 0, 0, size, size, size, size, size, size);
         stack.popMatrix();
         if (ang > 0) {
             stack.popMatrix();
@@ -100,21 +101,21 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         data = "[AllMusic Client]" + data;
         LOGGER.warn(data);
         String finalData = data;
-        MinecraftClient.getInstance().execute(() -> {
-            if (MinecraftClient.getInstance().player == null)
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
                 return;
-            MinecraftClient.getInstance().player.sendMessage(Text.of(finalData), false);
+            Minecraft.getInstance().player.displayClientMessage(Component.literal(finalData), false);
         });
     }
 
     public float getVolume() {
-        return MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.RECORDS);
+        return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
     @Override
     public void stopPlayMusic() {
-        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
-        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
     }
 
     @Override
@@ -128,8 +129,8 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
 
     public static class Tex extends AbstractTexture {
         public Tex(GpuTexture tex, GpuTextureView view) {
-            this.glTexture = tex;
-            this.glTextureView = view;
+            this.texture = tex;
+            this.textureView = view;
         }
     }
 }

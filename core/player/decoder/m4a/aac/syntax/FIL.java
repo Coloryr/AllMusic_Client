@@ -13,6 +13,7 @@ class FIL extends Element implements Constants {
     private static final int TYPE_SBR_DATA_CRC = 14;
     private final boolean downSampledSBR;
     private DynamicRangeInfo dri;
+
     FIL(boolean downSampledSBR) {
         super();
         this.downSampledSBR = downSampledSBR;

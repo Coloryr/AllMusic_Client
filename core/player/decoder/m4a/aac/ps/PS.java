@@ -180,7 +180,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
         }
 
         /* we are here, but no header has been read yet */
-        if (this.header_read == false) {
+        if (!this.header_read) {
             this.ps_data_available = 0;
             return 1;
         }
@@ -329,7 +329,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
         if (enable) {
             if (!dt_flag) {
                 /* delta coded in frequency direction */
-                index[0] = 0 + index[0];
+                index[0] = index[0];
                 index[0] = delta_clip(index[0], min_index, max_index);
 
                 for (i = 1; i < nr_par; i++) {
@@ -382,7 +382,7 @@ public class PS implements PSConstants, PSTables, HuffmanTables {
         if (enable) {
             if (!dt_flag) {
                 /* delta coded in frequency direction */
-                index[0] = 0 + index[0];
+                index[0] = index[0];
                 index[0] &= and_modulo;
 
                 for (i = 1; i < nr_par; i++) {

@@ -1,38 +1,35 @@
 package com.coloryr.allmusic.client;
 
-import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
-import com.coloryr.allmusic.codec.MusicPack;
 import com.coloryr.allmusic.comm.MusicCodec;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
-    public static final Identifier ID = Identifier.of("allmusic", "channel");
-    private static DrawContext context;
-
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+    private static GuiGraphics context;
+
+    public static void update(GuiGraphics draw) {
+        context = draw;
+        AllMusicCore.hudUpdate();
+    }
 
     @Override
     public Object genTexture(int size) {
@@ -45,33 +42,33 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     }
 
     public int getScreenWidth() {
-        return MinecraftClient.getInstance().getWindow().getScaledWidth();
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth();
     }
 
     public int getScreenHeight() {
-        return MinecraftClient.getInstance().getWindow().getScaledHeight();
+        return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
 
     public int getTextWidth(String item) {
-        return MinecraftClient.getInstance().textRenderer.getWidth(item);
+        return Minecraft.getInstance().font.width(item);
     }
 
     public int getFontHeight() {
-        return MinecraftClient.getInstance().textRenderer.fontHeight;
+        return Minecraft.getInstance().font.lineHeight;
     }
 
     public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = MinecraftClient.getInstance().textRenderer;
-        context.drawText(hud, item, x, y, color, shadow);
+        var hud = Minecraft.getInstance().font;
+        Component component = MiniMessage.parse(item);
+        context.drawString(hud, component, x, y, color, shadow);
     }
 
     public void drawPic(Object texture, int size, int x, int y, int ang) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, (int) texture);
 
-        MatrixStack stack = new MatrixStack();
-        Matrix4f matrix = stack.peek().getPositionMatrix();
+        PoseStack stack = new PoseStack();
+        Matrix4f matrix = stack.last().pose();
 
         int a = size / 2;
 
@@ -92,39 +89,35 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         float v0 = 0;
         float v1 = 1;
 
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        BufferBuilder bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).texture(u0, v1);
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).texture(u1, v1);
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).texture(u1, v0);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).texture(u0, v0);
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.addVertex(matrix, (float) x0, (float) y1, (float) z).setUv(u0, v1);
+        bufferBuilder.addVertex(matrix, (float) x1, (float) y1, (float) z).setUv(u1, v1);
+        bufferBuilder.addVertex(matrix, (float) x1, (float) y0, (float) z).setUv(u1, v0);
+        bufferBuilder.addVertex(matrix, (float) x0, (float) y0, (float) z).setUv(u0, v0);
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
     }
 
     public void sendMessage(String data) {
         data = "[AllMusic Client]" + data;
         LOGGER.warn(data);
         String finalData = data;
-        MinecraftClient.getInstance().execute(() -> {
-            if (MinecraftClient.getInstance().player == null)
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().player == null)
                 return;
-            MinecraftClient.getInstance().player.sendMessage(Text.of(finalData));
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(finalData));
         });
     }
 
     public float getVolume() {
-        return MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.RECORDS);
+        return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
     @Override
     public void stopPlayMusic() {
-        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.MUSIC);
-        MinecraftClient.getInstance().getSoundManager().stopSounds(null, SoundCategory.RECORDS);
-    }
-
-    public static void update(DrawContext draw) {
-        context = draw;
-        AllMusicCore.hudUpdate();
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
+        Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
     }
 
     @Override

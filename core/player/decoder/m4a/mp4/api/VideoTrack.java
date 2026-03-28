@@ -14,6 +14,7 @@ public class VideoTrack extends Track {
     private final VideoMediaHeaderBox vmhd;
     private final VideoSampleEntry sampleEntry;
     private final Codec codec;
+
     public VideoTrack(Box trak, MP4InputStream in) {
         super(trak, in);
 

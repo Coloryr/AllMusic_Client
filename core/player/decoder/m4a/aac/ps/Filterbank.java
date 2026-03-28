@@ -2,13 +2,13 @@ package com.coloryr.allmusic.client.core.player.decoder.m4a.aac.ps;
 
 class Filterbank implements PSTables {
 
-    private int frame_len;
-    private int[] resolution20 = new int[3];
-    private int[] resolution34 = new int[5];
+    private final int frame_len;
+    private final int[] resolution20 = new int[3];
+    private final int[] resolution34 = new int[5];
 
-    private float[][] work;
-    private float[][][] buffer;
-    private float[][][] temp;
+    private final float[][] work;
+    private final float[][][] buffer;
+    private final float[][][] temp;
 
     Filterbank(int numTimeSlotsRate) {
         int i;
@@ -38,14 +38,14 @@ class Filterbank implements PSTables {
         int i;
 
         for (i = 0; i < frame_len; i++) {
-            float r0 = (filter[0] * (buffer[0 + i][0] + buffer[12 + i][0]));
+            float r0 = (filter[0] * (buffer[i][0] + buffer[12 + i][0]));
             float r1 = (filter[1] * (buffer[1 + i][0] + buffer[11 + i][0]));
             float r2 = (filter[2] * (buffer[2 + i][0] + buffer[10 + i][0]));
             float r3 = (filter[3] * (buffer[3 + i][0] + buffer[9 + i][0]));
             float r4 = (filter[4] * (buffer[4 + i][0] + buffer[8 + i][0]));
             float r5 = (filter[5] * (buffer[5 + i][0] + buffer[7 + i][0]));
             float r6 = (filter[6] * buffer[6 + i][0]);
-            float i0 = (filter[0] * (buffer[0 + i][1] + buffer[12 + i][1]));
+            float i0 = (filter[0] * (buffer[i][1] + buffer[12 + i][1]));
             float i1 = (filter[1] * (buffer[1 + i][1] + buffer[11 + i][1]));
             float i2 = (filter[2] * (buffer[2 + i][1] + buffer[10 + i][1]));
             float i3 = (filter[3] * (buffer[3 + i][1] + buffer[9 + i][1]));
@@ -78,14 +78,14 @@ class Filterbank implements PSTables {
                     + (filter[3] * (buffer[i + 3][0] + buffer[i + 9][0]))
                     - (filter[5] * (buffer[i + 5][0] + buffer[i + 7][0]))));
 
-            input_im1[0] = (filter[0] * (buffer[i + 0][1] - buffer[i + 12][1]))
+            input_im1[0] = (filter[0] * (buffer[i][1] - buffer[i + 12][1]))
                     - (filter[4] * (buffer[i + 4][1] - buffer[i + 8][1]));
             input_im1[1] = (0.70710678118655f
                     * ((filter[1] * (buffer[i + 1][1] - buffer[i + 11][1]))
                     - (filter[3] * (buffer[i + 3][1] - buffer[i + 9][1]))
                     - (filter[5] * (buffer[i + 5][1] - buffer[i + 7][1]))));
 
-            input_re2[0] = (filter[0] * (buffer[i + 0][0] - buffer[i + 12][0]))
+            input_re2[0] = (filter[0] * (buffer[i][0] - buffer[i + 12][0]))
                     - (filter[4] * (buffer[i + 4][0] - buffer[i + 8][0]));
             input_re2[1] = (0.70710678118655f
                     * ((filter[1] * (buffer[i + 1][0] - buffer[i + 11][0]))
@@ -218,11 +218,11 @@ class Filterbank implements PSTables {
         for (i = 0; i < frame_len; i++) {
             input_re1[0] = (filter[6] * buffer[6 + i][0]);
             input_re1[1] = (filter[5] * (buffer[5 + i][0] + buffer[7 + i][0]));
-            input_re1[2] = -(filter[0] * (buffer[0 + i][0] + buffer[12 + i][0])) + (filter[4] * (buffer[4 + i][0] + buffer[8 + i][0]));
+            input_re1[2] = -(filter[0] * (buffer[i][0] + buffer[12 + i][0])) + (filter[4] * (buffer[4 + i][0] + buffer[8 + i][0]));
             input_re1[3] = -(filter[1] * (buffer[1 + i][0] + buffer[11 + i][0])) + (filter[3] * (buffer[3 + i][0] + buffer[9 + i][0]));
 
             input_im1[0] = (filter[5] * (buffer[7 + i][1] - buffer[5 + i][1]));
-            input_im1[1] = (filter[0] * (buffer[12 + i][1] - buffer[0 + i][1])) + (filter[4] * (buffer[8 + i][1] - buffer[4 + i][1]));
+            input_im1[1] = (filter[0] * (buffer[12 + i][1] - buffer[i][1])) + (filter[4] * (buffer[8 + i][1] - buffer[4 + i][1]));
             input_im1[2] = (filter[1] * (buffer[11 + i][1] - buffer[1 + i][1])) + (filter[3] * (buffer[9 + i][1] - buffer[3 + i][1]));
             input_im1[3] = (filter[2] * (buffer[10 + i][1] - buffer[2 + i][1]));
 
@@ -246,11 +246,11 @@ class Filterbank implements PSTables {
 
             input_im2[0] = (filter[6] * buffer[6 + i][1]);
             input_im2[1] = (filter[5] * (buffer[5 + i][1] + buffer[7 + i][1]));
-            input_im2[2] = -(filter[0] * (buffer[0 + i][1] + buffer[12 + i][1])) + (filter[4] * (buffer[4 + i][1] + buffer[8 + i][1]));
+            input_im2[2] = -(filter[0] * (buffer[i][1] + buffer[12 + i][1])) + (filter[4] * (buffer[4 + i][1] + buffer[8 + i][1]));
             input_im2[3] = -(filter[1] * (buffer[1 + i][1] + buffer[11 + i][1])) + (filter[3] * (buffer[3 + i][1] + buffer[9 + i][1]));
 
             input_re2[0] = (filter[5] * (buffer[7 + i][0] - buffer[5 + i][0]));
-            input_re2[1] = (filter[0] * (buffer[12 + i][0] - buffer[0 + i][0])) + (filter[4] * (buffer[8 + i][0] - buffer[4 + i][0]));
+            input_re2[1] = (filter[0] * (buffer[12 + i][0] - buffer[i][0])) + (filter[4] * (buffer[8 + i][0] - buffer[4 + i][0]));
             input_re2[2] = (filter[1] * (buffer[11 + i][0] - buffer[1 + i][0])) + (filter[3] * (buffer[9 + i][0] - buffer[3 + i][0]));
             input_re2[3] = (filter[2] * (buffer[10 + i][0] - buffer[2 + i][0]));
 
