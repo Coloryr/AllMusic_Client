@@ -45,6 +45,7 @@ public class AllMusicPlayer extends InputStream {
     private int channels;
     private IntBuffer source;
     private long local;
+    private boolean isRun;
 
     public AllMusicPlayer(IntBuffer source) {
         try {
@@ -94,6 +95,10 @@ public class AllMusicPlayer extends InputStream {
     }
 
     private void run() {
+        if (isRun) {
+            return;
+        }
+        isRun = true;
         while (true) {
             try {
                 semaphore.acquire();
