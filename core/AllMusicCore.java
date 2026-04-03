@@ -260,7 +260,7 @@ public class AllMusicCore {
                 hud.close();
                 break;
             case POS:
-                player.set(data1);
+                player.setTime(data1);
                 break;
             case HUD_DATA:
                 hud.setPos(gson.fromJson(data, HudPosObj.class));

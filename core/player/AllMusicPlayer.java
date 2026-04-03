@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.client.core.player;
 
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.objs.PlayTaskObj;
 import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.m4a.M4ADecoder;
@@ -22,30 +23,28 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.*;
 
 public class AllMusicPlayer extends InputStream {
 
-    private final Queue<String> urls = new ConcurrentLinkedQueue<>();
+    private final Stack<PlayTaskObj> tasks = new Stack<>();
     private final Semaphore semaphore = new Semaphore(0);
     private final Semaphore semaphore1 = new Semaphore(0);
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
-    private String url;
-    private HttpGet request;
+    private PlayTaskObj nowTask;
     private CloseableHttpResponse response;
     private BufferedInputStream content;
     private boolean isClose = false;
     private boolean reload = false;
-    private IDecoder decoder;
-    private int time = 0;
     private long local = 0;
+    private IDecoder decoder;
     private boolean isPlay = false;
     private boolean wait = false;
     private int index = -1;
     private int frequency;
     private int channels;
     private IntBuffer source;
-    private float lastVolume;
 
     public AllMusicPlayer(IntBuffer source) {
         try {
@@ -59,8 +58,8 @@ public class AllMusicPlayer extends InputStream {
     }
 
     public void run1() {
-        if (isPlay) {
-            time += 10;
+        if (isPlay && nowTask != null) {
+            nowTask.time += 10;
         }
     }
 
@@ -68,33 +67,24 @@ public class AllMusicPlayer extends InputStream {
         return isPlay;
     }
 
-    public void set(String time) {
-        try {
-            int time1 = Integer.parseInt(time);
-            set(time1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void set(int time) {
-        if (url == null) {
+    public void setTime(int time) {
+        if (nowTask == null) {
             return;
         }
         closePlayer();
-        this.time = time;
-        urls.add(url);
+        nowTask.time = time;
+        tasks.push(nowTask);
         semaphore.release();
     }
 
     public void connect() throws IOException {
         getClose();
         streamClose();
-        request = new HttpGet(url);
-        request.setHeader("Range", "bytes=" + local + "-");
+        HttpGet request = new HttpGet(nowTask.url);
+        request.setHeader("range", "bytes=" + local + "-");
         response = AllMusicCore.client.execute(request);
         int statusCode = response.getCode();
-        if (statusCode < 200 || statusCode >= 300) {
+        if (statusCode < 200 || statusCode >= 400) {
             throw new IOException("Unexpected code " + statusCode);
         }
         HttpEntity entity = response.getEntity();
@@ -120,10 +110,9 @@ public class AllMusicPlayer extends InputStream {
                     }
                 }
 
-                url = urls.poll();
-                if (url == null || url.isEmpty()) continue;
-                urls.clear();
-                if (url == null) continue;
+                nowTask = tasks.pop();
+                if (nowTask == null || nowTask.url == null || nowTask.url.isEmpty()) continue;
+                tasks.clear();
                 try {
                     local = 0;
                     connect();
@@ -166,11 +155,10 @@ public class AllMusicPlayer extends InputStream {
                 frequency = decoder.getOutputFrequency();
                 channels = decoder.getOutputChannels();
                 if (channels != 1 && channels != 2) continue;
-                if (time != 0) {
-                    decoder.set(time);
+                if (nowTask.time != 0) {
+                    decoder.set(nowTask.time);
                 }
                 queue.clear();
-                lastVolume = Float.NaN;
                 reload = false;
                 isClose = false;
                 while (true) {
@@ -210,7 +198,7 @@ public class AllMusicPlayer extends InputStream {
                     wait = true;
                     if (semaphore1.tryAcquire(500, TimeUnit.MILLISECONDS)) {
                         if (reload) {
-                            urls.add(url);
+                            tasks.push(nowTask);
                             semaphore.release();
                             continue;
                         }
@@ -224,7 +212,7 @@ public class AllMusicPlayer extends InputStream {
                         m_numqueued--;
                     }
                 } else {
-                    urls.add(url);
+                    tasks.push(nowTask);
                     semaphore.release();
                 }
             } catch (Exception e) {
@@ -245,9 +233,9 @@ public class AllMusicPlayer extends InputStream {
         }
         if (isPlay) {
             float temp = AllMusicCore.bridge.getVolume();
-            if (lastVolume != temp) {
-                lastVolume = temp;
-                AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
+            float now = AL10.alGetSourcef(index, AL10.AL_GAIN);
+            if (now != temp) {
+                AL10.alSourcef(index, AL10.AL_GAIN, temp);
             }
         }
         while (!queue.isEmpty()) {
@@ -278,9 +266,11 @@ public class AllMusicPlayer extends InputStream {
     }
 
     public void setMusic(String url) {
-        time = 0;
         closePlayer();
-        urls.add(url);
+        PlayTaskObj taskObj = new PlayTaskObj();
+        taskObj.time = 0;
+        taskObj.url = url;
+        tasks.push(taskObj);
         semaphore.release();
     }
 
@@ -290,7 +280,6 @@ public class AllMusicPlayer extends InputStream {
             response.close(CloseMode.IMMEDIATE);
             response = null;
         }
-        request = null;
     }
 
     private void streamClose() throws IOException {
@@ -315,6 +304,11 @@ public class AllMusicPlayer extends InputStream {
     @Override
     public int read(byte[] buf) throws IOException {
         return content.read(buf);
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+        return content.skip(n);
     }
 
     @Override
