@@ -38,7 +38,7 @@ public class MP4InputStream {
      * <code>RandomAccessFile</code>. It will have random access and seeking
      * will be possible.
      *
-     * @param in a <code>RandomAccessFile</code> to read from
+     * @param fin a <code>RandomAccessFile</code> to read from
      */
     MP4InputStream(RandomAccessFile fin) {
         this.fin = fin;

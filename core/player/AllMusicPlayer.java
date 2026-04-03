@@ -37,7 +37,6 @@ public class AllMusicPlayer extends InputStream {
     private BufferedInputStream content;
     private boolean isClose = false;
     private boolean reload = false;
-    private long local = 0;
     private IDecoder decoder;
     private boolean isPlay = false;
     private boolean wait = false;
@@ -45,6 +44,7 @@ public class AllMusicPlayer extends InputStream {
     private int frequency;
     private int channels;
     private IntBuffer source;
+    private long local;
 
     public AllMusicPlayer(IntBuffer source) {
         try {
@@ -78,10 +78,9 @@ public class AllMusicPlayer extends InputStream {
     }
 
     public void connect() throws IOException {
-        getClose();
         streamClose();
         HttpGet request = new HttpGet(nowTask.url);
-        request.setHeader("range", "bytes=" + local + "-");
+        request.setHeader("Range", "bytes=" + local + "-");
         response = AllMusicCore.client.execute(request);
         int statusCode = response.getCode();
         if (statusCode < 200 || statusCode >= 400) {
@@ -188,7 +187,6 @@ public class AllMusicPlayer extends InputStream {
                         break;
                     }
                 }
-                getClose();
                 streamClose();
                 decodeClose();
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
@@ -274,15 +272,11 @@ public class AllMusicPlayer extends InputStream {
         semaphore.release();
     }
 
-    private void getClose() {
-        // Close the HTTP response if it exists
+    private void streamClose() throws IOException {
         if (response != null) {
             response.close(CloseMode.IMMEDIATE);
             response = null;
         }
-    }
-
-    private void streamClose() throws IOException {
         if (content != null) {
             content.close();
             content = null;
@@ -298,17 +292,28 @@ public class AllMusicPlayer extends InputStream {
 
     @Override
     public int read() throws IOException {
+        local++;
         return content.read();
     }
 
     @Override
     public int read(byte[] buf) throws IOException {
-        return content.read(buf);
+        int temp = content.read(buf);
+        local += temp;
+        return temp;
     }
 
     @Override
     public long skip(long n) throws IOException {
-        return content.skip(n);
+        if (n <= 2048) {
+            long temp = content.skip(n);
+            local += temp;
+            return temp;
+        } else {
+            local += n;
+            connect();
+        }
+        return n;
     }
 
     @Override
@@ -319,7 +324,7 @@ public class AllMusicPlayer extends InputStream {
             return temp;
         } catch (SocketTimeoutException | SocketException ex) {
             connect();
-            return read(buf, off, len);
+            return this.read(buf, off, len);
         }
     }
 
@@ -334,7 +339,6 @@ public class AllMusicPlayer extends InputStream {
     }
 
     public void setLocal(long local) throws IOException {
-        getClose();
         streamClose();
         this.local = local;
         connect();
