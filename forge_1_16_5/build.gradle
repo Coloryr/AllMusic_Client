@@ -163,17 +163,18 @@ dependencies {
 }
 
 shadowJar {
-//    relocate 'okhttp3', 'com.coloryr.allmusic.server.lib.okhttp3'
-//    relocate 'okio', 'com.coloryr.allmusic.server.lib.okio'
-//    relocate 'kotlin', 'com.coloryr.allmusic.server.lib.kotlin'
-//    relocate 'org.intellij', 'com.coloryr.allmusic.server.lib.org.intellij'
-//    relocate 'org.jetbrains', 'com.coloryr.allmusic.server.lib.org.jetbrains'
+    relocate 'org.slf4j', 'com.coloryr.allmusic.server.lib.org.slf4j'
+    relocate 'net.kyori', 'com.coloryr.allmusic.server.lib.net.kyori'
+    relocate 'org.apache.httpcomponents', 'com.coloryr.allmusic.server.lib.org.apache.httpcomponents'
+
     configurations = [project.configurations.shadow]
     archiveClassifier.set('')
     dependencies {
         include(dependency('org.apache.httpcomponents.client5:httpclient5:5.6'))
         include(dependency('org.apache.httpcomponents.core5:httpcore5:5.4'))
         include(dependency('org.apache.httpcomponents.core5:httpcore5-h2:5.4'))
+        include(dependency('org.slf4j:slf4j-api:1.7.36'))
+        include(dependency('org.slf4j:slf4j-simple:1.7.36'))
     }
 }
 
