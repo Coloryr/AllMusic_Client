@@ -32,6 +32,9 @@ public class M4ADecoder implements IDecoder {
     @Override
     public BuffPack decodeFrame() throws Exception {
         Frame frame = track.readNextFrame();
+        if (frame == null) {
+            return null;
+        }
         SampleBuffer buffer = new SampleBuffer();
         decoder.decodeFrame(frame.getData(), buffer);
         BuffPack pack = new BuffPack();

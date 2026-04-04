@@ -19,12 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AllMusicPlayer extends InputStream {
 
@@ -32,30 +32,70 @@ public class AllMusicPlayer extends InputStream {
     private final Semaphore semaphore = new Semaphore(0);
     private final Semaphore semaphore1 = new Semaphore(0);
     private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
+
     private PlayTaskObj nowTask;
     private CloseableHttpResponse response;
     private BufferedInputStream content;
-    private boolean isClose = false;
-    private boolean reload = false;
+    private volatile boolean isClose = false;
+    private volatile boolean reload = false;
     private IDecoder decoder;
-    private boolean isPlay = false;
+    private volatile boolean isPlay = false;
     private boolean wait = false;
     private int index = -1;
     private int frequency;
     private int channels;
     private IntBuffer source;
     private long local;
-    private boolean isRun;
+    private volatile boolean isRun;
+    private ScheduledExecutorService scheduler;
 
     public AllMusicPlayer(IntBuffer source) {
         try {
             this.source = source;
             new Thread(this::run, "allmusic_run").start();
-            ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-            service.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
+            scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.scheduleAtFixedRate(this::run1, 0, 10, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void stop() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+        closePlayer();
+        // 完全清理 OpenAL 资源
+        fullCleanup();
+    }
+
+    private void fullCleanup() {
+        if (index != -1) {
+            // 1. 停止源
+            AL10.alSourceStop(index);
+
+            // 2. 【关键】解绑所有缓冲区
+            AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
+
+            // 3. 循环清理所有队列中的缓冲区，直到完全清空
+            int queued;
+            while ((queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED)) > 0) {
+                int buffer = AL10.alSourceUnqueueBuffers(index);
+                if (buffer != 0) {
+                    AL10.alDeleteBuffers(buffer);
+                }
+            }
+
+            // 4. 清理已处理的缓冲区
+            int processed;
+            while ((processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED)) > 0) {
+                int buffer = AL10.alSourceUnqueueBuffers(index);
+                if (buffer != 0) {
+                    AL10.alDeleteBuffers(buffer);
+                }
+            }
+        }
+        queue.clear();
     }
 
     public void run1() {
@@ -72,9 +112,12 @@ public class AllMusicPlayer extends InputStream {
         if (nowTask == null) {
             return;
         }
+        String url = nowTask.url;
         closePlayer();
-        nowTask.time = time;
-        tasks.push(nowTask);
+        PlayTaskObj task = new PlayTaskObj();
+        task.url = url;
+        task.time = time;
+        tasks.push(task);
         semaphore.release();
     }
 
@@ -92,6 +135,31 @@ public class AllMusicPlayer extends InputStream {
             throw new IOException("Response entity is null");
         }
         content = new BufferedInputStream(entity.getContent());
+    }
+
+    private void resetSource() {
+        if (index != -1) {
+            // 完全重置源状态 - 这是消除杂音的关键
+            AL10.alSourceStop(index);
+            AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
+
+            // 循环清理直到队列为空
+            int queued;
+            do {
+                queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                if (queued > 0) {
+                    int buffer = AL10.alSourceUnqueueBuffers(index);
+                    if (buffer != 0) {
+                        AL10.alDeleteBuffers(buffer);
+                    }
+                }
+            } while (queued > 0);
+
+            // 重置音量等参数
+            AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
+            AL10.alSourcef(index, AL10.AL_PITCH, 1.0f);
+        }
+        queue.clear();
     }
 
     private void run() {
@@ -114,6 +182,9 @@ public class AllMusicPlayer extends InputStream {
                     }
                 }
 
+                // 【关键】每次播放新歌前完全重置源
+                resetSource();
+
                 nowTask = tasks.pop();
                 if (nowTask == null || nowTask.url == null || nowTask.url.isEmpty()) continue;
                 tasks.clear();
@@ -131,9 +202,6 @@ public class AllMusicPlayer extends InputStream {
                 content.read(head);
                 content.reset();
 
-//                if (head[0] == 'f' && head[1] == 'L' && head[2] == 'a' && head[3] == 'C') {
-//                    decoder = new FlacDecoder(this);
-//                }
                 if (head[0] == 0 && head[1] == 0 && head[2] == 0 && head[3] == 0x1c) {
                     decoder = new M4ADecoder(this);
                 } else if (head[0] == 'I' && head[1] == 'D' && head[2] == '3') {
@@ -150,12 +218,6 @@ public class AllMusicPlayer extends InputStream {
                 }
 
                 isPlay = true;
-                int m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                while (m_numqueued > 0) {
-                    int temp = AL10.alSourceUnqueueBuffers(index);
-                    AL10.alDeleteBuffers(temp);
-                    m_numqueued--;
-                }
                 frequency = decoder.getOutputFrequency();
                 channels = decoder.getOutputChannels();
                 if (channels != 1 && channels != 2) continue;
@@ -165,26 +227,22 @@ public class AllMusicPlayer extends InputStream {
                 queue.clear();
                 reload = false;
                 isClose = false;
+
                 while (true) {
                     try {
                         if (isClose) break;
+
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
                             if (isClose) break;
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
                                     .put(output.buff, 0, output.len);
-                            ((Buffer) byteBuffer).flip();
+                            byteBuffer.flip();
                             queue.add(byteBuffer);
                         }
 
-                        if (AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED) > 0) {
-                            if (isClose) break;
-                            int temp = AL10.alSourceUnqueueBuffers(index);
-                            AL10.alDeleteBuffers(temp);
-                        }
-
-                        Thread.sleep(10);
+                        Thread.sleep(5);
                     } catch (Exception e) {
                         if (!isClose) {
                             e.printStackTrace();
@@ -192,11 +250,14 @@ public class AllMusicPlayer extends InputStream {
                         break;
                     }
                 }
+
                 streamClose();
                 decodeClose();
+
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
                     Thread.sleep(50);
                 }
+
                 if (!reload) {
                     wait = true;
                     if (semaphore1.tryAcquire(500, TimeUnit.MILLISECONDS)) {
@@ -207,12 +268,16 @@ public class AllMusicPlayer extends InputStream {
                         }
                     }
                     isPlay = false;
+                    // 播放完成后也清理一下
                     AL10.alSourceStop(index);
-                    m_numqueued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                    while (m_numqueued > 0) {
-                        int temp = AL10.alSourceUnqueueBuffers(index);
-                        AL10.alDeleteBuffers(temp);
-                        m_numqueued--;
+                    AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
+                    int queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+                    while (queued > 0) {
+                        int buffer = AL10.alSourceUnqueueBuffers(index);
+                        if (buffer != 0) {
+                            AL10.alDeleteBuffers(buffer);
+                        }
+                        queued--;
                     }
                 } else {
                     tasks.push(nowTask);
@@ -225,7 +290,6 @@ public class AllMusicPlayer extends InputStream {
     }
 
     public void tick() {
-        int count = 0;
         if (wait) {
             wait = false;
             semaphore1.release();
@@ -234,31 +298,56 @@ public class AllMusicPlayer extends InputStream {
         if (isClose) {
             return;
         }
-        if (isPlay) {
+
+        if (isPlay && index != -1) {
+            // 设置音量
             float temp = AllMusicCore.bridge.getVolume();
             float now = AL10.alGetSourcef(index, AL10.AL_GAIN);
             if (now != temp) {
                 AL10.alSourcef(index, AL10.AL_GAIN, temp);
             }
-        }
-        while (!queue.isEmpty()) {
-            count++;
-            if (count > AllMusicCore.config.exitSize) break;
-            ByteBuffer byteBuffer = queue.poll();
-            if (byteBuffer == null) continue;
-            if (isClose) return;
-            IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
-            AL10.alGenBuffers(intBuffer);
 
-            AL10.alBufferData(
-                    intBuffer.get(0),
-                    channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
-                    byteBuffer,
-                    frequency);
+            // 清理已处理完的缓冲区（只清理，不删除，让 OpenAL 自己管理）
+            int processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED);
+            for (int i = 0; i < processed; i++) {
+                AL10.alSourceUnqueueBuffers(index);  // 只出队，不删除
+            }
 
-            AL10.alSourceQueueBuffers(index, intBuffer);
-            if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
-                AL10.alSourcePlay(index);
+            // 添加新的音频数据
+            int count = 0;
+            int queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+
+            while (!queue.isEmpty() && queued < AllMusicCore.config.queueSize) {
+                count++;
+                if (count > AllMusicCore.config.exitSize) break;
+
+                ByteBuffer byteBuffer = queue.poll();
+                if (byteBuffer == null) continue;
+                if (isClose) return;
+
+                IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
+                AL10.alGenBuffers(intBuffer);
+                int buffer = intBuffer.get(0);
+
+                if (buffer == 0) continue;
+
+                AL10.alBufferData(
+                        buffer,
+                        channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
+                        byteBuffer,
+                        frequency);
+
+                AL10.alSourceQueueBuffers(index, buffer);
+                queued++;
+
+                if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
+                    AL10.alSourcePlay(index);
+                }
+            }
+        } else if (index != -1) {
+            // 不在播放状态，确保停止
+            if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
+                AL10.alSourceStop(index);
             }
         }
     }
@@ -266,6 +355,7 @@ public class AllMusicPlayer extends InputStream {
     public void closePlayer() {
         isClose = true;
         queue.clear();
+        nowTask = null;
     }
 
     public void setMusic(String url) {
