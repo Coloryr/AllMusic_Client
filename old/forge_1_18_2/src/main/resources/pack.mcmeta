@@ -1,7 +1,0 @@
-{
-  "pack": {
-    "description": "heartage resources",
-    "pack_format": 8,
-    "_comment": "A pack_format of 6 requires json lang files. Note: we require v6 pack meta for all mods."
-  }
-}
