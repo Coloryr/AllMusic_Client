@@ -1,6 +1,9 @@
 val shadowImplementation by configurations.getting
 
 dependencies {
+    shadowImplementation(project(":codec:buffercodec"))
+    shadowImplementation(project(":codec"))
+
     shadowImplementation("org.apache.httpcomponents.client5:httpclient5:5.6")
     shadowImplementation("org.apache.httpcomponents.core5:httpcore5:5.4")
     shadowImplementation("org.apache.httpcomponents.core5:httpcore5-h2:5.4")
