@@ -10,7 +10,7 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
@@ -40,7 +40,7 @@ import java.nio.ByteBuffer;
 public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBridge {
     public static final Logger LOGGER = LoggerFactory.getLogger("AllMusic Client");
     public static final Identifier channel = Identifier.fromNamespaceAndPath("allmusic", "channel");
-    private static GuiGraphics gui;
+    private static GuiGraphicsExtractor gui;
 
     @SubscribeEvent
     public static void setup(final FMLClientSetupEvent event) {
@@ -98,7 +98,7 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
         Minecraft.getInstance().execute(() -> {
             if (Minecraft.getInstance().player == null)
                 return;
-            Minecraft.getInstance().player.displayClientMessage(Component.literal(finalData), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(finalData));
         });
     }
 
@@ -160,7 +160,7 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
     public void drawText(String item, int x, int y, int color, boolean shadow) {
         var hud = Minecraft.getInstance().font;
         Component component = MiniMessage.parse(item);
-        gui.drawString(hud, component, x, y, color, shadow);
+        gui.text(hud, component, x, y, color, shadow);
     }
 
     @Override
