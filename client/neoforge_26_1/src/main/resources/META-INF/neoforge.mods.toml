@@ -15,13 +15,13 @@ description='''AllMusic Client Mod'''
 [[dependencies.allmusic_client]]
 modId="neoforge"
 type="required"
-versionRange="[21.11.17-beta,)"
+versionRange="[26.1.0.19-beta,)"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.allmusic_client]]
 modId="minecraft"
 type="required"
-versionRange="[1.21.11]"
+versionRange="[26.1)"
 ordering="NONE"
 side="CLIENT"

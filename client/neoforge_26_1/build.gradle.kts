@@ -1,15 +1,15 @@
 plugins {
-    id("dev.architectury.loom-no-remap") version "1.14-SNAPSHOT"
-    id("architectury-plugin") version "3.5-SNAPSHOT"
+    id("dev.architectury.loom-no-remap") version Versions.architecturyLoom
+//    id("architectury-plugin") version "3.5-SNAPSHOT"
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_25
 java.targetCompatibility = JavaVersion.VERSION_25
 
-architectury {
-  platformSetupLoomIde()
-  neoForge()
-}
+//architectury {
+//  platformSetupLoomIde()
+//  neoForge()
+//}
 
 repositories {
     maven("https://maven.neoforged.net/releases/")
