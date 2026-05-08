@@ -17,6 +17,6 @@ subprojects {
 
 tasks {
     clean {
-        delete("$projectDir/target")
+        delete("$projectDir/../build")
     }
 }

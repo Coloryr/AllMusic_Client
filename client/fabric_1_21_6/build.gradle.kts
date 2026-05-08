@@ -30,7 +30,7 @@ tasks {
         inputFile.set(shadowJar.get().archiveFile)
 
         archiveFileName.set("[fabric-1.21.6]AllMusic_Client-${project.version}.jar")
-        destinationDirectory.set(file("${parent!!.projectDir}/target"))
+        destinationDirectory.set(file("${parent!!.projectDir}/../build"))
     }
 
     build {

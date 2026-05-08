@@ -30,16 +30,9 @@ tasks {
     shadowJar {
         relocate("com.google.gson", "com.coloryr.allmusic.libs.com.google.gson")
 
-//        inputFile.set(shadowJar.get().archiveFile)
-//        archiveFileName.set("[neoforge-26.1]AllMusic_Client-${project.version}.jar")
-//        destinationDirectory.set(file("${parent!!.projectDir}/target"))
+        archiveFileName.set("[neoforge-26.1]AllMusic_Client-${project.version}.jar")
+        destinationDirectory.set(file("${parent!!.projectDir}/../build"))
     }
-
-//    remapJar {
-//        inputFile.set(shadowJar.get().archiveFile)
-//        archiveFileName.set("[neoforge-1.21.11]AllMusic_Client-${project.version}.jar")
-//        destinationDirectory.set(file("${parent!!.projectDir}/target"))
-//    }
 
     build {
         dependsOn(shadowJar)

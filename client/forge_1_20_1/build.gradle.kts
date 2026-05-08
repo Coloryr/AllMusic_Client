@@ -35,7 +35,7 @@ tasks {
     remapJar {
         inputFile.set(shadowJar.get().archiveFile)
         archiveFileName.set("[forge-1.20.1]AllMusic_Client-${project.version}.jar")
-        destinationDirectory.set(file("${parent!!.projectDir}/target"))
+        destinationDirectory.set(file("${parent!!.projectDir}/../build"))
     }
 
     build {
