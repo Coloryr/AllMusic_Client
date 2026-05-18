@@ -3,7 +3,9 @@ rootProject.name = "AllMusic_Client"
 include(":codec")
 include(":codec:buffercodec")
 
+
 include(":client:core")
+include(":client:core_gl")
 include(":client:fabric_1_16_5")
 include(":client:fabric_1_20_1")
 include(":client:fabric_1_21")

@@ -2,6 +2,8 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.GLTexture;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -18,6 +20,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 
 import java.nio.ByteBuffer;
 
@@ -30,12 +34,12 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
 
     @Override
     public Object genTexture(int size) {
-        return AllMusicCore.genGLTexture(size);
+        return GLTexture.genGLTexture(size);
     }
 
     @Override
     public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
+        GLTexture.updateGLTexture((int) tex, size, byteBuffer);
     }
 
     public int getScreenWidth() {
@@ -54,21 +58,23 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         return Minecraft.getInstance().font.lineHeight;
     }
 
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
+    public void drawText(String item, int color, boolean shadow) {
         Gui hud = Minecraft.getInstance().gui;
         Font textRenderer = hud.getFont();
         Component component = MiniMessage.parse(item);
         if (shadow) {
-            textRenderer.drawShadow(stack, component, x, y, color);
+            textRenderer.drawShadow(stack, component, 0, 0, color);
         } else {
-            textRenderer.draw(stack, component, x, y, color);
+            textRenderer.draw(stack, component, 0, 0, color);
         }
     }
 
-    public void drawPic(Object texture, int size, int x, int y, int ang) {
+    public void drawPic(Object texture, int size, int x, int y, int ang, float alpha) {
         GlStateManager._bindTexture((int) texture);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.enableAlphaTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.depthFunc(GL11.GL_LESS);
+        RenderSystem.enableBlend();
+        RenderSystem.depthFunc(GL30.GL_ALWAYS);
 
         Matrix4f matrix;
 
@@ -90,14 +96,16 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         float v1 = 1;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
         bufferBuilder.end();
-        RenderSystem.enableAlphaTest();
         BufferUploader.end(bufferBuilder);
+
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     public void sendMessage(String data) {
@@ -119,6 +127,11 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public void stopPlayMusic() {
         Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
         Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
+    }
+
+    @Override
+    public TextFrameBuffer makeTextRender() {
+        return new CoreRenderTarget();
     }
 
     @Override

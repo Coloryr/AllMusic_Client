@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class Tick {
 
-    @Inject(method = "tick", at = @At("TAIL"))
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;updateSource(Lnet/minecraft/client/Camera;)V"))
     public void tick(CallbackInfo info) {
         AllMusicCore.tick();
     }

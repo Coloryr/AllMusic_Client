@@ -1,19 +1,12 @@
 package com.coloryr.allmusic.client.core;
 
-import java.nio.ByteBuffer;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 
 /**
  * AllMusic 核心桥
  */
 public interface AllMusicBridge {
-    /**
-     * 获取一个渲染材质
-     *
-     * @param size 材质大小
-     * @return 材质
-     */
-    Object genTexture(int size);
-
     /**
      * 获取屏幕宽度
      *
@@ -44,37 +37,6 @@ public interface AllMusicBridge {
     int getFontHeight();
 
     /**
-     * 更新材质内容
-     *
-     * @param tex        材质
-     * @param size       贴图大小
-     * @param byteBuffer 贴图内容
-     */
-    void updateTexture(Object tex, int size, ByteBuffer byteBuffer);
-
-    /**
-     * 绘制文字
-     *
-     * @param item   文字内容
-     * @param x      X坐标
-     * @param y      Y坐标
-     * @param color  显示颜色
-     * @param shadow 是否有阴影
-     */
-    void drawText(String item, int x, int y, int color, boolean shadow);
-
-    /**
-     * 绘制图片
-     *
-     * @param texture 材质
-     * @param size    大小
-     * @param x       X坐标
-     * @param y       Y坐标
-     * @param ang     旋转角度
-     */
-    void drawPic(Object texture, int size, int x, int y, int ang);
-
-    /**
      * 显示消息
      *
      * @param data 显示内容
@@ -92,4 +54,17 @@ public interface AllMusicBridge {
      * 停止播放其他音频
      */
     void stopPlayMusic();
+
+    /**
+     * 创建渲染层
+     * @return 渲染层
+     */
+    TextFrameBuffer makeTextRender();
+
+    /**
+     * 创建图片渲染层
+     * @param size 图片大小
+     * @return 图片渲染
+     */
+    PictureFrameBuffer makePictureRender(int size);
 }

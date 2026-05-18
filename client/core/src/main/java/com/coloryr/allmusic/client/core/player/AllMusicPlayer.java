@@ -19,34 +19,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AllMusicPlayer extends InputStream {
 
     private final Stack<PlayTaskObj> tasks = new Stack<>();
     private final Semaphore semaphore = new Semaphore(0);
     private final Semaphore semaphore1 = new Semaphore(0);
-    private final Queue<ByteBuffer> queue = new ConcurrentLinkedQueue<>();
 
     private PlayTaskObj nowTask;
     private CloseableHttpResponse response;
     private BufferedInputStream content;
-    private volatile boolean isClose = false;
-    private volatile boolean reload = false;
+    private boolean isClose = false;
+    private boolean reload = false;
     private IDecoder decoder;
-    private volatile boolean isPlay = false;
+    private boolean isPlay = false;
     private boolean wait = false;
     private int index = -1;
     private int frequency;
     private int channels;
     private IntBuffer source;
     private long local;
-    private volatile boolean isRun;
+    private boolean isRun;
     private ScheduledExecutorService scheduler;
 
     public AllMusicPlayer(IntBuffer source) {
@@ -58,44 +56,6 @@ public class AllMusicPlayer extends InputStream {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void stop() {
-        if (scheduler != null && !scheduler.isShutdown()) {
-            scheduler.shutdown();
-        }
-        closePlayer();
-        // 完全清理 OpenAL 资源
-        fullCleanup();
-    }
-
-    private void fullCleanup() {
-        if (index != -1) {
-            // 1. 停止源
-            AL10.alSourceStop(index);
-
-            // 2. 【关键】解绑所有缓冲区
-            AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
-
-            // 3. 循环清理所有队列中的缓冲区，直到完全清空
-            int queued;
-            while ((queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED)) > 0) {
-                int buffer = AL10.alSourceUnqueueBuffers(index);
-                if (buffer != 0) {
-                    AL10.alDeleteBuffers(buffer);
-                }
-            }
-
-            // 4. 清理已处理的缓冲区
-            int processed;
-            while ((processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED)) > 0) {
-                int buffer = AL10.alSourceUnqueueBuffers(index);
-                if (buffer != 0) {
-                    AL10.alDeleteBuffers(buffer);
-                }
-            }
-        }
-        queue.clear();
     }
 
     public void run1() {
@@ -139,11 +99,9 @@ public class AllMusicPlayer extends InputStream {
 
     private void resetSource() {
         if (index != -1) {
-            // 完全重置源状态 - 这是消除杂音的关键
             AL10.alSourceStop(index);
             AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
 
-            // 循环清理直到队列为空
             int queued;
             do {
                 queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
@@ -155,11 +113,9 @@ public class AllMusicPlayer extends InputStream {
                 }
             } while (queued > 0);
 
-            // 重置音量等参数
             AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
             AL10.alSourcef(index, AL10.AL_PITCH, 1.0f);
         }
-        queue.clear();
     }
 
     private void run() {
@@ -182,7 +138,6 @@ public class AllMusicPlayer extends InputStream {
                     }
                 }
 
-                // 【关键】每次播放新歌前完全重置源
                 resetSource();
 
                 nowTask = tasks.pop();
@@ -224,7 +179,6 @@ public class AllMusicPlayer extends InputStream {
                 if (nowTask.time != 0) {
                     decoder.set(nowTask.time);
                 }
-                queue.clear();
                 reload = false;
                 isClose = false;
 
@@ -238,8 +192,39 @@ public class AllMusicPlayer extends InputStream {
                             if (output == null) break;
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
                                     .put(output.buff, 0, output.len);
-                            byteBuffer.flip();
-                            queue.add(byteBuffer);
+                            ((Buffer) byteBuffer).flip();
+
+                            IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
+                            AL10.alGenBuffers(intBuffer);
+                            int buffer = intBuffer.get(0);
+
+                            if (buffer == 0) continue;
+
+                            AL10.alBufferData(
+                                    buffer,
+                                    channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
+                                    byteBuffer,
+                                    frequency);
+
+                            AL10.alSourceQueueBuffers(index, buffer);
+
+                            if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
+                                AL10.alSourcePlay(index);
+                            }
+                        }
+
+                        float temp = AllMusicCore.bridge.getVolume();
+                        float now = AL10.alGetSourcef(index, AL10.AL_GAIN);
+                        if (now != temp) {
+                            AL10.alSourcef(index, AL10.AL_GAIN, temp);
+                        }
+
+                        int processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED);
+                        for (int i = 0; i < processed; i++) {
+                            int buffer = AL10.alSourceUnqueueBuffers(index);
+                            if (buffer != 0) {
+                                AL10.alDeleteBuffers(buffer);
+                            }
                         }
 
                         Thread.sleep(5);
@@ -268,7 +253,7 @@ public class AllMusicPlayer extends InputStream {
                         }
                     }
                     isPlay = false;
-                    // 播放完成后也清理一下
+
                     AL10.alSourceStop(index);
                     AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
                     int queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
@@ -294,67 +279,10 @@ public class AllMusicPlayer extends InputStream {
             wait = false;
             semaphore1.release();
         }
-
-        if (isClose) {
-            return;
-        }
-
-        if (isPlay && index != -1) {
-            // 设置音量
-            float temp = AllMusicCore.bridge.getVolume();
-            float now = AL10.alGetSourcef(index, AL10.AL_GAIN);
-            if (now != temp) {
-                AL10.alSourcef(index, AL10.AL_GAIN, temp);
-            }
-
-            // 清理已处理完的缓冲区（只清理，不删除，让 OpenAL 自己管理）
-            int processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED);
-            for (int i = 0; i < processed; i++) {
-                AL10.alSourceUnqueueBuffers(index);  // 只出队，不删除
-            }
-
-            // 添加新的音频数据
-            int count = 0;
-            int queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-
-            while (!queue.isEmpty() && queued < AllMusicCore.config.queueSize) {
-                count++;
-                if (count > AllMusicCore.config.exitSize) break;
-
-                ByteBuffer byteBuffer = queue.poll();
-                if (byteBuffer == null) continue;
-                if (isClose) return;
-
-                IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
-                AL10.alGenBuffers(intBuffer);
-                int buffer = intBuffer.get(0);
-
-                if (buffer == 0) continue;
-
-                AL10.alBufferData(
-                        buffer,
-                        channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
-                        byteBuffer,
-                        frequency);
-
-                AL10.alSourceQueueBuffers(index, buffer);
-                queued++;
-
-                if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) != AL10.AL_PLAYING) {
-                    AL10.alSourcePlay(index);
-                }
-            }
-        } else if (index != -1) {
-            // 不在播放状态，确保停止
-            if (AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
-                AL10.alSourceStop(index);
-            }
-        }
     }
 
     public void closePlayer() {
         isClose = true;
-        queue.clear();
         nowTask = null;
     }
 

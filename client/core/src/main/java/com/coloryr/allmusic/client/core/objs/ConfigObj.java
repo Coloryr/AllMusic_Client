@@ -9,8 +9,4 @@ public class ConfigObj {
      * 音频队列大小
      */
     public int queueSize;
-    /**
-     * 队列溢出大小
-     */
-    public int exitSize;
 }

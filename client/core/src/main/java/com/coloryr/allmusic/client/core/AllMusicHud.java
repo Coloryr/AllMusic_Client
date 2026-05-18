@@ -1,6 +1,7 @@
-package com.coloryr.allmusic.client.core.hud;
+package com.coloryr.allmusic.client.core;
 
-import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.coloryr.allmusic.codec.HudDirType;
 import com.coloryr.allmusic.codec.HudPosObj;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -9,7 +10,10 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -29,28 +33,46 @@ public class AllMusicHud {
     /**
      * 图片buffer
      */
-    private final ByteBuffer byteBuffer;
+    private byte[] sourceImage;
     /**
-     * 游戏内贴图
+     * 图片buffer
      */
-    private final Object texture;
+    private byte[] rotateImage;
+
     /**
      * 图片大小
      */
     private final int size;
+
     //显示信息
-    public String info = "";
-    public String list = "";
-    public String lyric = "";
+    private String info = "";
+    private String list = "";
+    private String lyric = "";
+    private String lyricKtv = "";
+
+    public float lyric_state = 0;
+
     public HudPosObj save;
+
+    /**
+     * 图片渲染
+     */
+    private final PictureFrameBuffer picRender;
+
+    /**
+     * 文字渲染
+     */
+    private final TextFrameBuffer infoRender;
+//    private final TextFrameBuffer list_buffer;
+//
+//    private final TextFrameBuffer lyric_buffer;
+//    private final TextFrameBuffer lyric_tran_buffer;
+
     /**
      * 是否有图片
      */
     private boolean haveImg;
-    /**
-     * 是否为旋转图片
-     */
-    private boolean thisRoute;
+
     /**
      * 旋转角度
      */
@@ -63,7 +85,11 @@ public class AllMusicHud {
     /**
      * 是否需要更新材质
      */
-    private boolean needUpload;
+    private boolean imageNeedUpload;
+    /**
+     * 是否需要文字
+     */
+    private boolean infoNeedUpdate;
 
     public AllMusicHud(int size) {
         this.size = size;
@@ -71,10 +97,17 @@ public class AllMusicHud {
         Thread thread = new Thread(this::run);
         thread.setName("allmusic_pic");
         thread.start();
-        byteBuffer = ByteBuffer.allocateDirect(size * size * 4);
-        texture = AllMusicCore.bridge.genTexture(size);
+
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::picRotateTick, 0, 1, TimeUnit.MILLISECONDS);
+
+        picRender = AllMusicCore.bridge.makePictureRender(size);
+
+        infoRender = AllMusicCore.bridge.makeTextRender();
+//        list_buffer = AllMusicCore.bridge.makeTextRender();
+//
+//        lyric_buffer = AllMusicCore.bridge.makeTextRender();
+//        lyric_tran_buffer = AllMusicCore.bridge.makeTextRender();
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
@@ -115,7 +148,7 @@ public class AllMusicHud {
     private void loadPic(String picUrl) {
         haveImg = false;
         try {
-            while (save == null || needUpload) {
+            while (save == null || imageNeedUpload) {
                 Thread.sleep(200);
             }
             if (!save.pic.enable) {
@@ -128,83 +161,61 @@ public class AllMusicHud {
                 return resizeImage(ImageIO.read(inputStream), size, size);
             }));
 
-            int[] pixels = new int[size * size];
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", outputStream);
+            sourceImage = outputStream.toByteArray();
 
-            //图片旋转
-            if (save.pic.shadow) {
-                // 透明底的图片
-                BufferedImage formatAvatarImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D graphics = formatAvatarImage.createGraphics();
-                // 把图片切成一个园
-                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // 留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
-                int border = (int) (size * 0.11);
-                // 图片是一个圆型
-                Ellipse2D.Double shape = new Ellipse2D.Double(border, border, size - border * 2, size - border * 2);
-                // 需要保留的区域
-                graphics.setClip(shape);
-                graphics.drawImage(image, border, border, size - border * 2, size - border * 2, null);
-                graphics.dispose();
-                // 在圆图外面再画一个圆
-                // 新创建一个graphics，这样画的圆不会有锯齿
-                graphics = formatAvatarImage.createGraphics();
-                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // 画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
-                // 使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
-                int border1;
+            // 透明底的图片
+            BufferedImage formatAvatarImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = formatAvatarImage.createGraphics();
+            // 把图片切成一个园
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            // 留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
+            int border = (int) (size * 0.11);
+            // 图片是一个圆型
+            Ellipse2D.Double shape = new Ellipse2D.Double(border, border, size - border * 2, size - border * 2);
+            // 需要保留的区域
+            graphics.setClip(shape);
+            graphics.drawImage(image, border, border, size - border * 2, size - border * 2, null);
+            graphics.dispose();
+            // 在圆图外面再画一个圆
+            // 新创建一个graphics，这样画的圆不会有锯齿
+            graphics = formatAvatarImage.createGraphics();
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            // 画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
+            // 使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
+            int border1;
 
-                border1 = (int) (size * 0.08);
-                BasicStroke s = new BasicStroke(border1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-                graphics.setStroke(s);
-                graphics.setColor(Color.decode("#121212"));
-                graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
+            border1 = (int) (size * 0.08);
+            BasicStroke s = new BasicStroke(border1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            graphics.setStroke(s);
+            graphics.setColor(Color.decode("#121212"));
+            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
 
-                border1 = (int) (size * 0.05);
-                float si = (float) (border1 / 6);
-                s = new BasicStroke(si, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-                graphics.setStroke(s);
-                graphics.setColor(Color.decode("#181818"));
-                graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
+            border1 = (int) (size * 0.05);
+            float si = (float) (border1 / 6);
+            s = new BasicStroke(si, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            graphics.setStroke(s);
+            graphics.setColor(Color.decode("#181818"));
+            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
 
-                border1 = (int) (size * 0.065);
-                graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
+            border1 = (int) (size * 0.065);
+            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
 
-                border1 = (int) (size * 0.08);
-                graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
+            border1 = (int) (size * 0.08);
+            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
 
-                border1 = (int) (size * 0.095);
-                graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
+            border1 = (int) (size * 0.095);
+            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
 
-                graphics.dispose();
+            graphics.dispose();
 
-//                ImageIO.write(formatAvatarImage, "png", new File(path.toFile(), "output.png"));
-
-                formatAvatarImage.getRGB(0, 0, size,
-                        size, pixels, 0, size);
-                thisRoute = true;
-            } else {
-                image.getRGB(0, 0, size, size, pixels, 0, size);
-                thisRoute = false;
-            }
+            outputStream = new ByteArrayOutputStream();
+            ImageIO.write(formatAvatarImage, "png", outputStream);
+            rotateImage = outputStream.toByteArray();
 
             request.clear();
-
-            synchronized (byteBuffer) {
-                for (int h = 0; h < size; h++) {
-                    for (int w = 0; w < size; w++) {
-                        int pixel = pixels[h * size + w];
-
-                        byteBuffer.put((byte) ((pixel >> 16) & 0xFF));
-                        byteBuffer.put((byte) ((pixel >> 8) & 0xFF));
-                        byteBuffer.put((byte) (pixel & 0xFF));
-                        byteBuffer.put((byte) ((pixel >> 24) & 0xFF));
-                    }
-                }
-
-                byteBuffer.flip();
-            }
-
-            needUpload = true;
+            imageNeedUpload = true;
         } catch (Exception e) {
             e.printStackTrace();
             AllMusicCore.bridge.sendMessage("图片解析错误");
@@ -216,9 +227,7 @@ public class AllMusicHud {
      * 更新材质
      */
     private void updateTexture() {
-        synchronized (byteBuffer) {
-            AllMusicCore.bridge.updateTexture(texture, size, byteBuffer);
-        }
+        picRender.updatePic(sourceImage, rotateImage);
         haveImg = true;
     }
 
@@ -267,38 +276,89 @@ public class AllMusicHud {
         //复制一份防止突然替换
         HudPosObj save = this.save;
         if (save == null) return;
-        if (save.info.enable && !info.isEmpty()) {
+        if (infoNeedUpdate && !info.isEmpty()) {
             int offset = 0;
             String[] temp = info.split("\n");
+
+            int height = AllMusicCore.bridge.getFontHeight();
+            int allHeight = (height + 10) * temp.length;
+            int allWidth = 0;
+
             for (String item : temp) {
-                drawText(item, save.info.x, save.info.y + offset, save.info.dir, save.info.color, save.info.shadow);
+                if (item.isEmpty()) {
+                    continue;
+                }
+                allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
+            }
+
+            infoRender.resize(allWidth, allHeight);
+            for (String item : temp) {
+                if (item.isEmpty()) {
+                    continue;
+                }
+                infoRender.drawText(item, offset, save.info.color, save.info.shadow);
                 offset += 10;
             }
         }
-        if (save.list.enable && !list.isEmpty()) {
-            String[] temp = list.split("\n");
-            int offset = 0;
-            for (String item : temp) {
-                drawText(item, save.list.x, save.list.y + offset, save.list.dir, save.list.color, save.list.shadow);
-                offset += 10;
-            }
+
+        if (save.info.enable) {
+//            info_buffer.draw();
         }
-        if (save.lyric.enable && !lyric.isEmpty()) {
-            String[] temp = lyric.split("\n");
-            int offset = 0;
-            for (String item : temp) {
-                drawText(item, save.lyric.x, save.lyric.y + offset, save.lyric.dir,
-                        save.lyric.color, save.lyric.shadow);
-                offset += 10;
-            }
-        }
+//        if (save.list.enable && !list.isEmpty()) {
+//            String[] temp = list.split("\n");
+//            int offset = 0;
+//            for (String item : temp) {
+//                if (item.isEmpty()) {
+//                    offset += 10;
+//                    continue;
+//                }
+//                int width = AllMusicCore.bridge.getTextWidth(item);
+//                int height = AllMusicCore.bridge.getFontHeight();
+//
+//                list_buffer.resize(width, height);
+//                list_buffer.use();
+//
+//                AllMusicCore.bridge.drawText(item, save.list.color, save.list.shadow);
+//
+//                drawText(list_buffer, width, height, save.list.x, save.list.y + offset,
+//                        save.list.dir, save.list.alpha);
+//
+//                list_buffer.unUse();
+//
+//                offset += 10;
+//            }
+//        }
+//        if (save.lyric.enable && !lyric.isEmpty()) {
+//            String[] temp = lyric.split("\n");
+//            int offset = 0;
+//            for (String item : temp) {
+//                if (item.isEmpty()) {
+//                    offset += 10;
+//                    continue;
+//                }
+//                int width = AllMusicCore.bridge.getTextWidth(item);
+//                int height = AllMusicCore.bridge.getFontHeight();
+//
+//                lyric_buffer.resize(width, height);
+//                lyric_buffer.use();
+//
+//                AllMusicCore.bridge.drawText(item, save.lyric.color, save.lyric.shadow);
+//
+//                drawText(lyric_buffer, width, height, save.lyric.x, save.lyric.y + offset,
+//                        save.lyric.dir, save.lyric.alpha);
+//
+//                lyric_buffer.unUse();
+//
+//                offset += 10;
+//            }
+//        }
         //需要更新材质
-        if (needUpload) {
-            needUpload = false;
+        if (imageNeedUpload) {
+            imageNeedUpload = false;
             //是否正在渲染中，多线程渲染需要做这个判断
             if (display) {
                 display = false;
-                needUpload = true;
+                imageNeedUpload = true;
                 return;
             }
             updateTexture();
@@ -363,23 +423,19 @@ public class AllMusicHud {
                 break;
         }
 
-        AllMusicCore.bridge.drawPic(texture, size, x1, y1, (save.pic.shadow && thisRoute) ? ang : 0);
+        picRender.drawPic(save.pic.shadow, size, x1, y1, ang, save.pic.alpha);
     }
 
     /**
      * 显示文字内容
      *
-     * @param item   内容
+     * @param fb   内容
      * @param x      X坐标
      * @param y      Y坐标
      * @param dir    对齐方式
-     * @param color  显示颜色
-     * @param shadow 是否带阴影
+     * @param alpha 透明度
      */
-    private void drawText(String item, int x, int y, HudDirType dir, int color, boolean shadow) {
-        int width = AllMusicCore.bridge.getTextWidth(item);
-        int height = AllMusicCore.bridge.getFontHeight();
-
+    private void drawText(TextFrameBuffer fb, String text, int width, int height, int x, int y, HudDirType dir, float alpha) {
         int screenWidth = AllMusicCore.bridge.getScreenWidth();
         int screenHeight = AllMusicCore.bridge.getScreenHeight();
 
@@ -417,6 +473,24 @@ public class AllMusicHud {
                 break;
         }
 
-        AllMusicCore.bridge.drawText(item, x1, y1, color, shadow);
+//        fb.draw(text, alpha, x1, y1, width, height);
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+
+        infoNeedUpdate = true;
+    }
+
+    public void setList(String list) {
+        this.list = list;
+    }
+
+    public void setLyric(String lyric) {
+        this.lyric = lyric;
+    }
+
+    public void setLyricKtv(String ktv) {
+        this.lyricKtv = ktv;
     }
 }

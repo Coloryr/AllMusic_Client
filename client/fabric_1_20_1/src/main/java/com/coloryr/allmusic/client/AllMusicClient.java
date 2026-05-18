@@ -2,39 +2,25 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-
-import java.nio.ByteBuffer;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final ResourceLocation ID = new ResourceLocation("allmusic", "channel");
     private static GuiGraphics context;
 
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
-
-    @Override
-    public Object genTexture(int size) {
-        return AllMusicCore.genGLTexture(size);
-    }
-
-    @Override
-    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
-    }
 
     public int getScreenWidth() {
         return Minecraft.getInstance().getWindow().getGuiScaledWidth();
@@ -50,49 +36,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
 
     public int getFontHeight() {
         return Minecraft.getInstance().font.lineHeight;
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(item);
-        context.drawString(hud, component, x, y, color, shadow);
-    }
-
-    public void drawPic(Object texture, int size, int x, int y, int ang) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, (int) texture);
-
-        PoseStack stack = new PoseStack();
-        Matrix4f matrix = stack.last().pose();
-
-        int a = size / 2;
-
-        if (ang > 0) {
-            matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
-        } else {
-            matrix = matrix.translation(x + a, y + a, 0);
-        }
-
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        int z = 0;
-        int u0 = 0;
-        float u1 = 1;
-        float v0 = 0;
-        float v1 = 1;
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
-
-        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     public void sendMessage(String data) {
@@ -114,6 +57,16 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public void stopPlayMusic() {
         Minecraft.getInstance().getSoundManager().stop(null, SoundSource.MUSIC);
         Minecraft.getInstance().getSoundManager().stop(null, SoundSource.RECORDS);
+    }
+
+    @Override
+    public TextFrameBuffer makeTextRender() {
+        return new CoreRenderTarget();
+    }
+
+    @Override
+    public PictureFrameBuffer makePictureRender(int size) {
+        return new PicRender(size);
     }
 
     public static void update(GuiGraphics draw) {
