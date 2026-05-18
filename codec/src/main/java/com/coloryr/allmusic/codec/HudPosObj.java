@@ -17,11 +17,11 @@ public class HudPosObj {
     public static HudItemPosObj makeDefault(HudType pos) {
         switch (pos) {
             case INFO:
-                return new HudItemPosObj(74, 2, HudDirType.TOP_LEFT, 0xffffffff, true, true, 1.0f);
+                return new HudItemPosObj(74, 2, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
             case LIST:
-                return new HudItemPosObj(2, 74, HudDirType.TOP_LEFT, 0xffffffff, true, true, 1.0f);
+                return new HudItemPosObj(2, 74, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
             case LYRIC:
-                return new HudItemPosObj(74, 53, HudDirType.TOP_LEFT, 0xffffffff, true, true, 1.0f);
+                return new HudItemPosObj(74, 53, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
             case PIC:
                 return new HudItemPosObj(2, 2, HudDirType.TOP_LEFT, 70, true, true, 1.0f);
         }
@@ -62,9 +62,9 @@ public class HudPosObj {
 
     public void init() {
         picRotateSpeed = 30;
-        list = new HudItemPosObj(2, 74, HudDirType.TOP_LEFT, 0xffffffff, true, true, 1.0f);
-        lyric = new HudItemPosObj(74, 53, HudDirType.TOP_LEFT, 0xffffffff, true, true, 1.0f);
-        info = new HudItemPosObj(74, 2, HudDirType.TOP_LEFT, 0xffffffff, true, true, 1.0f);
+        list = new HudItemPosObj(2, 74, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
+        lyric = new HudItemPosObj(74, 53, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
+        info = new HudItemPosObj(74, 2, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
         pic = new HudItemPosObj(2, 2, HudDirType.TOP_LEFT, 70, true, true, 1.0f);
     }
 }

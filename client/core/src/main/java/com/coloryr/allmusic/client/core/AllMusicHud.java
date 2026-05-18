@@ -292,6 +292,7 @@ public class AllMusicHud {
             }
 
             infoRender.resize(allWidth, allHeight);
+            infoRender.use();
             for (String item : temp) {
                 if (item.isEmpty()) {
                     continue;
@@ -299,10 +300,12 @@ public class AllMusicHud {
                 infoRender.drawText(item, offset, save.info.color, save.info.shadow);
                 offset += 10;
             }
+            infoRender.unUse();
+            infoNeedUpdate = false;
         }
 
         if (save.info.enable) {
-//            info_buffer.draw();
+            infoRender.draw(save.info.alpha, save.info.x, save.info.y, 0, 0);
         }
 //        if (save.list.enable && !list.isEmpty()) {
 //            String[] temp = list.split("\n");

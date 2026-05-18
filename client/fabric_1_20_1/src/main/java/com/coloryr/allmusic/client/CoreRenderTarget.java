@@ -5,25 +5,27 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexSorting;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.lwjgl.opengl.GL30;
 
 public class CoreRenderTarget extends TextFrameBuffer {
     private static final RenderBuffers renderBuffers = new RenderBuffers();
 
     private final RenderTarget target;
-    private Matrix4f matrix4f;
+    private Matrix4f matrix4f = new Matrix4f();
 
     private int nowWidth, nowHeight;
 
     public CoreRenderTarget() {
         target = new TextureTarget(800, 200, false, false);
         target.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        matrix4f = new Matrix4f().setOrtho(0.0F, target.width, target.height, 0.0F, 1000.0F, 3000.0F);
     }
 
     @Override
@@ -35,71 +37,73 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         if (nowWidth > target.width || nowHeight > target.height) {
             target.resize(nowWidth, nowHeight, false);
-            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (nowWidth / window.getGuiScale()), (float)(nowHeight / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
         }
+
+        matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
+                (float)(target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
     }
 
     @Override
-    public void drawText(String text, int y, int color, boolean shadow) {
+    public void use() {
         target.clear(false);
         target.bindWrite(true);
-        Matrix4f prj = RenderSystem.getProjectionMatrix();
 
+        RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+    }
 
-        var font = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(text);
-        font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), renderBuffers.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
-        RenderSystem.disableDepthTest();
-
-        renderBuffers.bufferSource().endBatch();
-        RenderSystem.enableDepthTest();
-
-        RenderSystem.setProjectionMatrix(prj, VertexSorting.ORTHOGRAPHIC_Z);
+    @Override
+    public void unUse() {
+        RenderSystem.restoreProjectionMatrix();
 
         RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
         main.bindWrite(true);
     }
 
     @Override
+    public void drawText(String text, int y, int color, boolean shadow) {
+        var font = Minecraft.getInstance().font;
+        Component component = MiniMessage.parse(text);
+        font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), renderBuffers.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+        RenderSystem.disableDepthTest();
+        renderBuffers.bufferSource().endBatch();
+        RenderSystem.enableDepthTest();
+    }
+
+    @Override
     public void draw(float alpha, int x, int y, int width, int height) {
-//        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
-//        main.bindWrite(true);
-//
-//        RenderSystem.assertOnRenderThread();
-//        GlStateManager._colorMask(true, true, true, false);
-//        GlStateManager._disableDepthTest();
-//        GlStateManager._depthMask(false);
-//        GlStateManager._viewport(0, 0, main.width, main.height);
-//
-//        Minecraft minecraft = Minecraft.getInstance();
-//        ShaderInstance shaderInstance = minecraft.gameRenderer.blitShader;
-//        shaderInstance.setSampler("DiffuseSampler", target.getColorTextureId());
-//        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, main.width, main.height, 0.0F, 1000.0F, 3000.0F);
-//        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-//        if (shaderInstance.MODEL_VIEW_MATRIX != null) {
-//            shaderInstance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));
-//        }
-//
-//        if (shaderInstance.PROJECTION_MATRIX != null) {
-//            shaderInstance.PROJECTION_MATRIX.set(matrix4f);
-//        }
-//
-//        shaderInstance.apply();
-//        float f = x;
-//        float g = y;
-//        float h = (float)width / target.width;
-//        float k = (float)height / target.height;
-//        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-//        BufferBuilder bufferBuilder = tesselator.getBuilder();
-//        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-//        bufferBuilder.vertex(0.0, g, 0.0).uv(0.0F, 0.0F).color(255, 255, 255, 255).endVertex();
-//        bufferBuilder.vertex(f, g, 0.0).uv(h, 0.0F).color(255, 255, 255, 255).endVertex();
-//        bufferBuilder.vertex(f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
-//        bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0F, k).color(255, 255, 255, 255).endVertex();
-//        BufferUploader.draw(bufferBuilder.end());
-//        shaderInstance.clear();
-//        GlStateManager._depthMask(true);
-//        GlStateManager._colorMask(true, true, true, true);
+        alpha = 1.0f;
+
+        RenderSystem.setShaderTexture(0, target.getColorTextureId());
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+
+        RenderSystem.depthMask(false);
+        RenderSystem.enableBlend();
+        RenderSystem.depthFunc(GL30.GL_ALWAYS);
+
+        Matrix4f matrix = new Matrix4f().translation(x, y, 0);
+
+        var w = target.width / 2;
+        var h = target.height / 2;
+
+        int x0 = -w;
+        int x1 = w;
+        int y0 = -h;
+        int y1 = h;
+        int z = 0;
+        int u0 = 0;
+        float u1 = 1;
+        float v0 = 0;
+        float v1 = 1;
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
+        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
+        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
+
+        BufferUploader.drawWithShader(bufferBuilder.end());
+        target.unbindRead();
     }
 }

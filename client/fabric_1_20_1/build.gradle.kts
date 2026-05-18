@@ -6,8 +6,6 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_17
 
 dependencies {
-    shadowImplementation(project(":client:core_gl"))
-
     minecraft("com.mojang:minecraft:1.20.1")
     mappings(loom.officialMojangMappings())
     modCompileOnly("net.fabricmc:fabric-loader:0.16.10")

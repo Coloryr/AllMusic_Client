@@ -10,7 +10,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL30;
 
-import java.nio.ByteBuffer;
+import java.io.ByteArrayInputStream;
 
 public class PicRender extends PictureFrameBuffer {
     private final DynamicTexture sourceTexture;
@@ -24,11 +24,13 @@ public class PicRender extends PictureFrameBuffer {
     @Override
     public void updatePic(byte[] source, byte[] rotate) {
         try {
-            var image1 = NativeImage.read(source);
+            ByteArrayInputStream stream = new ByteArrayInputStream(source);
+            var image1 = NativeImage.read(stream);
             sourceTexture.setPixels(image1);
             sourceTexture.upload();
 
-            var image2 = NativeImage.read(rotate);
+            stream = new ByteArrayInputStream(rotate);
+            var image2 = NativeImage.read(stream);
             rotateTexture.setPixels(image2);
             rotateTexture.upload();
         } catch (Exception e) {
