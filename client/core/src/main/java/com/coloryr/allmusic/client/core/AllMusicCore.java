@@ -1,9 +1,11 @@
 package com.coloryr.allmusic.client.core;
 
+import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.objs.ConfigObj;
 import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
 import com.coloryr.allmusic.codec.CommandType;
 import com.coloryr.allmusic.codec.HudPosObj;
+import com.coloryr.allmusic.codec.MusicPack;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
@@ -149,7 +151,7 @@ public class AllMusicCore {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        hud.save = null;
+        hud.close();
     }
 
     /**
@@ -157,7 +159,7 @@ public class AllMusicCore {
      */
     private static void stopPlaying() {
         player.closePlayer();
-        hud.close();
+        hud.clear();
     }
 
     /**
@@ -177,88 +179,49 @@ public class AllMusicCore {
     }
 
     /**
-     * 从数据包中读文字
-     *
-     * @param buf 数据包
-     * @return 文字
-     */
-    private static String readString(ByteBuf buf) {
-        int size = buf.readInt();
-        byte[] temp = new byte[size];
-        buf.readBytes(temp);
-
-        return new String(temp, StandardCharsets.UTF_8);
-    }
-
-    /**
      * 读取数据包
      *
      * @param buffer 数据包
      */
     public static void packRead(ByteBuf buffer) {
-        byte type = buffer.readByte();
-        if (type >= types.length || type < 0) {
-            return;
-        }
-        CommandType type1 = types[type];
-        String data = null;
-        float data2 = 0;
-        int data1 = 0;
-        switch (type1) {
-            case LYRIC:
-            case LYRIC_KTV:
-            case INFO:
-            case LIST:
-            case PLAY:
-            case IMG:
-            case HUD_DATA:
-                data = readString(buffer);
-                break;
-            case POS:
-                data1 = buffer.readInt();
-                break;
-            case LYRIC_STATE:
-                data2 = buffer.readFloat();
-                break;
-        }
-        packDo(type1, data, data1, data2);
-        buffer.clear();
+        packDo(MusicPacketCodec.decode(buffer));
     }
 
     /**
      * 解析数据包
      *
-     * @param type  命令
-     * @param data  数据
-     * @param data1 数据
+     * @param pack  数据
      */
-    public static void packDo(CommandType type, String data, int data1, float data2) {
-        if (type == CommandType.PLAY) {
+    public static void packDo(MusicPack pack) {
+        if (pack.type == CommandType.PLAY) {
             bridge.stopPlayMusic();
         }
 
-        switch (type) {
+        switch (pack.type) {
             case LYRIC:
-                hud.setLyric(data);
-                break;
-            case LYRIC_KTV:
-                hud.setLyricKtv(data);
+                MusicPack.LyricMusicPack pack1 = (MusicPack.LyricMusicPack) pack;
+                hud.setLyric(pack1.lyric, pack1.tlyric, pack1.klyric);
                 break;
             case LYRIC_STATE:
-                hud.lyric_state = data2;
+                MusicPack.FloatMusicPack pack2 = (MusicPack.FloatMusicPack) pack;
+                hud.lyricState = pack2.data;
                 break;
             case INFO:
-                hud.setInfo(data);
+                MusicPack.StringMusicPack pack3 = (MusicPack.StringMusicPack) pack;
+                hud.setInfo(pack3.data);
                 break;
             case LIST:
-                hud.setList(data);
+                MusicPack.StringMusicPack pack4 = (MusicPack.StringMusicPack) pack;
+                hud.setList(pack4.data);
                 break;
             case PLAY:
+                MusicPack.StringMusicPack pack5 = (MusicPack.StringMusicPack) pack;
                 stopPlaying();
-                player.setMusic(data);
+                player.setMusic(pack5.data);
                 break;
             case IMG:
-                hud.setImg(data);
+                MusicPack.StringMusicPack pack6 = (MusicPack.StringMusicPack) pack;
+                hud.setImg(pack6.data);
                 break;
             case STOP:
                 stopPlaying();
@@ -267,10 +230,12 @@ public class AllMusicCore {
                 hud.close();
                 break;
             case POS:
-                player.setTime(data1);
+                MusicPack.IntMusicPack pack7 = (MusicPack.IntMusicPack) pack;
+                player.setTime(pack7.data);
                 break;
             case HUD_DATA:
-                hud.setPos(gson.fromJson(data, HudPosObj.class));
+                MusicPack.StringMusicPack pack8 = (MusicPack.StringMusicPack) pack;
+                hud.setPos(gson.fromJson(pack8.data, HudPosObj.class));
                 break;
         }
     }

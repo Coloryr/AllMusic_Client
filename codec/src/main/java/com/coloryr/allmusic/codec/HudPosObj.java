@@ -4,8 +4,7 @@ public class HudPosObj {
     public HudItemPosObj list;
     public HudItemPosObj lyric;
     public HudItemPosObj info;
-    public HudItemPosObj pic;
-    public int picRotateSpeed;
+    public HudPicPosObj pic;
 
     public static HudPosObj make() {
         HudPosObj obj = new HudPosObj();
@@ -17,16 +16,20 @@ public class HudPosObj {
     public static HudItemPosObj makeDefault(HudType pos) {
         switch (pos) {
             case INFO:
-                return new HudItemPosObj(74, 2, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
+                return new HudItemPosObj(74, 2, HudPosType.TOP_LEFT, 0xffffff, true, true, 1.0f, LoopType.NO_LOOP, 1000);
             case LIST:
-                return new HudItemPosObj(2, 74, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
+                return new HudItemPosObj(2, 74, HudPosType.TOP_LEFT, 0xffffff, true, true, 1.0f, LoopType.NO_LOOP, 1000);
             case LYRIC:
-                return new HudItemPosObj(74, 53, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
+                return new HudItemPosObj(74, 53, HudPosType.TOP_LEFT, 0xffffff, true, true, 1.0f, LoopType.NO_LOOP, 1000);
             case PIC:
-                return new HudItemPosObj(2, 2, HudDirType.TOP_LEFT, 70, true, true, 1.0f);
+                return new HudItemPosObj(2, 2, HudPosType.TOP_LEFT, 70, true, true, 1.0f, LoopType.NO_LOOP, 1000);
         }
 
-        return new HudItemPosObj(0, 0, HudDirType.TOP_LEFT, 0xffffff, false, true, 1.0f);
+        return new HudItemPosObj(0, 0, HudPosType.TOP_LEFT, 0xffffff, false, true, 1.0f, LoopType.NO_LOOP, 1000);
+    }
+
+    public static HudPicPosObj makePicDefault() {
+        return new HudPicPosObj(2, 2, HudPosType.TOP_LEFT, 70, true, true, 1.0f, 30);
     }
 
     public HudPosObj copy() {
@@ -35,7 +38,6 @@ public class HudPosObj {
         obj1.list = this.list.copy();
         obj1.lyric = this.lyric.copy();
         obj1.pic = this.pic.copy();
-        obj1.picRotateSpeed = this.picRotateSpeed;
         return obj1;
     }
 
@@ -55,16 +57,15 @@ public class HudPosObj {
         }
         if (pic == null) {
             save = true;
-            pic = makeDefault(HudType.PIC);
+            pic = makePicDefault();
         }
         return save;
     }
 
     public void init() {
-        picRotateSpeed = 30;
-        list = new HudItemPosObj(2, 74, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
-        lyric = new HudItemPosObj(74, 53, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
-        info = new HudItemPosObj(74, 2, HudDirType.TOP_LEFT, 0xffffff, true, true, 1.0f);
-        pic = new HudItemPosObj(2, 2, HudDirType.TOP_LEFT, 70, true, true, 1.0f);
+        list = makeDefault(HudType.LIST);
+        lyric = makeDefault(HudType.LYRIC);
+        info = makeDefault(HudType.INFO);
+        pic = makePicDefault();
     }
 }

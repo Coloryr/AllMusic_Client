@@ -1,29 +1,28 @@
 package com.coloryr.allmusic.codec;
 
-public class HudItemPosObj {
-    public int x;
-    public int y;
-    public HudDirType dir;
+public class HudItemPosObj extends HudBasePosObj {
     public int color;
-    public float alpha;
     public boolean shadow;
-    public boolean enable;
+    public LoopType loop;
+    public int maxWidth;
 
     public HudItemPosObj() {
 
     }
 
-    public HudItemPosObj(int x, int y, HudDirType type, int color, boolean shadow, boolean enable, float alpha) {
+    public HudItemPosObj(int x, int y, HudPosType type, int color, boolean shadow, boolean enable, float alpha, LoopType loop, int maxWidth) {
         this.x = x;
         this.y = y;
-        this.dir = type;
+        this.pos = type;
         this.color = color;
         this.shadow = shadow;
         this.enable = enable;
         this.alpha = alpha;
+        this.loop = loop;
+        this.maxWidth = maxWidth;
     }
 
     public HudItemPosObj copy() {
-        return new HudItemPosObj(this.x, this.y, this.dir, this.color, this.shadow, this.enable, this.alpha);
+        return new HudItemPosObj(this.x, this.y, this.pos, this.color, this.shadow, this.enable, this.alpha, this.loop, this.maxWidth);
     }
 }

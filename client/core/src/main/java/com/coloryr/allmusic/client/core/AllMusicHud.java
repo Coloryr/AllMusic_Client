@@ -2,7 +2,7 @@ package com.coloryr.allmusic.client.core;
 
 import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
-import com.coloryr.allmusic.codec.HudDirType;
+import com.coloryr.allmusic.codec.HudPosType;
 import com.coloryr.allmusic.codec.HudPosObj;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 
@@ -12,9 +12,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.*;
 
@@ -48,11 +45,12 @@ public class AllMusicHud {
     private String info = "";
     private String list = "";
     private String lyric = "";
+    private String lyricTran = "";
     private String lyricKtv = "";
 
-    public float lyric_state = 0;
+    public float lyricState = 0;
 
-    public HudPosObj save;
+    private HudPosObj save;
 
     /**
      * 图片渲染
@@ -63,10 +61,10 @@ public class AllMusicHud {
      * 文字渲染
      */
     private final TextFrameBuffer infoRender;
-//    private final TextFrameBuffer list_buffer;
-//
-//    private final TextFrameBuffer lyric_buffer;
-//    private final TextFrameBuffer lyric_tran_buffer;
+    private final TextFrameBuffer listRender;
+    private final TextFrameBuffer lyricRender;
+    private final TextFrameBuffer lyricTranRender;
+    private final TextFrameBuffer lyricKtvRender;
 
     /**
      * 是否有图片
@@ -79,10 +77,6 @@ public class AllMusicHud {
     private int ang = 0;
     private int count = 0;
     /**
-     * 是否显示
-     */
-    private boolean display;
-    /**
      * 是否需要更新材质
      */
     private boolean imageNeedUpload;
@@ -90,6 +84,8 @@ public class AllMusicHud {
      * 是否需要文字
      */
     private boolean infoNeedUpdate;
+    private boolean listNeedUpdate;
+    private boolean lyricNeedUpdate;
 
     public AllMusicHud(int size) {
         this.size = size;
@@ -104,10 +100,10 @@ public class AllMusicHud {
         picRender = AllMusicCore.bridge.makePictureRender(size);
 
         infoRender = AllMusicCore.bridge.makeTextRender();
-//        list_buffer = AllMusicCore.bridge.makeTextRender();
-//
-//        lyric_buffer = AllMusicCore.bridge.makeTextRender();
-//        lyric_tran_buffer = AllMusicCore.bridge.makeTextRender();
+        listRender = AllMusicCore.bridge.makeTextRender();
+        lyricRender = AllMusicCore.bridge.makeTextRender();
+        lyricTranRender = AllMusicCore.bridge.makeTextRender();
+        lyricKtvRender = AllMusicCore.bridge.makeTextRender();
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
@@ -123,19 +119,26 @@ public class AllMusicHud {
      */
     private void picRotateTick() {
         if (save == null) return;
-        if (count < save.picRotateSpeed) {
+        if (count < save.pic.speed) {
             count++;
             return;
         }
         count = 0;
         ang++;
         ang = ang % 360;
+
+        infoRender.tick();
     }
 
     /**
      * 清理显示
      */
     public void close() {
+        clear();
+        save = null;
+    }
+
+    public void clear() {
         haveImg = false;
         info = list = lyric = "";
     }
@@ -165,25 +168,16 @@ public class AllMusicHud {
             ImageIO.write(image, "png", outputStream);
             sourceImage = outputStream.toByteArray();
 
-            // 透明底的图片
             BufferedImage formatAvatarImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics = formatAvatarImage.createGraphics();
-            // 把图片切成一个园
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            // 留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
             int border = (int) (size * 0.11);
-            // 图片是一个圆型
             Ellipse2D.Double shape = new Ellipse2D.Double(border, border, size - border * 2, size - border * 2);
-            // 需要保留的区域
             graphics.setClip(shape);
             graphics.drawImage(image, border, border, size - border * 2, size - border * 2, null);
             graphics.dispose();
-            // 在圆图外面再画一个圆
-            // 新创建一个graphics，这样画的圆不会有锯齿
             graphics = formatAvatarImage.createGraphics();
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            // 画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
-            // 使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
             int border1;
 
             border1 = (int) (size * 0.08);
@@ -267,110 +261,202 @@ public class AllMusicHud {
      */
     public void setPos(HudPosObj save) {
         this.save = save;
+
+        infoNeedUpdate = true;
+        listNeedUpdate = true;
+        lyricNeedUpdate = true;
     }
 
     /**
      * 显示更新
      */
     public void update() {
-        //复制一份防止突然替换
-        HudPosObj save = this.save;
         if (save == null) return;
-        if (infoNeedUpdate && !info.isEmpty()) {
-            int offset = 0;
-            String[] temp = info.split("\n");
 
-            int height = AllMusicCore.bridge.getFontHeight();
-            int allHeight = (height + 10) * temp.length;
-            int allWidth = 0;
+        // 需要更新文字渲染
+        if (infoNeedUpdate) {
+            if (!info.isEmpty()) {
+                int offset = 0;
+                String[] temp = info.split("\n");
 
-            for (String item : temp) {
-                if (item.isEmpty()) {
-                    continue;
+                int height = AllMusicCore.bridge.getFontHeight();
+                int allHeight = (height + 10) * temp.length;
+                int allWidth = 0;
+
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
                 }
-                allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
+
+                infoRender.resize(allWidth, allHeight);
+                infoRender.use();
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    infoRender.drawText(item, offset, save.info.color, save.info.shadow);
+                    offset += 10;
+                }
+                infoRender.unUse();
+            } else {
+                infoRender.use();
+                infoRender.unUse();
             }
 
-            infoRender.resize(allWidth, allHeight);
-            infoRender.use();
-            for (String item : temp) {
-                if (item.isEmpty()) {
-                    continue;
-                }
-                infoRender.drawText(item, offset, save.info.color, save.info.shadow);
-                offset += 10;
-            }
-            infoRender.unUse();
             infoNeedUpdate = false;
         }
 
-        if (save.info.enable) {
-            infoRender.draw(save.info.alpha, save.info.x, save.info.y, 0, 0);
+        if (listNeedUpdate) {
+            if (!list.isEmpty()) {
+                int offset = 0;
+                String[] temp = list.split("\n");
+
+                int height = AllMusicCore.bridge.getFontHeight();
+                int allHeight = (height + 10) * temp.length;
+                int allWidth = 0;
+
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
+                }
+
+                listRender.resize(allWidth, allHeight);
+                listRender.use();
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    listRender.drawText(item, offset, save.list.color, save.list.shadow);
+                    offset += 10;
+                }
+                listRender.unUse();
+
+            } else {
+                listRender.use();
+                listRender.unUse();
+            }
+
+            listNeedUpdate = false;
         }
-//        if (save.list.enable && !list.isEmpty()) {
-//            String[] temp = list.split("\n");
-//            int offset = 0;
-//            for (String item : temp) {
-//                if (item.isEmpty()) {
-//                    offset += 10;
-//                    continue;
-//                }
-//                int width = AllMusicCore.bridge.getTextWidth(item);
-//                int height = AllMusicCore.bridge.getFontHeight();
-//
-//                list_buffer.resize(width, height);
-//                list_buffer.use();
-//
-//                AllMusicCore.bridge.drawText(item, save.list.color, save.list.shadow);
-//
-//                drawText(list_buffer, width, height, save.list.x, save.list.y + offset,
-//                        save.list.dir, save.list.alpha);
-//
-//                list_buffer.unUse();
-//
-//                offset += 10;
-//            }
-//        }
-//        if (save.lyric.enable && !lyric.isEmpty()) {
-//            String[] temp = lyric.split("\n");
-//            int offset = 0;
-//            for (String item : temp) {
-//                if (item.isEmpty()) {
-//                    offset += 10;
-//                    continue;
-//                }
-//                int width = AllMusicCore.bridge.getTextWidth(item);
-//                int height = AllMusicCore.bridge.getFontHeight();
-//
-//                lyric_buffer.resize(width, height);
-//                lyric_buffer.use();
-//
-//                AllMusicCore.bridge.drawText(item, save.lyric.color, save.lyric.shadow);
-//
-//                drawText(lyric_buffer, width, height, save.lyric.x, save.lyric.y + offset,
-//                        save.lyric.dir, save.lyric.alpha);
-//
-//                lyric_buffer.unUse();
-//
-//                offset += 10;
-//            }
-//        }
+
+        if (lyricNeedUpdate) {
+            int offset = 0;
+            if (!lyric.isEmpty()) {
+                String[] temp = lyric.split("\n");
+
+                int height = AllMusicCore.bridge.getFontHeight();
+                int allHeight = (height + 10) * temp.length;
+                int allWidth = 0;
+
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
+                }
+
+                lyricRender.resize(allWidth, allHeight);
+                lyricRender.use();
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    lyricRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
+                    offset += 10;
+                }
+                lyricRender.unUse();
+            } else {
+                lyricRender.use();
+                lyricRender.unUse();
+            }
+
+            if (!lyricTran.isEmpty()) {
+                offset = 0;
+                String[] temp = lyricTran.split("\n");
+
+                int height = AllMusicCore.bridge.getFontHeight();
+                int allHeight = (height + 10) * temp.length;
+                int allWidth = 0;
+
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
+                }
+
+                lyricTranRender.resize(allWidth, allHeight);
+                lyricTranRender.use();
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    lyricTranRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
+                    offset += 10;
+                }
+                lyricTranRender.unUse();
+            } else {
+                lyricTranRender.use();
+                lyricTranRender.unUse();
+            }
+
+            if (!lyricKtv.isEmpty()) {
+                offset = 0;
+                String[] temp = lyricKtv.split("\n");
+
+                int height = AllMusicCore.bridge.getFontHeight();
+                int allHeight = (height + 10) * temp.length;
+                int allWidth = 0;
+
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
+                }
+
+                lyricKtvRender.resize(allWidth, allHeight);
+                lyricKtvRender.use();
+                for (String item : temp) {
+                    if (item.isEmpty()) {
+                        continue;
+                    }
+                    lyricKtvRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
+                    offset += 10;
+                }
+                lyricKtvRender.unUse();
+            } else {
+                lyricKtvRender.use();
+                lyricKtvRender.unUse();
+            }
+
+            listNeedUpdate = false;
+        }
+
+        if (save.info.enable) {
+            infoRender.draw(save.info.alpha, save.info.x, save.info.y, 1000);
+        }
+        if (save.list.enable) {
+            listRender.draw(save.list.alpha, save.list.x, save.list.y, 1000);
+        }
+        if (save.lyric.enable) {
+            lyricRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000);
+            lyricTranRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y + 10, 1000);
+            lyricKtvRender.drawWithState(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000, lyricState);
+        }
+
         //需要更新材质
         if (imageNeedUpload) {
             imageNeedUpload = false;
-            //是否正在渲染中，多线程渲染需要做这个判断
-            if (display) {
-                display = false;
-                imageNeedUpload = true;
-                return;
-            }
             updateTexture();
         }
         //绘制图片
         if (save.pic.enable && haveImg) {
-            display = true;
-            drawPic(save.pic.color, save.pic.x, save.pic.y, save.pic.dir, ang);
-            display = false;
+            drawPic(save.pic.size, save.pic.x, save.pic.y, save.pic.pos, ang);
         }
     }
 
@@ -383,7 +469,7 @@ public class AllMusicHud {
      * @param dir  对齐方式
      * @param ang  旋转角度
      */
-    private void drawPic(int size, int x, int y, HudDirType dir, int ang) {
+    private void drawPic(int size, int x, int y, HudPosType dir, int ang) {
         if (dir == null) {
             return;
         }
@@ -426,7 +512,7 @@ public class AllMusicHud {
                 break;
         }
 
-        picRender.drawPic(save.pic.shadow, size, x1, y1, ang, save.pic.alpha);
+        picRender.drawPic(save.pic.rotate, size, x1, y1, ang, save.pic.alpha);
     }
 
     /**
@@ -438,7 +524,7 @@ public class AllMusicHud {
      * @param dir    对齐方式
      * @param alpha 透明度
      */
-    private void drawText(TextFrameBuffer fb, String text, int width, int height, int x, int y, HudDirType dir, float alpha) {
+    private void drawText(TextFrameBuffer fb, int width, int height, int x, int y, HudPosType dir, float alpha) {
         int screenWidth = AllMusicCore.bridge.getScreenWidth();
         int screenHeight = AllMusicCore.bridge.getScreenHeight();
 
@@ -487,13 +573,17 @@ public class AllMusicHud {
 
     public void setList(String list) {
         this.list = list;
+
+        listNeedUpdate = true;
     }
 
-    public void setLyric(String lyric) {
+    public void setLyric(String lyric, String tlyric, String ktv) {
         this.lyric = lyric;
-    }
-
-    public void setLyricKtv(String ktv) {
+        this.lyricTran = tlyric;
         this.lyricKtv = ktv;
+
+        lyricState = 0;
+
+        lyricNeedUpdate = true;
     }
 }

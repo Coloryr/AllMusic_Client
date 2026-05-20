@@ -1,6 +1,6 @@
 package com.coloryr.allmusic.codec;
 
-public enum HudDirType {
+public enum HudPosType {
     /**
      * 左上角
      */
