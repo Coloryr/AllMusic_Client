@@ -227,7 +227,7 @@ public class AllMusicCore {
                 stopPlaying();
                 break;
             case CLEAR:
-                hud.close();
+                hud.clear();
                 break;
             case POS:
                 MusicPack.IntMusicPack pack7 = (MusicPack.IntMusicPack) pack;

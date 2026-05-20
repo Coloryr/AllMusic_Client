@@ -140,7 +140,11 @@ public class AllMusicHud {
 
     public void clear() {
         haveImg = false;
-        info = list = lyric = "";
+        info = list = lyric = lyricTran = lyricKtv = "";
+
+        infoNeedUpdate = true;
+        lyricNeedUpdate = true;
+        listNeedUpdate = true;
     }
 
     /**
