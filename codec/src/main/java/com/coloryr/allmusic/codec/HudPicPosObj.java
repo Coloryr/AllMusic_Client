@@ -5,23 +5,16 @@ public class HudPicPosObj extends HudBasePosObj {
     public boolean rotate;
     public int speed;
 
-    public HudPicPosObj() {
-
-    }
-
-    public HudPicPosObj(int x, int y, HudPosType type, int size, boolean rotate, boolean enable, float alpha, int speed) {
-        this.x = x;
-        this.y = y;
-        this.pos = type;
-        this.size = size;
-        this.rotate = rotate;
-        this.enable = enable;
-        this.alpha = alpha;
-
-        this.speed = speed;
-    }
-
     public HudPicPosObj copy() {
-        return new HudPicPosObj(this.x, this.y, this.pos, this.size, this.rotate, this.enable, this.alpha, this.speed);
+        HudPicPosObj obj = new HudPicPosObj();
+        obj.x = x;
+        obj.y = y;
+        obj.pos = pos;
+        obj.size = size;
+        obj.rotate = rotate;
+        obj.enable = enable;
+        obj.alpha = alpha;
+        obj.speed = speed;
+        return obj;
     }
 }

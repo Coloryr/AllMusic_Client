@@ -18,7 +18,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
     private static final RenderBuffers renderBuffers = new RenderBuffers();
 
     private final RenderTarget target;
-    private Matrix4f matrix4f = new Matrix4f();
+    private Matrix4f matrix4f;
 
     public CoreRenderTarget() {
         target = new TextureTarget(800, 200, false, false);
@@ -34,21 +34,32 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         if (nowWidth > target.width || nowHeight > target.height) {
             target.resize(nowWidth, nowHeight, false);
+            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
+                    (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
         }
 
-        matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
-                (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
+        if (matrix4f == null) {
+            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
+                    (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
+        }
+    }
+
+    @Override
+    public void clear() {
+        target.clear(false);
+        texts.clear();
     }
 
     @Override
     public void use() {
-        target.clear(false);
+        clear();
+
         target.bindWrite(true);
 
-        texts.clear();
-
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+        if (matrix4f != null) {
+            RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+        }
     }
 
     @Override
@@ -88,7 +99,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
      * @param texY   贴图左上角Y坐标
      * @param scale  贴图缩放
      */
-    public void draw(float alpha, float x, float y, float width, float height, float texX, float texY, float scale) {
+    private void draw(float alpha, float x, float y, float width, float height, float texX, float texY, float scale) {
         RenderSystem.setShaderTexture(0, target.getColorTextureId());
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 
@@ -283,8 +294,21 @@ public class CoreRenderTarget extends TextFrameBuffer {
         for (var item : texts) {
             drawLoop(alpha, x, y + item.y, 0, item.y, item.width, item.height, maxWidth, 0, item.scale);
         }
+    }
 
-        target.unbindRead();
+
+    @Override
+    public int drawLine(float alpha, int x, int y, int line) {
+        if (line >= texts.size()) {
+            return 0;
+        }
+        TextItem item = texts.get(line);
+        if (item != null) {
+            draw(alpha, x, y, item.width, item.height, 0, item.y, item.scale);
+            return item.width;
+        }
+
+        return 0;
     }
 
     @Override

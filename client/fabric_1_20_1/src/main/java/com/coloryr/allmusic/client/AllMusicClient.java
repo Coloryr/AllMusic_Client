@@ -4,6 +4,7 @@ import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -17,8 +18,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
+    public static final String MODID = "allmusic_client";
+
     public static final ResourceLocation ID = new ResourceLocation("allmusic", "channel");
-    private static GuiGraphics context;
+
+    public static GuiGraphics graphics;
 
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
@@ -65,12 +69,17 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     }
 
     @Override
+    public TextureRender makeTextureRender(String file) {
+        return new TexRender(file);
+    }
+
+    @Override
     public PictureFrameBuffer makePictureRender(int size) {
         return new PicRender(size);
     }
 
-    public static void update(GuiGraphics draw) {
-        context = draw;
+    public static void update(GuiGraphics graphics) {
+        AllMusicClient.graphics = graphics;
         AllMusicCore.hudUpdate();
     }
 

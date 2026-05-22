@@ -5,6 +5,8 @@ import java.util.List;
 
 public abstract class TextFrameBuffer {
 
+
+
     public static class TextItem {
         public final int width;
         public final int height;
@@ -25,8 +27,10 @@ public abstract class TextFrameBuffer {
 
     public abstract void use();
     public abstract void unUse();
+    public abstract void clear();
     public abstract void resize(int width, int height);
     public abstract void drawText(String text, int y, int color, boolean shadow);
+    public abstract int drawLine(float alpha, int x, int y, int line);
     public abstract void draw(float alpha, int x, int y, int maxWidth);
     public abstract void drawWithState(float alpha, int x, int y, int maxWidth, float state);
     public abstract void tick();

@@ -2,6 +2,7 @@ package com.coloryr.allmusic.client.core;
 
 import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 
 /**
  * AllMusic 核心桥
@@ -60,6 +61,12 @@ public interface AllMusicBridge {
      * @return 渲染层
      */
     TextFrameBuffer makeTextRender();
+
+    /**
+     * 创建渲染层
+     * @return 渲染层
+     */
+    TextureRender makeTextureRender(String file);
 
     /**
      * 创建图片渲染层

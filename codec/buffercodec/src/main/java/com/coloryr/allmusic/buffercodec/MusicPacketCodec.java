@@ -2,10 +2,12 @@ package com.coloryr.allmusic.buffercodec;
 
 import com.coloryr.allmusic.codec.CommandType;
 import com.coloryr.allmusic.codec.MusicPack;
+import com.coloryr.allmusic.codec.KtvLyricObj;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class MusicPacketCodec {
     public static final CommandType[] types = CommandType.values();
@@ -33,13 +35,30 @@ public class MusicPacketCodec {
                 writeString(buf, pack2.tlyric);
                 writeString(buf, pack2.klyric);
                 break;
-            case LYRIC_STATE:
-                MusicPack.FloatMusicPack pack3 = (MusicPack.FloatMusicPack) pack;
-                buf.writeFloat(pack3.data);
+            case LYRIC_KTV:
+                MusicPack.LyricKtvMusicPack pack3 = (MusicPack.LyricKtvMusicPack) pack;
+                if (pack3.data == null) {
+                    buf.writeLong(-1);
+                } else {
+                    buf.writeLong(pack3.time)
+                            .writeLong(pack3.data.start)
+                            .writeLong(pack3.data.time)
+                            .writeInt(pack3.data.charCount)
+                            .writeInt(pack3.data.items.size());
+                    for (KtvLyricObj.KtvItem item : pack3.data.items) {
+                        buf.writeLong(item.start)
+                                .writeLong(item.time);
+                        writeString(buf, item.key);
+                    }
+                }
                 break;
             case POS:
                 MusicPack.IntMusicPack pack4 = (MusicPack.IntMusicPack) pack;
                 buf.writeInt(pack4.data);
+                break;
+            case TIME:
+                MusicPack.TimeMusicPack pack5 = (MusicPack.TimeMusicPack) pack;
+                buf.writeLong(pack5.time).writeLong(pack5.now);
                 break;
         }
     }
@@ -77,11 +96,30 @@ public class MusicPacketCodec {
             case LYRIC:
                 pack = new MusicPack.LyricMusicPack(readString(buf), readString(buf), readString(buf));
                 break;
-            case LYRIC_STATE:
-                pack = new MusicPack.FloatMusicPack(type1, buf.readFloat());
-                break;
+            case LYRIC_KTV:
+                KtvLyricObj ktv = null;
+                long state = buf.readLong();
+                if (state != -1) {
+                    ktv = new KtvLyricObj();
+                    ktv.start = buf.readLong();
+                    ktv.time = buf.readLong();
+                    ktv.charCount = buf.readInt();
+                    ktv.items = new ArrayList<>();
+                    int size = buf.readInt();
+                    for (int i = 0; i < size; i++) {
+                        KtvLyricObj.KtvItem item = new KtvLyricObj.KtvItem();
+                        item.start = buf.readLong();
+                        item.time = buf.readLong();
+                        item.key = readString(buf);
+                        ktv.items.add(item);
+                    }
+                }
+                return new MusicPack.LyricKtvMusicPack(state, ktv);
             case POS:
                 pack = new MusicPack.IntMusicPack(type1, buf.readInt());
+                break;
+            case TIME:
+                pack = new MusicPack.TimeMusicPack(buf.readLong(), buf.readLong());
                 break;
             default:
                 pack = new MusicPack(type1);

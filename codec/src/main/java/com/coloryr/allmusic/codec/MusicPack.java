@@ -38,12 +38,25 @@ public class MusicPack {
         }
     }
 
-    public static class FloatMusicPack extends MusicPack {
-        public float data;
+    public static class LyricKtvMusicPack extends MusicPack {
+        public KtvLyricObj data;
+        public long time;
 
-        public FloatMusicPack(CommandType type, float data) {
-            super(type);
+        public LyricKtvMusicPack(long time, KtvLyricObj data) {
+            super(CommandType.LYRIC_KTV);
             this.data = data;
+            this.time = time;
+        }
+    }
+
+    public static class TimeMusicPack extends MusicPack {
+        public long now;
+        public long time;
+
+        public TimeMusicPack(long time, long now) {
+            super(CommandType.TIME);
+            this.now = now;
+            this.time = time;
         }
     }
 }

@@ -1,9 +1,10 @@
 package com.coloryr.allmusic.codec;
 
 public class HudPosObj {
-    public HudItemPosObj list;
-    public HudItemPosObj lyric;
-    public HudItemPosObj info;
+    public HudInfoPosObj list;
+    public HudLyricPosObj lyric;
+    public HudInfoPosObj info;
+    public HudStatePosObj state;
     public HudPicPosObj pic;
 
     public static HudPosObj make() {
@@ -13,23 +14,74 @@ public class HudPosObj {
         return obj;
     }
 
-    public static HudItemPosObj makeDefault(HudType pos) {
-        switch (pos) {
-            case INFO:
-                return new HudItemPosObj(74, 2, HudPosType.TOP_LEFT, 0xffffff, true, true, 1.0f, LoopType.NO_LOOP, 1000);
-            case LIST:
-                return new HudItemPosObj(2, 74, HudPosType.TOP_LEFT, 0xffffff, true, true, 1.0f, LoopType.NO_LOOP, 1000);
-            case LYRIC:
-                return new HudItemPosObj(74, 53, HudPosType.TOP_LEFT, 0xffffff, true, true, 1.0f, LoopType.NO_LOOP, 1000);
-            case PIC:
-                return new HudItemPosObj(2, 2, HudPosType.TOP_LEFT, 70, true, true, 1.0f, LoopType.NO_LOOP, 1000);
-        }
-
-        return new HudItemPosObj(0, 0, HudPosType.TOP_LEFT, 0xffffff, false, true, 1.0f, LoopType.NO_LOOP, 1000);
+    public static HudInfoPosObj makeInfo() {
+        HudInfoPosObj obj = new HudInfoPosObj();
+        obj.x = 74;
+        obj.y = 2;
+        obj.pos = HudPosType.TOP_LEFT;
+        obj.color = 0xffffff;
+        obj.enable = true;
+        obj.shadow = true;
+        obj.alpha = 1.0f;
+        obj.loop = LoopType.LOOP_CYCLE;
+        obj.maxWidth = 2000;
+        obj.gap = 10;
+        return obj;
     }
 
-    public static HudPicPosObj makePicDefault() {
-        return new HudPicPosObj(2, 2, HudPosType.TOP_LEFT, 70, true, true, 1.0f, 30);
+    public static HudInfoPosObj makeList() {
+        HudInfoPosObj obj = new HudInfoPosObj();
+        obj.x = 2;
+        obj.y = 74;
+        obj.pos = HudPosType.TOP_LEFT;
+        obj.color = 0xffffff;
+        obj.enable = true;
+        obj.shadow = true;
+        obj.alpha = 1.0f;
+        obj.loop = LoopType.LOOP_CYCLE;
+        obj.maxWidth = 2000;
+        obj.gap = 10;
+        return obj;
+    }
+
+    public static HudLyricPosObj makeLyric() {
+        HudLyricPosObj obj = new HudLyricPosObj();
+        obj.x = 74;
+        obj.y = 53;
+        obj.gap = 10;
+        obj.pos = HudPosType.TOP_LEFT;
+        obj.color = 0xffffff;
+        obj.enable = true;
+        obj.shadow = true;
+        obj.alpha = 1.0f;
+        obj.maxWidth = 2000;
+        return obj;
+    }
+
+    public static HudStatePosObj makeState() {
+        HudStatePosObj obj = new HudStatePosObj();
+        obj.x = 74;
+        obj.y = 40;
+        obj.pos = HudPosType.TOP_LEFT;
+        obj.color = 0xffffff;
+        obj.enable = true;
+        obj.shadow = true;
+        obj.gap = 10;
+        obj.alpha = 1.0f;
+        return obj;
+    }
+
+    public static HudPicPosObj makePic() {
+        HudPicPosObj obj = new HudPicPosObj();
+        obj.x = 2;
+        obj.y = 2;
+        obj.pos = HudPosType.TOP_LEFT;
+        obj.size = 70;
+        obj.enable = true;
+        obj.rotate = true;
+        obj.alpha = 1.0f;
+        obj.speed = 30;
+        return obj;
     }
 
     public HudPosObj copy() {
@@ -37,6 +89,7 @@ public class HudPosObj {
         obj1.info = this.info.copy();
         obj1.list = this.list.copy();
         obj1.lyric = this.lyric.copy();
+        obj1.state = this.state.copy();
         obj1.pic = this.pic.copy();
         return obj1;
     }
@@ -45,27 +98,32 @@ public class HudPosObj {
         boolean save = false;
         if (list == null) {
             save = true;
-            list = makeDefault(HudType.LIST);
+            list = makeList();
         }
         if (lyric == null) {
             save = true;
-            lyric = makeDefault(HudType.LYRIC);
+            lyric = makeLyric();
         }
         if (info == null) {
             save = true;
-            info = makeDefault(HudType.INFO);
+            info = makeInfo();
+        }
+        if (state == null) {
+            save = true;
+            state = makeState();
         }
         if (pic == null) {
             save = true;
-            pic = makePicDefault();
+            pic = makePic();
         }
         return save;
     }
 
     public void init() {
-        list = makeDefault(HudType.LIST);
-        lyric = makeDefault(HudType.LYRIC);
-        info = makeDefault(HudType.INFO);
-        pic = makePicDefault();
+        list = makeList();
+        lyric = makeLyric();
+        info = makeInfo();
+        state = makeState();
+        pic = makePic();
     }
 }

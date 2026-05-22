@@ -2,8 +2,10 @@ package com.coloryr.allmusic.client.core;
 
 import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.coloryr.allmusic.codec.HudPosType;
 import com.coloryr.allmusic.codec.HudPosObj;
+import com.coloryr.allmusic.codec.KtvLyricObj;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 
 import javax.imageio.ImageIO;
@@ -48,9 +50,14 @@ public class AllMusicHud {
     private String lyricTran = "";
     private String lyricKtv = "";
 
-    public float lyricState = 0;
+    private long allTime, nowTime;
+
+    public KtvLyricObj ktv = null;
 
     private HudPosObj save;
+
+    private float lyricState = 0.0f;
+    private long lyricTime = -1;
 
     /**
      * 图片渲染
@@ -60,11 +67,20 @@ public class AllMusicHud {
     /**
      * 文字渲染
      */
+    private final TextFrameBuffer stateRender;
     private final TextFrameBuffer infoRender;
     private final TextFrameBuffer listRender;
     private final TextFrameBuffer lyricRender;
     private final TextFrameBuffer lyricTranRender;
     private final TextFrameBuffer lyricKtvRender;
+
+    private static final String PG1 = "textures/hud/pg1.png";
+    private static final String PG2 = "textures/hud/pg2.png";
+    private static final String PG3 = "textures/hud/pg2.png";
+
+    private final TextureRender progress1;
+    private final TextureRender progress2;
+    private final TextureRender progress3;
 
     /**
      * 是否有图片
@@ -86,6 +102,7 @@ public class AllMusicHud {
     private boolean infoNeedUpdate;
     private boolean listNeedUpdate;
     private boolean lyricNeedUpdate;
+    private boolean stateNeedUpdate;
 
     public AllMusicHud(int size) {
         this.size = size;
@@ -97,13 +114,21 @@ public class AllMusicHud {
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::picRotateTick, 0, 1, TimeUnit.MILLISECONDS);
 
+        service = Executors.newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(this::lyricTick, 0, 10, TimeUnit.MILLISECONDS);
+
         picRender = AllMusicCore.bridge.makePictureRender(size);
 
+        stateRender = AllMusicCore.bridge.makeTextRender();
         infoRender = AllMusicCore.bridge.makeTextRender();
         listRender = AllMusicCore.bridge.makeTextRender();
         lyricRender = AllMusicCore.bridge.makeTextRender();
         lyricTranRender = AllMusicCore.bridge.makeTextRender();
         lyricKtvRender = AllMusicCore.bridge.makeTextRender();
+
+        progress1 = AllMusicCore.bridge.makeTextureRender(PG1);
+        progress2 = AllMusicCore.bridge.makeTextureRender(PG2);
+        progress3 = AllMusicCore.bridge.makeTextureRender(PG3);
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
@@ -115,10 +140,23 @@ public class AllMusicHud {
     }
 
     /**
+     * 时间转换
+     *
+     * @param time 时间
+     * @return 结果
+     */
+    private static String tranTime(long time) {
+        long m = time / 60;
+        long s = time - m * 60;
+        return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
+    /**
      * 图片旋转计数器
      */
     private void picRotateTick() {
         if (save == null) return;
+
         if (count < save.pic.speed) {
             count++;
             return;
@@ -128,6 +166,13 @@ public class AllMusicHud {
         ang = ang % 360;
 
         infoRender.tick();
+
+    }
+
+    private void lyricTick() {
+        if (save == null || ktv == null || lyricTime == -1) return;
+        lyricTime += 10;
+        kUpdate();
     }
 
     /**
@@ -141,10 +186,44 @@ public class AllMusicHud {
     public void clear() {
         haveImg = false;
         info = list = lyric = lyricTran = lyricKtv = "";
+        allTime = nowTime = 0;
 
         infoNeedUpdate = true;
         lyricNeedUpdate = true;
         listNeedUpdate = true;
+        stateNeedUpdate = true;
+    }
+
+    public void kUpdate() {
+        if (ktv == null) {
+            lyricState = 0.0f;
+            return;
+        }
+
+        if (lyricTime <= ktv.start) {
+            lyricState = 0.0f;
+            return;
+        }
+
+        if (lyricTime >= ktv.start + ktv.time) {
+            lyricState = 1.0f;
+            return;
+        }
+
+        float now = 0;
+        for (int i = 0; i < ktv.items.size(); i++) {
+            KtvLyricObj.KtvItem item = ktv.items.get(i);
+            float itemp = (float) item.key.length() / ktv.charCount;
+            if (lyricTime >= item.start && lyricTime < item.start + item.time) {
+                float progressInChar = (float) (lyricTime - item.start) / item.time * itemp;
+                lyricState = now + progressInChar;
+                return;
+            }
+
+            now += itemp;
+        }
+
+        lyricState = 0.0f;
     }
 
     /**
@@ -284,7 +363,7 @@ public class AllMusicHud {
                 String[] temp = info.split("\n");
 
                 int height = AllMusicCore.bridge.getFontHeight();
-                int allHeight = (height + 10) * temp.length;
+                int allHeight = (height + save.info.gap) * temp.length;
                 int allWidth = 0;
 
                 for (String item : temp) {
@@ -301,12 +380,11 @@ public class AllMusicHud {
                         continue;
                     }
                     infoRender.drawText(item, offset, save.info.color, save.info.shadow);
-                    offset += 10;
+                    offset += save.info.gap;
                 }
                 infoRender.unUse();
             } else {
-                infoRender.use();
-                infoRender.unUse();
+                infoRender.clear();
             }
 
             infoNeedUpdate = false;
@@ -318,7 +396,7 @@ public class AllMusicHud {
                 String[] temp = list.split("\n");
 
                 int height = AllMusicCore.bridge.getFontHeight();
-                int allHeight = (height + 10) * temp.length;
+                int allHeight = (height + save.list.gap) * temp.length;
                 int allWidth = 0;
 
                 for (String item : temp) {
@@ -335,13 +413,12 @@ public class AllMusicHud {
                         continue;
                     }
                     listRender.drawText(item, offset, save.list.color, save.list.shadow);
-                    offset += 10;
+                    offset += save.list.gap;
                 }
                 listRender.unUse();
 
             } else {
-                listRender.use();
-                listRender.unUse();
+                listRender.clear();
             }
 
             listNeedUpdate = false;
@@ -353,7 +430,7 @@ public class AllMusicHud {
                 String[] temp = lyric.split("\n");
 
                 int height = AllMusicCore.bridge.getFontHeight();
-                int allHeight = (height + 10) * temp.length;
+                int allHeight = (height + save.lyric.gap) * temp.length;
                 int allWidth = 0;
 
                 for (String item : temp) {
@@ -370,12 +447,11 @@ public class AllMusicHud {
                         continue;
                     }
                     lyricRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
-                    offset += 10;
+                    offset += save.lyric.gap;
                 }
                 lyricRender.unUse();
             } else {
-                lyricRender.use();
-                lyricRender.unUse();
+                lyricRender.clear();
             }
 
             if (!lyricTran.isEmpty()) {
@@ -383,7 +459,7 @@ public class AllMusicHud {
                 String[] temp = lyricTran.split("\n");
 
                 int height = AllMusicCore.bridge.getFontHeight();
-                int allHeight = (height + 10) * temp.length;
+                int allHeight = (height + save.lyric.gap) * temp.length;
                 int allWidth = 0;
 
                 for (String item : temp) {
@@ -400,12 +476,11 @@ public class AllMusicHud {
                         continue;
                     }
                     lyricTranRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
-                    offset += 10;
+                    offset += save.lyric.gap;
                 }
                 lyricTranRender.unUse();
             } else {
-                lyricTranRender.use();
-                lyricTranRender.unUse();
+                lyricTranRender.clear();
             }
 
             if (!lyricKtv.isEmpty()) {
@@ -413,7 +488,7 @@ public class AllMusicHud {
                 String[] temp = lyricKtv.split("\n");
 
                 int height = AllMusicCore.bridge.getFontHeight();
-                int allHeight = (height + 10) * temp.length;
+                int allHeight = (height + save.lyric.gap) * temp.length;
                 int allWidth = 0;
 
                 for (String item : temp) {
@@ -430,15 +505,33 @@ public class AllMusicHud {
                         continue;
                     }
                     lyricKtvRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
-                    offset += 10;
+                    offset += save.lyric.gap;
                 }
                 lyricKtvRender.unUse();
             } else {
-                lyricKtvRender.use();
-                lyricKtvRender.unUse();
+                lyricKtvRender.clear();
             }
 
             listNeedUpdate = false;
+        }
+
+        if (stateNeedUpdate) {
+            if (allTime == 0) {
+                stateRender.clear();
+            }else {
+                String all = tranTime(allTime / 1000);
+                String time = tranTime(nowTime / 1000);
+
+                int allWidth = Math.max(AllMusicCore.bridge.getTextWidth(time), AllMusicCore.bridge.getTextWidth(all));
+                int allHeight = AllMusicCore.bridge.getFontHeight() * 2;
+
+                lyricKtvRender.resize(allWidth, allHeight);
+                stateRender.use();
+                stateRender.drawText(all, 0, save.state.color, save.state.shadow);
+                stateRender.drawText(time, 10, save.state.color, save.state.shadow);
+                stateRender.unUse();
+            }
+            stateNeedUpdate = false;
         }
 
         if (save.info.enable) {
@@ -449,8 +542,25 @@ public class AllMusicHud {
         }
         if (save.lyric.enable) {
             lyricRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000);
-            lyricTranRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y + 10, 1000);
-            lyricKtvRender.drawWithState(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000, lyricState);
+            lyricTranRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y + save.lyric.gap, 1000);
+            if (ktv != null) {
+                lyricKtvRender.drawWithState(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000, lyricState);
+            }
+        }
+        if (save.state.enable && allTime != 0) {
+            int x = save.state.x;
+            int start = stateRender.drawLine(save.state.alpha, x, save.state.y, 0);
+            x += save.state.gap + start;
+            progress1.drawPic(x, save.state.y, save.state.alpha);
+            x += save.state.gap + progress1.width;
+            stateRender.drawLine(save.state.alpha, x, save.state.y, 1);
+
+            x = start + save.state.gap;
+            progress2.drawPic(x, save.state.y, (float) nowTime / allTime, save.state.alpha);
+
+            float x1 = progress1.width * ((float) nowTime / allTime) + (float) progress3.width / 2;
+
+            progress3.drawPic(x1, save.state.y, save.state.alpha);
         }
 
         //需要更新材质
@@ -522,10 +632,10 @@ public class AllMusicHud {
     /**
      * 显示文字内容
      *
-     * @param fb   内容
-     * @param x      X坐标
-     * @param y      Y坐标
-     * @param dir    对齐方式
+     * @param fb    内容
+     * @param x     X坐标
+     * @param y     Y坐标
+     * @param dir   对齐方式
      * @param alpha 透明度
      */
     private void drawText(TextFrameBuffer fb, int width, int height, int x, int y, HudPosType dir, float alpha) {
@@ -586,8 +696,20 @@ public class AllMusicHud {
         this.lyricTran = tlyric;
         this.lyricKtv = ktv;
 
-        lyricState = 0;
+        lyricState = 0.0f;
 
         lyricNeedUpdate = true;
+    }
+
+    public void setKtv(long time, KtvLyricObj pack2) {
+        ktv = pack2;
+        lyricTime = time;
+    }
+
+    public void setTime(long time, long now) {
+        this.nowTime = now;
+        this.allTime = time;
+
+        stateNeedUpdate = true;
     }
 }

@@ -39,7 +39,7 @@ public class PicRender extends PictureFrameBuffer {
     }
 
     @Override
-    public void drawPic(boolean rotate, int size, int x, int y, int ang, float alpha) {
+    public void drawPic(boolean rotate, int size, float x, float y, int ang, float alpha) {
         RenderSystem.setShaderTexture(0, rotate ? rotateTexture.getId() : sourceTexture.getId());
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 

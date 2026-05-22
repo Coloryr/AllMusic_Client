@@ -2,7 +2,7 @@ package com.coloryr.allmusic.codec;
 
 public enum CommandType {
     LYRIC,
-    LYRIC_STATE,
+    LYRIC_KTV,
     INFO,
     LIST,
     PLAY,
@@ -10,5 +10,6 @@ public enum CommandType {
     STOP,
     CLEAR,
     POS,
-    HUD_DATA
+    HUD_DATA,
+    TIME,
 }

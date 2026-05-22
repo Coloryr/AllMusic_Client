@@ -1,7 +1,5 @@
 package com.coloryr.allmusic.client.core.render;
 
-import java.nio.ByteBuffer;
-
 public abstract class PictureFrameBuffer {
     /**
      * 更新图片
@@ -19,5 +17,5 @@ public abstract class PictureFrameBuffer {
      * @param ang     旋转角度
      * @param alpha   透明度
      */
-    public abstract void drawPic(boolean rotate, int size, int x, int y, int ang, float alpha);
+    public abstract void drawPic(boolean rotate, int size, float x, float y, int ang, float alpha);
 }

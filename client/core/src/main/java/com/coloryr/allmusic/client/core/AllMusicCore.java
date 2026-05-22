@@ -202,9 +202,9 @@ public class AllMusicCore {
                 MusicPack.LyricMusicPack pack1 = (MusicPack.LyricMusicPack) pack;
                 hud.setLyric(pack1.lyric, pack1.tlyric, pack1.klyric);
                 break;
-            case LYRIC_STATE:
-                MusicPack.FloatMusicPack pack2 = (MusicPack.FloatMusicPack) pack;
-                hud.lyricState = pack2.data;
+            case LYRIC_KTV:
+                MusicPack.LyricKtvMusicPack pack2 = (MusicPack.LyricKtvMusicPack) pack;
+                hud.setKtv(pack2.time, pack2.data);
                 break;
             case INFO:
                 MusicPack.StringMusicPack pack3 = (MusicPack.StringMusicPack) pack;
@@ -236,6 +236,10 @@ public class AllMusicCore {
             case HUD_DATA:
                 MusicPack.StringMusicPack pack8 = (MusicPack.StringMusicPack) pack;
                 hud.setPos(gson.fromJson(pack8.data, HudPosObj.class));
+                break;
+            case TIME:
+                MusicPack.TimeMusicPack pack9 = (MusicPack.TimeMusicPack) pack;
+                hud.setTime(pack9.time, pack9.now);
                 break;
         }
     }
