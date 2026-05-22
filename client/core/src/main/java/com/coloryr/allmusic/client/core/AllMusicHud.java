@@ -564,7 +564,7 @@ public class AllMusicHud {
             x = save.state.x + start + save.state.gap;
             progress2.drawPic(x, save.state.y + pgOffset, (float) nowTime / allTime, save.state.alpha);
 
-            float x1 = save.state.x + start + save.state.gap + (((float) nowTime / allTime) * (progress1.width + (float) progress3.width)) - (float) progress3.width / 2;
+            float x1 = save.state.x + start + save.state.gap + (((float) nowTime / allTime) * (progress1.width)) - ((float) progress3.width / 2);
 
             progress3.drawPic(x1, save.state.y + pgOffset, save.state.alpha);
         }
