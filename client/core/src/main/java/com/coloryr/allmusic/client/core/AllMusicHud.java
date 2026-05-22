@@ -59,6 +59,8 @@ public class AllMusicHud {
     private float lyricState = 0.0f;
     private long lyricTime = -1;
 
+    private int pgOffset = 0;
+
     /**
      * 图片渲染
      */
@@ -76,7 +78,9 @@ public class AllMusicHud {
 
     private static final String PG1 = "textures/hud/pg1.png";
     private static final String PG2 = "textures/hud/pg2.png";
-    private static final String PG3 = "textures/hud/pg2.png";
+    private static final String PG3 = "textures/hud/pg3.png";
+
+    private static final String PG_OFFSET = "textures/hud/offset.txt";
 
     private final TextureRender progress1;
     private final TextureRender progress2;
@@ -129,6 +133,9 @@ public class AllMusicHud {
         progress1 = AllMusicCore.bridge.makeTextureRender(PG1);
         progress2 = AllMusicCore.bridge.makeTextureRender(PG2);
         progress3 = AllMusicCore.bridge.makeTextureRender(PG3);
+
+        String offset = AllMusicCore.bridge.readText(PG_OFFSET);
+        pgOffset = Integer.parseInt(offset);
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
@@ -362,7 +369,7 @@ public class AllMusicHud {
                 int offset = 0;
                 String[] temp = info.split("\n");
 
-                int height = AllMusicCore.bridge.getFontHeight();
+                int height = AllMusicCore.bridge.getFontHeight() + (save.info.shadow ? 1 : 0);
                 int allHeight = (height + save.info.gap) * temp.length;
                 int allWidth = 0;
 
@@ -395,7 +402,7 @@ public class AllMusicHud {
                 int offset = 0;
                 String[] temp = list.split("\n");
 
-                int height = AllMusicCore.bridge.getFontHeight();
+                int height = AllMusicCore.bridge.getFontHeight() + (save.list.shadow ? 1 : 0);
                 int allHeight = (height + save.list.gap) * temp.length;
                 int allWidth = 0;
 
@@ -416,7 +423,6 @@ public class AllMusicHud {
                     offset += save.list.gap;
                 }
                 listRender.unUse();
-
             } else {
                 listRender.clear();
             }
@@ -429,7 +435,7 @@ public class AllMusicHud {
             if (!lyric.isEmpty()) {
                 String[] temp = lyric.split("\n");
 
-                int height = AllMusicCore.bridge.getFontHeight();
+                int height = AllMusicCore.bridge.getFontHeight() + (save.lyric.shadow ? 1 : 0);
                 int allHeight = (height + save.lyric.gap) * temp.length;
                 int allWidth = 0;
 
@@ -458,7 +464,7 @@ public class AllMusicHud {
                 offset = 0;
                 String[] temp = lyricTran.split("\n");
 
-                int height = AllMusicCore.bridge.getFontHeight();
+                int height = AllMusicCore.bridge.getFontHeight() + (save.lyric.shadow ? 1 : 0);
                 int allHeight = (height + save.lyric.gap) * temp.length;
                 int allWidth = 0;
 
@@ -487,7 +493,7 @@ public class AllMusicHud {
                 offset = 0;
                 String[] temp = lyricKtv.split("\n");
 
-                int height = AllMusicCore.bridge.getFontHeight();
+                int height = AllMusicCore.bridge.getFontHeight() + (save.lyric.shadow ? 1 : 0);
                 int allHeight = (height + save.lyric.gap) * temp.length;
                 int allWidth = 0;
 
@@ -523,9 +529,9 @@ public class AllMusicHud {
                 String time = tranTime(nowTime / 1000);
 
                 int allWidth = Math.max(AllMusicCore.bridge.getTextWidth(time), AllMusicCore.bridge.getTextWidth(all));
-                int allHeight = AllMusicCore.bridge.getFontHeight() * 2;
+                int allHeight = (AllMusicCore.bridge.getFontHeight() + (save.state.shadow ? 1 : 0)) * 2;
 
-                lyricKtvRender.resize(allWidth, allHeight);
+                stateRender.resize(allWidth, allHeight);
                 stateRender.use();
                 stateRender.drawText(all, 0, save.state.color, save.state.shadow);
                 stateRender.drawText(time, 10, save.state.color, save.state.shadow);
@@ -549,18 +555,18 @@ public class AllMusicHud {
         }
         if (save.state.enable && allTime != 0) {
             int x = save.state.x;
-            int start = stateRender.drawLine(save.state.alpha, x, save.state.y, 0);
+            int start = stateRender.drawLine(save.state.alpha, x, save.state.y, 1);
             x += save.state.gap + start;
-            progress1.drawPic(x, save.state.y, save.state.alpha);
+            progress1.drawPic(x, save.state.y + pgOffset, save.state.alpha);
             x += save.state.gap + progress1.width;
-            stateRender.drawLine(save.state.alpha, x, save.state.y, 1);
+            stateRender.drawLine(save.state.alpha, x, save.state.y, 0);
 
-            x = start + save.state.gap;
-            progress2.drawPic(x, save.state.y, (float) nowTime / allTime, save.state.alpha);
+            x = save.state.x + start + save.state.gap;
+            progress2.drawPic(x, save.state.y + pgOffset, (float) nowTime / allTime, save.state.alpha);
 
-            float x1 = progress1.width * ((float) nowTime / allTime) + (float) progress3.width / 2;
+            float x1 = save.state.x + start + save.state.gap + (((float) nowTime / allTime) * (progress1.width + (float) progress3.width)) - (float) progress3.width / 2;
 
-            progress3.drawPic(x1, save.state.y, save.state.alpha);
+            progress3.drawPic(x1, save.state.y + pgOffset, save.state.alpha);
         }
 
         //需要更新材质

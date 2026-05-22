@@ -74,4 +74,11 @@ public interface AllMusicBridge {
      * @return 图片渲染
      */
     PictureFrameBuffer makePictureRender(int size);
+
+    /**
+     * 读取文件
+     * @param file 文件位置
+     * @return 内容
+     */
+    String readText(String file);
 }

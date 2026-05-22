@@ -4,21 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TextFrameBuffer {
-
-
-
-    public static class TextItem {
-        public final int width;
-        public final int height;
-        public final int y;
-        public final float scale;
-
-        public TextItem(int width, int height, int y, float scale) {
-            this.width = width;
-            this.height = height;
-            this.y = y;
-            this.scale = scale;
-        }
+    public void clear() {
+        texts.clear();
     }
 
     protected final List<TextItem> texts = new ArrayList<>();
@@ -26,12 +13,34 @@ public abstract class TextFrameBuffer {
     protected int nowWidth, nowHeight;
 
     public abstract void use();
+
     public abstract void unUse();
-    public abstract void clear();
+
     public abstract void resize(int width, int height);
+
     public abstract void drawText(String text, int y, int color, boolean shadow);
+
     public abstract int drawLine(float alpha, int x, int y, int line);
+
     public abstract void draw(float alpha, int x, int y, int maxWidth);
+
     public abstract void drawWithState(float alpha, int x, int y, int maxWidth, float state);
+
     public abstract void tick();
+
+    public static class TextItem {
+        public final int width;
+        public final int height;
+        public final int textWidth;
+        public final int y;
+        public final float scale;
+
+        public TextItem(int width, int height, int y, float scale) {
+            this.textWidth = width;
+            this.width = (int) (width * scale);
+            this.height = (int) (height * scale);
+            this.y = y;
+            this.scale = scale;
+        }
+    }
 }

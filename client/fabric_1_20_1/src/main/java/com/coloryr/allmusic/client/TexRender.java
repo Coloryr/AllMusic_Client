@@ -112,7 +112,7 @@ public class TexRender extends TextureRender {
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(GL30.GL_ALWAYS);
 
-        float w1 = (float) this.width / 2;
+        float w1 = (float) (this.width / 2) * width;
         float h1 = (float) height / 2;
 
         Matrix4f matrix = new Matrix4f().translation(x + w1, y + h1, 0);

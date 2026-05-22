@@ -37,22 +37,16 @@ public class CoreRenderTarget extends TextFrameBuffer {
             matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
                     (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
         }
-
-        if (matrix4f == null) {
+        else if (matrix4f == null) {
             matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
                     (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
         }
     }
 
     @Override
-    public void clear() {
-        target.clear(false);
-        texts.clear();
-    }
-
-    @Override
     public void use() {
         clear();
+        target.clear(false);
 
         target.bindWrite(true);
 
@@ -81,9 +75,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         renderBuffers.bufferSource().endBatch();
         RenderSystem.enableDepthTest();
 
-        TextItem item = new TextItem((int) (width * (float) window.getGuiScale()),
-                (int) ((font.lineHeight + (shadow ? 1 : 0)) * (float) window.getGuiScale()),
-                y, (float) window.getGuiScale());
+        TextItem item = new TextItem(width, font.lineHeight + (shadow ? 1 : 0), y, (float) window.getGuiScale());
         texts.add(item);
     }
 
@@ -305,7 +297,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         TextItem item = texts.get(line);
         if (item != null) {
             draw(alpha, x, y, item.width, item.height, 0, item.y, item.scale);
-            return item.width;
+            return item.textWidth;
         }
 
         return 0;

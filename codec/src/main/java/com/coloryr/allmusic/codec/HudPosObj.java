@@ -66,7 +66,7 @@ public class HudPosObj {
         obj.color = 0xffffff;
         obj.enable = true;
         obj.shadow = true;
-        obj.gap = 10;
+        obj.gap = 5;
         obj.alpha = 1.0f;
         return obj;
     }

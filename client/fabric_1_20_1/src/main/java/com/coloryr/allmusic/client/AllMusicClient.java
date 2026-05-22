@@ -13,9 +13,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final String MODID = "allmusic_client";
@@ -76,6 +82,20 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     @Override
     public PictureFrameBuffer makePictureRender(int size) {
         return new PicRender(size);
+    }
+
+    @Override
+    public String readText(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(MODID, file)).orElseThrow();
+            try (InputStream inputStream = resource.open()) {
+                byte[] bytes = inputStream.readAllBytes();
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static void update(GuiGraphics graphics) {
