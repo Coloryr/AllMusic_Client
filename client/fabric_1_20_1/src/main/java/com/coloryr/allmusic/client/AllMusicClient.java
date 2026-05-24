@@ -18,19 +18,20 @@ import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final String MODID = "allmusic_client";
 
     public static final ResourceLocation ID = new ResourceLocation("allmusic", "channel");
-
+    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
     public static GuiGraphics graphics;
 
-    public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
+    public static void update(GuiGraphics graphics) {
+        AllMusicClient.graphics = graphics;
+        AllMusicCore.hudUpdate();
+    }
 
     public int getScreenWidth() {
         return Minecraft.getInstance().getWindow().getGuiScaledWidth();
@@ -96,11 +97,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public static void update(GuiGraphics graphics) {
-        AllMusicClient.graphics = graphics;
-        AllMusicCore.hudUpdate();
     }
 
     @Override

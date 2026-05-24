@@ -4,14 +4,17 @@ import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 import java.io.IOException;
@@ -36,9 +39,8 @@ public class TexRender extends TextureRender {
 
     @Override
     public void drawPic(float x, float y, float alpha) {
-        RenderSystem.setShaderTexture(0, sourceTexture.getId());
-        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-
+        RenderSystem.bindTexture(sourceTexture.getId());
+        RenderSystem.enableTexture();
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(GL30.GL_ALWAYS);
@@ -46,7 +48,7 @@ public class TexRender extends TextureRender {
         float w1 = (float) width / 2;
         float h1 = (float) height / 2;
 
-        Matrix4f matrix = new Matrix4f().translation(x + w1, y + h1, 0);
+        Matrix4f matrix = Matrix4f.createTranslateMatrix(x + w1, y + h1, 0);
 
         float x0 = -w1;
         float x1 = w1;
@@ -59,20 +61,22 @@ public class TexRender extends TextureRender {
         float v1 = 1;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
         bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
         bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
         bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
         bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     @Override
     public void drawPic(float x, float y, float width, float alpha) {
-        RenderSystem.setShaderTexture(0, sourceTexture.getId());
-        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-
+        RenderSystem.bindTexture(sourceTexture.getId());
+        RenderSystem.enableTexture();
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(GL30.GL_ALWAYS);
@@ -80,7 +84,7 @@ public class TexRender extends TextureRender {
         float w1 = (float) (this.width / 2) * width;
         float h1 = (float) height / 2;
 
-        Matrix4f matrix = new Matrix4f().translation(x + w1, y + h1, 0);
+        Matrix4f matrix = Matrix4f.createTranslateMatrix(x + w1, y + h1, 0);
 
         float x0 = -w1;
         float x1 = w1;
@@ -93,13 +97,17 @@ public class TexRender extends TextureRender {
         float v1 = 1;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
         bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
         bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
         bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
         bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
+
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     public static class Tex extends SimpleTexture {
@@ -108,7 +116,7 @@ public class TexRender extends TextureRender {
         }
 
         public void load(ResourceManager resourceManager, TextureRender source) throws IOException {
-            SimpleTexture.TextureImage textureImage = this.getTextureImage(resourceManager);
+            TextureImage textureImage = this.getTextureImage(resourceManager);
             textureImage.throwIfError();
             TextureMetadataSection textureMetadataSection = textureImage.getTextureMetadata();
             boolean bl;

@@ -39,8 +39,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
             target.resize(nowWidth, nowHeight, false);
             matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
                     (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
-        }
-        else if (matrix4f == null) {
+        } else if (matrix4f == null) {
             matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
                     (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
         }
@@ -118,9 +117,9 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         // 计算贴图区域UV
         float u0 = texX * scale / target.width;
-        float v0 = 1 - (texY * scale  / target.height);
+        float v0 = 1 - (texY * scale / target.height);
         float u1 = (texX + width) * scale / target.width;
-        float v1 = 1 - ((texY + height)  * scale / target.height);
+        float v1 = 1 - ((texY + height) * scale / target.height);
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -148,8 +147,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
             float nowWith = textWidth - offsetX;
             draw(alpha, x, y, nowWith, textHeight, offsetX, texY, scale);
             draw(alpha, x + nowWith, y, maxWidth - nowWith, textHeight, 0, texY, scale);
-        }
-        else {
+        } else {
             draw(alpha, x, y, maxWidth, textHeight, offsetX, texY, scale);
         }
     }

@@ -19,10 +19,6 @@ tasks {
         }
     }
 
-    shadowJar {
-//        relocate("com.google.gson", "com.coloryr.allmusic.libs.com.google.gson")
-    }
-
     remapJar {
         inputFile.set(shadowJar.get().archiveFile)
 
