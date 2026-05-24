@@ -4,44 +4,54 @@ import com.coloryr.allmusic.client.core.AllMusicHud;
 import com.coloryr.allmusic.client.core.Point2f;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.coloryr.allmusic.codec.HudPosType;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.BlitRenderState;
+import net.minecraft.client.gui.render.state.GuiTextRenderState;
+import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
+import java.util.OptionalInt;
+
 public class CoreRenderTarget extends TextFrameBuffer {
-    private static final RenderBuffers renderBuffers = new RenderBuffers();
+    private static final RenderBuffers renderBuffers = new RenderBuffers(Runtime.getRuntime().availableProcessors());
 
     private final RenderTarget target;
-    private Matrix4f matrix4f;
+    private CachedOrthoProjectionMatrixBuffer matrix4f;
 
-    public CoreRenderTarget() {
-        target = new TextureTarget(800, 200, false, false);
-        target.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    private final String name;
+
+    public CoreRenderTarget(String name) {
+        this.name = name;
+        target = new TextureTarget(null, 800, 200, false);
+        matrix4f = new CachedOrthoProjectionMatrixBuffer(name, 1000.0f, 11000.0f, true);
     }
 
     @Override
     public void resize(int width, int height) {
         Window window = Minecraft.getInstance().getWindow();
 
-        nowWidth = (int) (width * window.getGuiScale());
-        nowHeight = (int) (height * window.getGuiScale());
+        nowWidth = width * window.getGuiScale();
+        nowHeight = height * window.getGuiScale();
 
         if (nowWidth > target.width || nowHeight > target.height) {
-            target.resize(nowWidth, nowHeight, false);
-            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
-                    (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
-        } else if (matrix4f == null) {
-            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
-                    (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
+            target.resize(nowWidth, nowHeight);
         }
     }
 
@@ -50,12 +60,11 @@ public class CoreRenderTarget extends TextFrameBuffer {
         isDraw = true;
 
         clear();
-        target.clear(false);
-        target.bindWrite(true);
+        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1.0d);
 
         RenderSystem.backupProjectionMatrix();
         if (matrix4f != null) {
-            RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+            RenderSystem.setProjectionMatrix(matrix4f.getBuffer(target.width, target.height), ProjectionType.ORTHOGRAPHIC);
         }
     }
 
@@ -64,9 +73,6 @@ public class CoreRenderTarget extends TextFrameBuffer {
         isDraw = false;
 
         RenderSystem.restoreProjectionMatrix();
-
-        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
-        main.bindWrite(true);
     }
 
     @Override
@@ -75,10 +81,14 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         var font = Minecraft.getInstance().font;
         Component component = MiniMessage.parse(text);
-        int width = font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), renderBuffers.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
-        RenderSystem.disableDepthTest();
+        int width = font.width(component.getVisualOrderText());
+
+        RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(()-> "allmusic text render", target.getColorTextureView(), OptionalInt.of(0xFFFFFF00));
+
+        font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), renderBuffers.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
         renderBuffers.bufferSource().endBatch();
-        RenderSystem.enableDepthTest();
+
+        pass.close();
 
         TextItem item = new TextItem(width, font.lineHeight + (shadow ? 1 : 0), y, (float) window.getGuiScale());
         texts.add(item);
@@ -97,23 +107,15 @@ public class CoreRenderTarget extends TextFrameBuffer {
      * @param scale  贴图缩放
      */
     private void draw(float alpha, float x, float y, float width, float height, float texX, float texY, float scale) {
-        RenderSystem.setShaderTexture(0, target.getColorTextureId());
-        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+        int w = (int) (width / 2);
+        int h = (int) (height / 2);
 
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.depthFunc(GL30.GL_ALWAYS);
+        Matrix3x2f matrix = new Matrix3x2f().translation(x + w, y + h);
 
-        float w = (width / 2);
-        float h = (height / 2);
-
-        Matrix4f matrix = new Matrix4f().translation(x + w, y + h, 0);
-
-        float x0 = -w;
-        float x1 = w;
-        float y0 = -h;
-        float y1 = h;
-        float z = 0;
+        int x0 = -w;
+        int x1 = w;
+        int y0 = -h;
+        int y1 = h;
 
         // 计算贴图区域UV
         float u0 = texX * scale / target.width;
@@ -121,19 +123,9 @@ public class CoreRenderTarget extends TextFrameBuffer {
         float u1 = (texX + width) * scale / target.width;
         float v1 = 1 - ((texY + height) * scale / target.height);
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
+        int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
-
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-
-        target.unbindRead();
+        AllMusicClient.context.guiRenderState.submitGuiElement(new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(target.getColorTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
     }
 
     public void drawLoop(float alpha, float x, float y,
@@ -313,7 +305,5 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
             drawByPercent(alpha, point.x, point.y + item.y, 0, item.y, item.textWidth, item.textHeight, maxWidth, state, item.scale);
         }
-
-        target.unbindRead();
     }
 }

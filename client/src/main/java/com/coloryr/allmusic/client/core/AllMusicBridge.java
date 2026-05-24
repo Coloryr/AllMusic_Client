@@ -60,7 +60,7 @@ public interface AllMusicBridge {
      * 创建渲染层
      * @return 渲染层
      */
-    TextFrameBuffer makeTextRender();
+    TextFrameBuffer makeTextRender(String name);
 
     /**
      * 创建渲染层

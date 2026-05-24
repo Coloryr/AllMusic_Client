@@ -71,7 +71,7 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     }
 
     @Override
-    public TextFrameBuffer makeTextRender() {
+    public TextFrameBuffer makeTextRender(String name) {
         return new CoreRenderTarget();
     }
 

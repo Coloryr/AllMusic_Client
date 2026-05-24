@@ -5,26 +5,24 @@ import com.coloryr.allmusic.client.core.Point2f;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.coloryr.allmusic.codec.HudPosType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.network.chat.Component;
-import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 public class CoreRenderTarget extends TextFrameBuffer {
     private static final RenderBuffers renderBuffers = new RenderBuffers();
 
     private final RenderTarget target;
-    private Matrix4f matrix4f;
 
     public CoreRenderTarget() {
-        target = new TextureTarget(800, 200, false, false);
+        target = new RenderTarget(800, 200, false, false);
         target.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
@@ -37,11 +35,6 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         if (nowWidth > target.width || nowHeight > target.height) {
             target.resize(nowWidth, nowHeight, false);
-            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
-                    (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
-        } else if (matrix4f == null) {
-            matrix4f = new Matrix4f().setOrtho(0.0F, (float) (target.width / window.getGuiScale()),
-                    (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
         }
     }
 
@@ -53,17 +46,19 @@ public class CoreRenderTarget extends TextFrameBuffer {
         target.clear(false);
         target.bindWrite(true);
 
-        RenderSystem.backupProjectionMatrix();
-        if (matrix4f != null) {
-            RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-        }
+        Window window = Minecraft.getInstance().getWindow();
+
+        RenderSystem.ortho(0.0F, (float) (target.width / window.getGuiScale()),
+                (float) (target.height / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F);
     }
 
     @Override
     public void unUse() {
         isDraw = false;
 
-        RenderSystem.restoreProjectionMatrix();
+        Window window = Minecraft.getInstance().getWindow();
+
+        RenderSystem.ortho(0.0F, (double) window.getWidth() / window.getGuiScale(), (double) window.getHeight() / window.getGuiScale(), 0.0F, 1000.0F, 3000.0F);
 
         RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
         main.bindWrite(true);
@@ -73,9 +68,17 @@ public class CoreRenderTarget extends TextFrameBuffer {
     public void drawText(String text, int y, int color, boolean shadow) {
         Window window = Minecraft.getInstance().getWindow();
 
-        var font = Minecraft.getInstance().font;
+        Font font = Minecraft.getInstance().font;
         Component component = MiniMessage.parse(text);
-        int width = font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), renderBuffers.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+
+        int width;
+
+        if (shadow) {
+            width = font.drawShadow(new PoseStack(), component, 0, 0, color);
+        } else {
+            width = font.draw(new PoseStack(), component, 0, 0, color);
+        }
+
         RenderSystem.disableDepthTest();
         renderBuffers.bufferSource().endBatch();
         RenderSystem.enableDepthTest();
@@ -97,9 +100,8 @@ public class CoreRenderTarget extends TextFrameBuffer {
      * @param scale  贴图缩放
      */
     private void draw(float alpha, float x, float y, float width, float height, float texX, float texY, float scale) {
-        RenderSystem.setShaderTexture(0, target.getColorTextureId());
-        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-
+        RenderSystem.bindTexture(target.getColorTextureId());
+        RenderSystem.enableTexture();
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(GL30.GL_ALWAYS);
@@ -107,7 +109,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         float w = (width / 2);
         float h = (height / 2);
 
-        Matrix4f matrix = new Matrix4f().translation(x + w, y + h, 0);
+        Matrix4f matrix = Matrix4f.createTranslateMatrix(x + w, y + h, 0);
 
         float x0 = -w;
         float x1 = w;
@@ -122,13 +124,13 @@ public class CoreRenderTarget extends TextFrameBuffer {
         float v1 = 1 - ((texY + height) * scale / target.height);
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
         bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
         bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
         bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
         bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
-
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
 
         RenderSystem.disableBlend();
         RenderSystem.depthMask(true);
@@ -280,7 +282,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
     @Override
     public void draw(float alpha, int x, int y, int maxWidth, HudPosType dir) {
-        for (var item : texts) {
+        for (TextItem item : texts) {
             Point2f point = AllMusicHud.getPos(Math.min(maxWidth, item.textWidth), item.textHeight, x, y, dir);
 
             drawLoop(alpha, point.x, point.y + item.y, 0, item.y, item.textWidth, item.textHeight, maxWidth, offsetX % item.textWidth, item.scale);
@@ -308,7 +310,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
     @Override
     public void drawWithState(float alpha, int x, int y, int maxWidth, float state, HudPosType dir) {
-        for (var item : texts) {
+        for (TextItem item : texts) {
             Point2f point = AllMusicHud.getPos(Math.min(maxWidth, item.textWidth), item.textHeight, x, y, dir);
 
             drawByPercent(alpha, point.x, point.y + item.y, 0, item.y, item.textWidth, item.textHeight, maxWidth, state, item.scale);

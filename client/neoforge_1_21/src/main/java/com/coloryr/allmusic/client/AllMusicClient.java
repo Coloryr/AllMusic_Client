@@ -2,6 +2,9 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.coloryr.allmusic.codec.MusicPack;
 import com.coloryr.allmusic.comm.AllMusicInit;
 import com.coloryr.allmusic.comm.MusicCodec;
@@ -15,6 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -43,7 +47,9 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 @EventBusSubscriber(modid = AllMusicInit.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBridge {
@@ -120,7 +126,7 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
     @Override
     public void handle(MusicCodec pack, IPayloadContext iPayloadContext)  {
         try {
-            AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
+            AllMusicCore.packDo(pack.pack());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,55 +158,32 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
-    public void drawPic(Object textureID, int size, int x, int y, int ang) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, (int)textureID);
+    @Override
+    public TextFrameBuffer makeTextRender(String name) {
+        return new CoreRenderTarget();
+    }
 
-        PoseStack stack = new PoseStack();
-        Matrix4f matrix = stack.last().pose();
+    @Override
+    public TextureRender makeTextureRender(String file) {
+        return new TexRender(file);
+    }
 
-        int a = size / 2;
+    @Override
+    public PictureFrameBuffer makePictureRender(int size) {
+        return new PicRender(size);
+    }
 
-        if (ang > 0) {
-            matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
-        } else {
-            matrix = matrix.translation(x + a, y + a, 0);
+    @Override
+    public String readText(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath(AllMusicInit.MODID, file)).orElseThrow();
+            try (InputStream inputStream = resource.open()) {
+                byte[] bytes = inputStream.readAllBytes();
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        int z = 0;
-        int u0 = 0;
-        float u1 = 1;
-        float v0 = 0;
-        float v1 = 1;
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.addVertex(matrix, (float) x0, (float) y1, (float) z).setUv(u0, v1);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y1, (float) z).setUv(u1, v1);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y0, (float) z).setUv(u1, v0);
-        bufferBuilder.addVertex(matrix, (float) x0, (float) y0, (float) z).setUv(u0, v0);
-
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(item);
-        gui.drawString(hud, component, x, y, color, shadow);
-    }
-
-    @Override
-    public Object genTexture(int size) {
-        return AllMusicCore.genGLTexture(size);
-    }
-
-    @Override
-    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
     }
 }

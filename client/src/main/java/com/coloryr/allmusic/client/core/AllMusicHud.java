@@ -126,12 +126,12 @@ public class AllMusicHud {
 
         picRender = AllMusicCore.bridge.makePictureRender(size);
 
-        stateRender = AllMusicCore.bridge.makeTextRender();
-        infoRender = AllMusicCore.bridge.makeTextRender();
-        listRender = AllMusicCore.bridge.makeTextRender();
-        lyricRender = AllMusicCore.bridge.makeTextRender();
-        lyricTranRender = AllMusicCore.bridge.makeTextRender();
-        lyricKtvRender = AllMusicCore.bridge.makeTextRender();
+        stateRender = AllMusicCore.bridge.makeTextRender("state");
+        infoRender = AllMusicCore.bridge.makeTextRender("info");
+        listRender = AllMusicCore.bridge.makeTextRender("list");
+        lyricRender = AllMusicCore.bridge.makeTextRender("lyric");
+        lyricTranRender = AllMusicCore.bridge.makeTextRender("lyric tran");
+        lyricKtvRender = AllMusicCore.bridge.makeTextRender("lyric ktv");
 
         progress1 = AllMusicCore.bridge.makeTextureRender(PG1);
         progress2 = AllMusicCore.bridge.makeTextureRender(PG2);

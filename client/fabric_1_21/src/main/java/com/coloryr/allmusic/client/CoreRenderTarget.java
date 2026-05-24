@@ -18,7 +18,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
 public class CoreRenderTarget extends TextFrameBuffer {
-    private static final RenderBuffers renderBuffers = new RenderBuffers();
+    private static final RenderBuffers renderBuffers = new RenderBuffers(Runtime.getRuntime().availableProcessors());
 
     private final RenderTarget target;
     private Matrix4f matrix4f;
@@ -98,7 +98,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
      */
     private void draw(float alpha, float x, float y, float width, float height, float texX, float texY, float scale) {
         RenderSystem.setShaderTexture(0, target.getColorTextureId());
-        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
@@ -121,14 +121,13 @@ public class CoreRenderTarget extends TextFrameBuffer {
         float u1 = (texX + width) * scale / target.width;
         float v1 = 1 - ((texY + height) * scale / target.height);
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(matrix, x0, y1, z).setUv(u0, v1).setColor(1.0f, 1.0f, 1.0f, alpha);
+        bufferBuilder.addVertex(matrix, x1, y1, z).setUv(u1, v1).setColor(1.0f, 1.0f, 1.0f, alpha);
+        bufferBuilder.addVertex(matrix, x1, y0, z).setUv(u1, v0).setColor(1.0f, 1.0f, 1.0f, alpha);
+        bufferBuilder.addVertex(matrix, x0, y0, z).setUv(u0, v0).setColor(1.0f, 1.0f, 1.0f, alpha);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         RenderSystem.disableBlend();
         RenderSystem.depthMask(true);

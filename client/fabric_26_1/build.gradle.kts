@@ -24,8 +24,6 @@ tasks {
     shadowJar {
         archiveFileName.set("[fabric-26.1]AllMusic_Client-${project.version}.jar")
         destinationDirectory.set(file("${parent!!.projectDir}/../build"))
-
-        relocate("com.google.gson", "com.coloryr.allmusic.libs.com.google.gson")
     }
 
     build {

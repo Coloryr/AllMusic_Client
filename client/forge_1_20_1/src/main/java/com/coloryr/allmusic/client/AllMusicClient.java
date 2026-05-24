@@ -2,6 +2,9 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -9,6 +12,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -21,7 +25,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkEvent;
@@ -31,16 +34,19 @@ import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
-@Mod("allmusic_client")
-public class AllMusic implements AllMusicBridge {
-    private static GuiGraphics gui;
+@Mod(AllMusicClient.MODID)
+public class AllMusicClient implements AllMusicBridge {
+    public static final String MODID = "allmusic_client";
+
     private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
 
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
-    public AllMusic() {
+    public AllMusicClient() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::setup);
@@ -124,53 +130,9 @@ public class AllMusic implements AllMusicBridge {
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
-    public void drawPic(Object textureID, int size, int x, int y, int ang) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, (int)textureID);
-
-        PoseStack stack = new PoseStack();
-        Matrix4f matrix = stack.last().pose();
-
-        int a = size / 2;
-
-        if (ang > 0) {
-            matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
-        } else {
-            matrix = matrix.translation(x + a, y + a, 0);
-        }
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        int z = 0;
-        int u0 = 0;
-        float u1 = 1;
-        float v0 = 0;
-        float v1 = 1;
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
-
-        BufferUploader.drawWithShader(bufferBuilder.end());
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(item);
-        gui.drawString(hud, component, x, y, color, shadow);
-    }
-
     @SubscribeEvent
     public void onRenderOverlay(RenderGuiOverlayEvent.Pre e) {
         if (e.getOverlay().id() == VanillaGuiOverlay.PORTAL.id()) {
-            gui = e.getGuiGraphics();
             AllMusicCore.hudUpdate();
         }
     }
@@ -181,12 +143,31 @@ public class AllMusic implements AllMusicBridge {
     }
 
     @Override
-    public Object genTexture(int size) {
-        return AllMusicCore.genGLTexture(size);
+    public TextFrameBuffer makeTextRender(String name) {
+        return new CoreRenderTarget();
     }
 
     @Override
-    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
+    public TextureRender makeTextureRender(String file) {
+        return new TexRender(file);
+    }
+
+    @Override
+    public PictureFrameBuffer makePictureRender(int size) {
+        return new PicRender(size);
+    }
+
+    @Override
+    public String readText(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(MODID, file)).orElseThrow();
+            try (InputStream inputStream = resource.open()) {
+                byte[] bytes = inputStream.readAllBytes();
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

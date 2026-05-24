@@ -2,6 +2,9 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.coloryr.allmusic.comm.MusicCodec;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -10,18 +13,19 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
-import java.nio.ByteBuffer;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
+    public static final String MODID = "allmusic_client";
+
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
     private static GuiGraphics context;
@@ -29,16 +33,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static void update(GuiGraphics draw) {
         context = draw;
         AllMusicCore.hudUpdate();
-    }
-
-    @Override
-    public Object genTexture(int size) {
-        return AllMusicCore.genGLTexture(size);
-    }
-
-    @Override
-    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
     }
 
     public int getScreenWidth() {
@@ -63,42 +57,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         context.drawString(hud, component, x, y, color, shadow);
     }
 
-    public void drawPic(Object texture, int size, int x, int y, int ang) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, (int) texture);
-
-        PoseStack stack = new PoseStack();
-        Matrix4f matrix = stack.last().pose();
-
-        int a = size / 2;
-
-        if (ang > 0) {
-            matrix = matrix.translationRotate(x + a, y + a, 0,
-                    new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
-        } else {
-            matrix = matrix.translation(x + a, y + a, 0);
-        }
-
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        int z = 0;
-        int u0 = 0;
-        float u1 = 1;
-        float v0 = 0;
-        float v1 = 1;
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.addVertex(matrix, (float) x0, (float) y1, (float) z).setUv(u0, v1);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y1, (float) z).setUv(u1, v1);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y0, (float) z).setUv(u1, v0);
-        bufferBuilder.addVertex(matrix, (float) x0, (float) y0, (float) z).setUv(u0, v0);
-
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-    }
-
     public void sendMessage(String data) {
         data = "[AllMusic Client]" + data;
         LOGGER.warn(data);
@@ -121,10 +79,39 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     }
 
     @Override
+    public TextFrameBuffer makeTextRender(String name) {
+        return new CoreRenderTarget();
+    }
+
+    @Override
+    public TextureRender makeTextureRender(String file) {
+        return new TexRender(file);
+    }
+
+    @Override
+    public PictureFrameBuffer makePictureRender(int size) {
+        return new PicRender(size);
+    }
+
+    @Override
+    public String readText(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath(MODID, file)).orElseThrow();
+            try (InputStream inputStream = resource.open()) {
+                byte[] bytes = inputStream.readAllBytes();
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(MusicCodec.ID, (pack, handler) -> {
             try {
-                AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
+                AllMusicCore.packDo(pack.pack());
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -2,6 +2,9 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -16,6 +19,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -33,17 +37,24 @@ import net.minecraftforge.fml.network.NetworkRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-@Mod("allmusic_client")
-public class AllMusic implements AllMusicBridge {
+@Mod(AllMusicClient.MODID)
+public class AllMusicClient implements AllMusicBridge {
+    public static final String MODID = "allmusic_client";
+
     private static final ResourceLocation channel = new ResourceLocation("allmusic", "channel");
-    private static final PoseStack stack = new PoseStack();
 
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
-    public AllMusic() {
+    public AllMusicClient() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::setup);
@@ -128,47 +139,6 @@ public class AllMusic implements AllMusicBridge {
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
-    public void drawPic(Object textureID, int size, int x, int y, int ang) {
-        GlStateManager._bindTexture((int) textureID);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-        Matrix4f matrix = Matrix4f.createTranslateMatrix(x + size / 2.0F, y + size / 2.0F, 0.0F);
-        if (ang > 0) {
-            matrix.multiply(new Quaternion(0, 0, ang, true));
-        }
-
-        int a = size / 2;
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        int z = 0;
-        int u0 = 0;
-        float u1 = 1;
-        float v0 = 0;
-        float v1 = 1;
-
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).uv(u0, v0).endVertex();
-        bufferBuilder.end();
-        RenderSystem.enableAlphaTest();
-        BufferUploader.end(bufferBuilder);
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        Font hud = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(item);
-        if (shadow) {
-            hud.drawShadow(stack, component, x, y, color);
-        } else {
-            hud.draw(stack, component, x, y, color);
-        }
-    }
-
     public void sendMessage(String data) {
         data = "[AllMusic Client]" + data;
         LOGGER.warn(data);
@@ -182,12 +152,93 @@ public class AllMusic implements AllMusicBridge {
     }
 
     @Override
-    public Object genTexture(int size) {
-        return AllMusicCore.genGLTexture(size);
+    public TextFrameBuffer makeTextRender(String name) {
+        return new CoreRenderTarget();
     }
 
     @Override
-    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        AllMusicCore.updateGLTexture((int) tex, size, byteBuffer);
+    public TextureRender makeTextureRender(String file) {
+        return new TexRender(file);
+    }
+
+    @Override
+    public PictureFrameBuffer makePictureRender(int size) {
+        return new PicRender(size);
+    }
+
+    public byte[] readNBytes(InputStream stream) throws IOException {
+        int len = Integer.MAX_VALUE;
+
+        List<byte[]> bufs = null;
+        byte[] result = null;
+        int total = 0;
+        int remaining = len;
+        int n;
+        do {
+            byte[] buf = new byte[Math.min(remaining, 16384)];
+            int nread = 0;
+
+            // read to EOF which may read more or less than buffer size
+            while ((n = stream.read(buf, nread,
+                    Math.min(buf.length - nread, remaining))) > 0) {
+                nread += n;
+                remaining -= n;
+            }
+
+            if (nread > 0) {
+                if (Integer.MAX_VALUE - 8 - total < nread) {
+                    throw new OutOfMemoryError("Required array size too large");
+                }
+                if (nread < buf.length) {
+                    buf = Arrays.copyOfRange(buf, 0, nread);
+                }
+                total += nread;
+                if (result == null) {
+                    result = buf;
+                } else {
+                    if (bufs == null) {
+                        bufs = new ArrayList<>();
+                        bufs.add(result);
+                    }
+                    bufs.add(buf);
+                }
+            }
+            // if the last call to read returned -1 or the number of bytes
+            // requested have been read then break
+        } while (n >= 0 && remaining > 0);
+
+        if (bufs == null) {
+            if (result == null) {
+                return new byte[0];
+            }
+            return result.length == total ?
+                    result : Arrays.copyOf(result, total);
+        }
+
+        result = new byte[total];
+        int offset = 0;
+        remaining = total;
+        for (byte[] b : bufs) {
+            int count = Math.min(b.length, remaining);
+            System.arraycopy(b, 0, result, offset, count);
+            offset += count;
+            remaining -= count;
+        }
+
+        return result;
+    }
+
+    @Override
+    public String readText(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(MODID, file));
+            try (InputStream inputStream = resource.getInputStream()) {
+                byte[] bytes = readNBytes(inputStream);
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
