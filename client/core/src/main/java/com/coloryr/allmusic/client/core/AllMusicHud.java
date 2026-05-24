@@ -59,7 +59,7 @@ public class AllMusicHud {
     private float lyricState = 0.0f;
     private long lyricTime = -1;
 
-    private int pgOffset = 0;
+    private int pgOffset;
 
     /**
      * 图片渲染
@@ -121,6 +121,9 @@ public class AllMusicHud {
         service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(this::lyricTick, 0, 10, TimeUnit.MILLISECONDS);
 
+        service = Executors.newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(this::loopTick, 0, 100, TimeUnit.MILLISECONDS);
+
         picRender = AllMusicCore.bridge.makePictureRender(size);
 
         stateRender = AllMusicCore.bridge.makeTextRender();
@@ -163,7 +166,6 @@ public class AllMusicHud {
      */
     private void picRotateTick() {
         if (save == null) return;
-
         if (count < save.pic.speed) {
             count++;
             return;
@@ -171,15 +173,18 @@ public class AllMusicHud {
         count = 0;
         ang++;
         ang = ang % 360;
-
-        infoRender.tick();
-
     }
 
     private void lyricTick() {
         if (save == null || ktv == null || lyricTime == -1) return;
         lyricTime += 10;
         kUpdate();
+    }
+
+    private void loopTick() {
+        if (save == null) return;
+        infoRender.tick();
+//        listRender.tick();
     }
 
     /**
@@ -311,7 +316,7 @@ public class AllMusicHud {
      * 更新材质
      */
     private void updateTexture() {
-        picRender.updatePic(sourceImage, rotateImage);
+        picRender.update(sourceImage, rotateImage);
         haveImg = true;
     }
 
@@ -541,30 +546,34 @@ public class AllMusicHud {
         }
 
         if (save.info.enable) {
-            infoRender.draw(save.info.alpha, save.info.x, save.info.y, 1000);
+            infoRender.draw(save.info.alpha, save.info.x, save.info.y, save.info.loop ? save.info.maxWidth : -1, save.info.pos);
         }
         if (save.list.enable) {
-            listRender.draw(save.list.alpha, save.list.x, save.list.y, 1000);
+            listRender.draw(save.list.alpha, save.list.x, save.list.y, save.list.loop ? save.list.maxWidth : -1, save.list.pos);
         }
         if (save.lyric.enable) {
-            lyricRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000);
-            lyricTranRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y + save.lyric.gap, 1000);
+            lyricRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y, save.lyric.maxWidth, save.lyric.pos);
+            lyricTranRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y + save.lyric.gap, save.lyric.maxWidth, save.lyric.pos);
             if (ktv != null) {
-                lyricKtvRender.drawWithState(save.lyric.alpha, save.lyric.x, save.lyric.y, 1000, lyricState);
+                lyricKtvRender.drawWithState(save.lyric.alpha, save.lyric.x, save.lyric.y, save.lyric.maxWidth, lyricState, save.lyric.pos);
             }
         }
         if (save.state.enable && allTime != 0) {
-            int x = save.state.x;
-            int start = stateRender.drawLine(save.state.alpha, x, save.state.y, 1);
-            x += save.state.gap + start;
-            progress1.drawPic(x, save.state.y + pgOffset, save.state.alpha);
-            x += save.state.gap + progress1.width;
-            stateRender.drawLine(save.state.alpha, x, save.state.y, 0);
+            int gap = save.state.gap;
+            Point2f item = stateRender.getLine(1);
+            Point2f item1 = stateRender.getLine(0);
+            // 渲染原点
+            Point2f point = getPos(item.x + item1.x + progress1.width + gap + gap,
+                    item.y, save.state.x, save.state.y, save.state.pos);
 
-            x = save.state.x + start + save.state.gap;
-            progress2.drawPic(x, save.state.y + pgOffset, (float) nowTime / allTime, save.state.alpha);
+            stateRender.drawLine(point.x, point.y, save.state.alpha, 1);
+            stateRender.drawLine(point.x + progress1.width + gap + gap + item.x, point.y, save.state.alpha, 0);
 
-            float x1 = save.state.x + start + save.state.gap + (((float) nowTime / allTime) * (progress1.width)) - ((float) progress3.width / 2);
+            float x = point.x + gap + item.x;
+            progress1.drawPic(x, point.y + pgOffset, save.state.alpha);
+            progress2.drawPic(x, point.y + pgOffset, (float) nowTime / allTime, save.state.alpha);
+
+            float x1 = x + (((float) nowTime / allTime) * (progress1.width)) - ((float) progress3.width / 2);
 
             progress3.drawPic(x1, save.state.y + pgOffset, save.state.alpha);
         }
@@ -576,80 +585,27 @@ public class AllMusicHud {
         }
         //绘制图片
         if (save.pic.enable && haveImg) {
-            drawPic(save.pic.size, save.pic.x, save.pic.y, save.pic.pos, ang);
+            picRender.draw(save.pic.rotate, save.pic.size, save.pic.x, save.pic.y, ang, save.pic.pos, save.pic.alpha);
         }
     }
 
     /**
      * 绘制图片
      *
-     * @param size 渲染大小
      * @param x    X坐标
      * @param y    Y坐标
      * @param dir  对齐方式
-     * @param ang  旋转角度
      */
-    private void drawPic(int size, int x, int y, HudPosType dir, int ang) {
+    public static Point2f getPos(float width, float height, float x, float y, HudPosType dir) {
         if (dir == null) {
-            return;
+            return new Point2f(x, y);
         }
 
-        int screenWidth = AllMusicCore.bridge.getScreenWidth();
-        int screenHeight = AllMusicCore.bridge.getScreenHeight();
+        float screenWidth = AllMusicCore.bridge.getScreenWidth();
+        float screenHeight = AllMusicCore.bridge.getScreenHeight();
 
-        //默认左上角
-        int x1 = x;
-        int y1 = y;
-
-        switch (dir) {
-            case TOP_CENTER:
-                x1 = screenWidth / 2 - size / 2 + x;
-                break;
-            case TOP_RIGHT:
-                x1 = screenWidth - size - x;
-                break;
-            case LEFT:
-                y1 = screenHeight / 2 - size / 2 + y;
-                break;
-            case CENTER:
-                x1 = screenWidth / 2 - size / 2 + x;
-                y1 = screenHeight / 2 - size / 2 + y;
-                break;
-            case RIGHT:
-                x1 = screenWidth - size - x;
-                y1 = screenHeight / 2 - size / 2 + y;
-                break;
-            case BOTTOM_LEFT:
-                y1 = screenHeight - size - y;
-                break;
-            case BOTTOM_CENTER:
-                x1 = screenWidth / 2 - size / 2 + x;
-                y1 = screenHeight - size - y;
-                break;
-            case BOTTOM_RIGHT:
-                x1 = screenWidth - size - x;
-                y1 = screenHeight - size - y;
-                break;
-        }
-
-        picRender.drawPic(save.pic.rotate, size, x1, y1, ang, save.pic.alpha);
-    }
-
-    /**
-     * 显示文字内容
-     *
-     * @param fb    内容
-     * @param x     X坐标
-     * @param y     Y坐标
-     * @param dir   对齐方式
-     * @param alpha 透明度
-     */
-    private void drawText(TextFrameBuffer fb, int width, int height, int x, int y, HudPosType dir, float alpha) {
-        int screenWidth = AllMusicCore.bridge.getScreenWidth();
-        int screenHeight = AllMusicCore.bridge.getScreenHeight();
-
-        int x1 = x;
-        int y1 = y;
+        float x1 = x;
+        float y1 = y;
 
         switch (dir) {
             case TOP_CENTER:
@@ -682,7 +638,7 @@ public class AllMusicHud {
                 break;
         }
 
-//        fb.draw(text, alpha, x1, y1, width, height);
+        return new Point2f(x1, y1);
     }
 
     public void setInfo(String info) {

@@ -1,6 +1,9 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.core.AllMusicHud;
+import com.coloryr.allmusic.client.core.Point2f;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.codec.HudPosType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
@@ -45,9 +48,10 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
     @Override
     public void use() {
+        isDraw = true;
+
         clear();
         target.clear(false);
-
         target.bindWrite(true);
 
         RenderSystem.backupProjectionMatrix();
@@ -58,6 +62,8 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
     @Override
     public void unUse() {
+        isDraw = false;
+
         RenderSystem.restoreProjectionMatrix();
 
         RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
@@ -99,8 +105,8 @@ public class CoreRenderTarget extends TextFrameBuffer {
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(GL30.GL_ALWAYS);
 
-        float w = (width / scale / 2);
-        float h = (height / scale / 2);
+        float w = (width / 2);
+        float h = (height / 2);
 
         Matrix4f matrix = new Matrix4f().translation(x + w, y + h, 0);
 
@@ -111,10 +117,10 @@ public class CoreRenderTarget extends TextFrameBuffer {
         float z = 0;
 
         // 计算贴图区域UV
-        float u0 = (texX * scale) / target.width;
+        float u0 = texX * scale / target.width;
         float v0 = 1 - (texY * scale  / target.height);
-        float u1 = (texX + width) / target.width;
-        float v1 = 1 - ((texY * scale + height) / target.height);
+        float u1 = (texX + width) * scale / target.width;
+        float v1 = 1 - ((texY + height)  * scale / target.height);
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -127,32 +133,24 @@ public class CoreRenderTarget extends TextFrameBuffer {
         target.unbindRead();
     }
 
-    public void drawLoop(float alpha, int startX, int startY,
-                         int texX, int texY,
-                         int texWidth, int texHeight,
-                         int maxWidth, int offsetX, float scale) {
+    public void drawLoop(float alpha, float x, float y,
+                         float texX, float texY,
+                         float textWidth, float textHeight,
+                         int maxWidth, float offsetX, float scale) {
 
         // 如果宽度不大于最大宽度，直接全部渲染
-        if (texWidth <= maxWidth) {
-            draw(alpha, startX, startY, texWidth, texHeight, texX, texY, scale);
+        if (maxWidth == -1 || textWidth <= maxWidth) {
+            draw(alpha, x, y, textWidth, textHeight, texX, texY, scale);
             return;
         }
 
-        int currentX = startX;
-        int currentTexX = texX + offsetX;
-        int remainingWidth = maxWidth;
-        int widthFromCurrentTex = texWidth - (currentTexX - texX);
-
-        // 渲染第一部分（从偏移到末尾）
-        int firstWidth = Math.min(widthFromCurrentTex, remainingWidth);
-        draw(alpha, currentX, startY, firstWidth, texHeight, currentTexX, texY, scale);
-
-        remainingWidth -= firstWidth;
-        currentX += firstWidth;
-
-        // 渲染第二部分（从开头到剩余宽度）
-        if (remainingWidth > 0) {
-            draw(alpha, currentX, startY, remainingWidth, texHeight, texX, texY, scale);
+        if (textWidth - offsetX < maxWidth) {
+            float nowWith = textWidth - offsetX;
+            draw(alpha, x, y, nowWith, textHeight, offsetX, texY, scale);
+            draw(alpha, x + nowWith, y, maxWidth - nowWith, textHeight, 0, texY, scale);
+        }
+        else {
+            draw(alpha, x, y, maxWidth, textHeight, offsetX, texY, scale);
         }
     }
 
@@ -169,9 +167,9 @@ public class CoreRenderTarget extends TextFrameBuffer {
      * @param maxWidth  最大渲染宽度
      * @param percent   百分比（0.0-1.0），0%显示左边，100%显示右边
      */
-    public void drawByPercent(float alpha, int startX, int startY,
-                              int texX, int texY,
-                              int texWidth, int texHeight,
+    public void drawByPercent(float alpha, float startX, float startY,
+                              float texX, float texY,
+                              float texWidth, float texHeight,
                               int maxWidth, float percent, float scale) {
 
         // 限制百分比范围
@@ -183,15 +181,12 @@ public class CoreRenderTarget extends TextFrameBuffer {
             return;
         }
 
-        // 计算显示宽度
-        int renderWidth = maxWidth;
-
         // 计算贴图的起始位置（根据百分比）
-        int maxOffset = texWidth - renderWidth;
+        float maxOffset = texWidth - maxWidth;
         int texOffset = (int) (maxOffset * percent);
 
         // 渲染
-        draw(alpha, startX, startY, renderWidth, texHeight, texX + texOffset, texY, scale);
+        draw(alpha, startX, startY, maxWidth, texHeight, texX + texOffset, texY, scale);
     }
 
     /**
@@ -282,38 +277,41 @@ public class CoreRenderTarget extends TextFrameBuffer {
     }
 
     @Override
-    public void draw(float alpha, int x, int y, int maxWidth) {
+    public void draw(float alpha, int x, int y, int maxWidth, HudPosType dir) {
         for (var item : texts) {
-            drawLoop(alpha, x, y + item.y, 0, item.y, item.width, item.height, maxWidth, 0, item.scale);
+            Point2f point = AllMusicHud.getPos(Math.min(maxWidth, item.textWidth), item.textHeight, x, y, dir);
+
+            drawLoop(alpha, point.x, point.y + item.y, 0, item.y, item.textWidth, item.textHeight, maxWidth, offsetX % item.textWidth, item.scale);
         }
     }
 
-
     @Override
-    public int drawLine(float alpha, int x, int y, int line) {
+    public void drawLine(float x, float y, float alpha, int line) {
         if (line >= texts.size()) {
-            return 0;
+            return;
         }
         TextItem item = texts.get(line);
-        if (item != null) {
-            draw(alpha, x, y, item.width, item.height, 0, item.y, item.scale);
-            return item.textWidth;
-        }
-
-        return 0;
+        draw(alpha, x, y, item.textWidth, item.textHeight, 0, item.y, item.scale);
     }
 
     @Override
-    public void drawWithState(float alpha, int x, int y, int maxWidth, float state) {
+    public Point2f getLine(int line) {
+        if (line >= texts.size()) {
+            return new Point2f(0, 0);
+        }
+        TextItem item = texts.get(line);
+        return new Point2f(item.textWidth, item.textHeight);
+    }
+
+
+    @Override
+    public void drawWithState(float alpha, int x, int y, int maxWidth, float state, HudPosType dir) {
         for (var item : texts) {
-            drawByPercent(alpha, x, y + item.y, 0, item.y, item.width, item.height, maxWidth, state, item.scale);
+            Point2f point = AllMusicHud.getPos(Math.min(maxWidth, item.textWidth), item.textHeight, x, y, dir);
+
+            drawByPercent(alpha, point.x, point.y + item.y, 0, item.y, item.textWidth, item.textHeight, maxWidth, state, item.scale);
         }
 
         target.unbindRead();
-    }
-
-    @Override
-    public void tick() {
-
     }
 }

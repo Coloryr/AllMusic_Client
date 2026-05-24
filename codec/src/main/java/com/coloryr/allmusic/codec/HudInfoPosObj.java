@@ -5,20 +5,20 @@ public class HudInfoPosObj extends HudBasePosObj {
     public boolean shadow;
     public int maxWidth;
     public int gap;
-    public LoopType loop;
+    public boolean loop;
 
     public HudInfoPosObj copy() {
-        HudInfoPosObj pos = new HudInfoPosObj();
-        pos.x = x;
-        pos.y = y;
-        pos.alpha = alpha;
-        pos.loop = loop;
-        pos.color = color;
-        pos.enable = enable;
-        pos.gap = gap;
-        pos.maxWidth = maxWidth;
-        pos.shadow = shadow;
-
-        return pos;
+        HudInfoPosObj obj = new HudInfoPosObj();
+        obj.x = x;
+        obj.y = y;
+        obj.alpha = alpha;
+        obj.loop = loop;
+        obj.color = color;
+        obj.enable = enable;
+        obj.gap = gap;
+        obj.maxWidth = maxWidth;
+        obj.shadow = shadow;
+        obj.pos = pos;
+        return obj;
     }
 }

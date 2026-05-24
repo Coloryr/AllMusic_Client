@@ -15,7 +15,6 @@ public class HudStatePosObj extends HudBasePosObj {
         obj.gap = gap;
         obj.shadow = shadow;
         obj.pos = pos;
-
         return obj;
     }
 }

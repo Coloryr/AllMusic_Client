@@ -7,16 +7,16 @@ public class HudLyricPosObj extends HudBasePosObj {
     public int maxWidth;
 
     public HudLyricPosObj copy() {
-        HudLyricPosObj pos = new HudLyricPosObj();
-        pos.x = x;
-        pos.y = y;
-        pos.alpha = alpha;
-        pos.color = color;
-        pos.enable = enable;
-        pos.maxWidth = maxWidth;
-        pos.shadow = shadow;
-        pos.gap = gap;
-
-        return pos;
+        HudLyricPosObj obj = new HudLyricPosObj();
+        obj.x = x;
+        obj.y = y;
+        obj.alpha = alpha;
+        obj.color = color;
+        obj.enable = enable;
+        obj.maxWidth = maxWidth;
+        obj.shadow = shadow;
+        obj.gap = gap;
+        obj.pos = pos;
+        return obj;
     }
 }

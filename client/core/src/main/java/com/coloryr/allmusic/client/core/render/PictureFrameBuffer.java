@@ -1,12 +1,14 @@
 package com.coloryr.allmusic.client.core.render;
 
+import com.coloryr.allmusic.codec.HudPosType;
+
 public abstract class PictureFrameBuffer {
     /**
      * 更新图片
      * @param source 原始
      * @param rotate 圆形
      */
-    public abstract void updatePic(byte[] source, byte[] rotate);
+    public abstract void update(byte[] source, byte[] rotate);
     /**
      * 绘制图片
      *
@@ -17,5 +19,5 @@ public abstract class PictureFrameBuffer {
      * @param ang     旋转角度
      * @param alpha   透明度
      */
-    public abstract void drawPic(boolean rotate, int size, float x, float y, int ang, float alpha);
+    public abstract void draw(boolean rotate, int size, float x, float y, int ang, HudPosType dir, float alpha);
 }

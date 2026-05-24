@@ -23,8 +23,8 @@ public class HudPosObj {
         obj.enable = true;
         obj.shadow = true;
         obj.alpha = 1.0f;
-        obj.loop = LoopType.LOOP_CYCLE;
-        obj.maxWidth = 2000;
+        obj.loop = true;
+        obj.maxWidth = 300;
         obj.gap = 10;
         return obj;
     }
@@ -38,8 +38,8 @@ public class HudPosObj {
         obj.enable = true;
         obj.shadow = true;
         obj.alpha = 1.0f;
-        obj.loop = LoopType.LOOP_CYCLE;
-        obj.maxWidth = 2000;
+        obj.loop = true;
+        obj.maxWidth = 300;
         obj.gap = 10;
         return obj;
     }
@@ -54,14 +54,14 @@ public class HudPosObj {
         obj.enable = true;
         obj.shadow = true;
         obj.alpha = 1.0f;
-        obj.maxWidth = 2000;
+        obj.maxWidth = 300;
         return obj;
     }
 
     public static HudStatePosObj makeState() {
         HudStatePosObj obj = new HudStatePosObj();
         obj.x = 74;
-        obj.y = 40;
+        obj.y = 43;
         obj.pos = HudPosType.TOP_LEFT;
         obj.color = 0xffffff;
         obj.enable = true;

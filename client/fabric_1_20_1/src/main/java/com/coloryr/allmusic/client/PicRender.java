@@ -1,6 +1,9 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.core.AllMusicHud;
+import com.coloryr.allmusic.client.core.Point2f;
 import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.codec.HudPosType;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -22,7 +25,7 @@ public class PicRender extends PictureFrameBuffer {
     }
 
     @Override
-    public void updatePic(byte[] source, byte[] rotate) {
+    public void update(byte[] source, byte[] rotate) {
         try {
             ByteArrayInputStream stream = new ByteArrayInputStream(source);
             var image1 = NativeImage.read(stream);
@@ -39,7 +42,9 @@ public class PicRender extends PictureFrameBuffer {
     }
 
     @Override
-    public void drawPic(boolean rotate, int size, float x, float y, int ang, float alpha) {
+    public void draw(boolean rotate, int size, float x, float y, int ang, HudPosType dir, float alpha) {
+        Point2f point = AllMusicHud.getPos(size, size, x, y, dir);
+
         RenderSystem.setShaderTexture(0, rotate ? rotateTexture.getId() : sourceTexture.getId());
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 
@@ -47,16 +52,15 @@ public class PicRender extends PictureFrameBuffer {
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(GL30.GL_ALWAYS);
 
-        PoseStack stack = new PoseStack();
-        Matrix4f matrix = stack.last().pose();
+        Matrix4f matrix;
 
         int a = size / 2;
 
         if (ang > 0) {
-            matrix = matrix.translationRotate(x + a, y + a, 0,
+            matrix = new Matrix4f().translationRotate(point.x + a, point.y + a, 0,
                     new Quaternionf().fromAxisAngleDeg(0, 0, 1, ang));
         } else {
-            matrix = matrix.translation(x + a, y + a, 0);
+            matrix = new Matrix4f().translation(point.x + a, point.y + a, 0);
         }
 
         int x0 = -a;
