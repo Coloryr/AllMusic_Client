@@ -8,24 +8,21 @@ import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.state.BlitRenderState;
-import net.minecraft.client.gui.render.state.GuiTextRenderState;
 import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL30;
 
 import java.util.OptionalInt;
 
@@ -33,13 +30,12 @@ public class CoreRenderTarget extends TextFrameBuffer {
     private static final RenderBuffers renderBuffers = new RenderBuffers(Runtime.getRuntime().availableProcessors());
 
     private final RenderTarget target;
-    private CachedOrthoProjectionMatrixBuffer matrix4f;
-
     private final String name;
+    private CachedOrthoProjectionMatrixBuffer matrix4f;
 
     public CoreRenderTarget(String name) {
         this.name = name;
-        target = new TextureTarget(null, 800, 200, false);
+        target = new TextureTarget(name, 800, 200, false);
         matrix4f = new CachedOrthoProjectionMatrixBuffer(name, 1000.0f, 11000.0f, true);
     }
 
@@ -60,7 +56,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         isDraw = true;
 
         clear();
-        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1.0d);
+        RenderSystem.getDevice().createCommandEncoder().clearColorTexture(target.getColorTexture(), 0);
 
         RenderSystem.backupProjectionMatrix();
         if (matrix4f != null) {
@@ -83,10 +79,21 @@ public class CoreRenderTarget extends TextFrameBuffer {
         Component component = MiniMessage.parse(text);
         int width = font.width(component.getVisualOrderText());
 
-        RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(()-> "allmusic text render", target.getColorTextureView(), OptionalInt.of(0xFFFFFF00));
+        GpuDevice device = RenderSystem.getDevice();
+        CommandEncoder encoder = device.createCommandEncoder();
+        RenderPass pass = encoder.createRenderPass(() -> "allmusic text render", target.getColorTextureView(), OptionalInt.of(0xFFFFFF00));
 
-        font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), renderBuffers.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
-        renderBuffers.bufferSource().endBatch();
+        pass.setPipeline(RenderPipelines.TEXT);
+        pass.drawMultipleIndexed();
+
+        MultiBufferSource.BufferSource bufferSource =
+                MultiBufferSource.immediate(pass.createCommandBuffer());
+
+        font.drawInBatch(component, 0, y, color, shadow, new Matrix4f(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
+        bufferSource.endBatch();
+
+        pass.close();
+        encoder.submit();
 
         pass.close();
 

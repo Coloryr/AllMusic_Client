@@ -1,5 +1,7 @@
 package com.coloryr.allmusic.client.core.render;
 
+import com.coloryr.allmusic.codec.HudPosType;
+
 public abstract class TextureRender {
     public int width;
     public int height;
@@ -18,4 +20,6 @@ public abstract class TextureRender {
     public abstract void drawPic(float x, float y, float alpha);
 
     public abstract void drawPic(float x, float y, float width, float alpha);
+
+    public abstract void drawPic(float x, float y, float width, float height, HudPosType dir, float alpha);
 }

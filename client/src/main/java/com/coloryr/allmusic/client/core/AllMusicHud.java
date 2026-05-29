@@ -80,11 +80,18 @@ public class AllMusicHud {
     private static final String PG2 = "textures/hud/pg2.png";
     private static final String PG3 = "textures/hud/pg3.png";
 
+    private static final String BG1 = "textures/hud/bg1.png";
+    private static final String BG2 = "textures/hud/bg2.png";
+    private static final String BG3 = "textures/hud/bg3.png";
+
     private static final String PG_OFFSET = "textures/hud/offset.txt";
 
     private final TextureRender progress1;
     private final TextureRender progress2;
     private final TextureRender progress3;
+
+    private final TextureRender bg1;
+    private final TextureRender bg3;
 
     /**
      * 是否有图片
@@ -136,6 +143,8 @@ public class AllMusicHud {
         progress1 = AllMusicCore.bridge.makeTextureRender(PG1);
         progress2 = AllMusicCore.bridge.makeTextureRender(PG2);
         progress3 = AllMusicCore.bridge.makeTextureRender(PG3);
+        bg1 = AllMusicCore.bridge.makeTextureRender(BG1);
+        bg3 = AllMusicCore.bridge.makeTextureRender(BG3);
 
         String offset = AllMusicCore.bridge.readText(PG_OFFSET);
         pgOffset = Integer.parseInt(offset);
@@ -529,7 +538,7 @@ public class AllMusicHud {
         if (stateNeedUpdate) {
             if (allTime == 0) {
                 stateRender.clear();
-            }else {
+            } else {
                 String all = tranTime(allTime / 1000);
                 String time = tranTime(nowTime / 1000);
 
@@ -585,7 +594,15 @@ public class AllMusicHud {
         }
         //绘制图片
         if (save.pic.enable && haveImg) {
+            if (save.pic.rotate) {
+                bg1.drawPic(save.pic.x, save.pic.y, save.pic.size, save.pic.size, save.pic.pos, save.pic.alpha);
+            }
+
             picRender.draw(save.pic.rotate, save.pic.size, save.pic.x, save.pic.y, ang, save.pic.pos, save.pic.alpha);
+
+            if (save.pic.rotate) {
+                bg3.drawPic(save.pic.x, save.pic.y, save.pic.size, save.pic.size, save.pic.pos, save.pic.alpha);
+            }
         }
     }
 
