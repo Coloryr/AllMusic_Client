@@ -43,7 +43,7 @@ public class PicRender extends PictureFrameBuffer {
     public void draw(boolean rotate, int size, float x, float y, int ang, HudPosType dir, float alpha) {
         Point2f point = AllMusicHud.getPos(size, size, x, y, dir);
 
-        Matrix3x2fStack matrix = new Matrix3x2fStack();
+        Matrix3x2fStack matrix = new Matrix3x2fStack(2);
 
         int a = size / 2;
 
