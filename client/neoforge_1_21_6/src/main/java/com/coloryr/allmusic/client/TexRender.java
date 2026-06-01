@@ -6,14 +6,11 @@ import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.coloryr.allmusic.codec.HudPosType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.BlitRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3x2f;
-import org.joml.Matrix3x2fStack;
-import org.joml.Matrix4f;
 
 public class TexRender extends TextureRender {
     private final SimpleTexture sourceTexture;
@@ -55,7 +52,7 @@ public class TexRender extends TextureRender {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(sourceTexture.getTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(sourceTexture.getTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 
     @Override
@@ -78,7 +75,7 @@ public class TexRender extends TextureRender {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(sourceTexture.getTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(sourceTexture.getTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 
     @Override
@@ -101,6 +98,6 @@ public class TexRender extends TextureRender {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(sourceTexture.getTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(sourceTexture.getTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 }

@@ -13,7 +13,10 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -22,8 +25,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.*;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.gui.render.state.GlyphEffectRenderState;
+import net.minecraft.client.gui.render.state.GlyphRenderState;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer;
+import net.minecraft.client.renderer.MappableRingBuffer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2f;
@@ -124,8 +132,8 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
-                TextureSetup.singleTexture(target.getColorTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
+                TextureSetup.singleTexture(target.getColorTextureView()), matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 
     public void drawLoop(float alpha, float x, float y,
