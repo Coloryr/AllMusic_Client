@@ -174,17 +174,17 @@ public class CoreRenderTarget extends TextFrameBuffer {
                               int maxWidth, float percent, float scale) {
 
         // 限制百分比范围
-        percent = Math.min(1.0f, Math.max(0.0f, percent));
+        percent = Math.clamp(percent, 0.0f, 1.0f);
 
         // 如果贴图宽度小于等于最大宽度，直接全部显示
         if (texWidth <= maxWidth) {
-            draw(alpha, startX, startY, (int) (texWidth * percent), texHeight, texX, texY, scale);
+            draw(alpha, startX, startY, texWidth * percent, texHeight, texX, texY, scale);
             return;
         }
 
         // 计算贴图的起始位置（根据百分比）
         float maxOffset = texWidth - maxWidth;
-        int texOffset = (int) (maxOffset * percent);
+        float texOffset = maxOffset * percent;
 
         // 渲染
         draw(alpha, startX, startY, maxWidth, texHeight, texX + texOffset, texY, scale);

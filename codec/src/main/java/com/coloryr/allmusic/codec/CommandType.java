@@ -4,7 +4,6 @@ public enum CommandType {
     LYRIC,
     LYRIC_KTV,
     INFO,
-    LIST,
     PLAY,
     IMG,
     STOP,

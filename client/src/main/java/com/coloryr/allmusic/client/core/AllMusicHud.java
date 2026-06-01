@@ -45,7 +45,6 @@ public class AllMusicHud {
 
     //显示信息
     private String info = "";
-    private String list = "";
     private String lyric = "";
     private String lyricTran = "";
     private String lyricKtv = "";
@@ -71,7 +70,6 @@ public class AllMusicHud {
      */
     private final TextFrameBuffer stateRender;
     private final TextFrameBuffer infoRender;
-    private final TextFrameBuffer listRender;
     private final TextFrameBuffer lyricRender;
     private final TextFrameBuffer lyricTranRender;
     private final TextFrameBuffer lyricKtvRender;
@@ -111,7 +109,6 @@ public class AllMusicHud {
      * 是否需要文字
      */
     private boolean infoNeedUpdate;
-    private boolean listNeedUpdate;
     private boolean lyricNeedUpdate;
     private boolean stateNeedUpdate;
 
@@ -135,7 +132,6 @@ public class AllMusicHud {
 
         stateRender = AllMusicCore.bridge.makeTextRender("state");
         infoRender = AllMusicCore.bridge.makeTextRender("info");
-        listRender = AllMusicCore.bridge.makeTextRender("list");
         lyricRender = AllMusicCore.bridge.makeTextRender("lyric");
         lyricTranRender = AllMusicCore.bridge.makeTextRender("lyric tran");
         lyricKtvRender = AllMusicCore.bridge.makeTextRender("lyric ktv");
@@ -193,7 +189,6 @@ public class AllMusicHud {
     private void loopTick() {
         if (save == null) return;
         infoRender.tick();
-//        listRender.tick();
     }
 
     /**
@@ -206,12 +201,11 @@ public class AllMusicHud {
 
     public void clear() {
         haveImg = false;
-        info = list = lyric = lyricTran = lyricKtv = "";
+        info = lyric = lyricTran = lyricKtv = "";
         allTime = nowTime = 0;
 
         infoNeedUpdate = true;
         lyricNeedUpdate = true;
-        listNeedUpdate = true;
         stateNeedUpdate = true;
     }
 
@@ -367,7 +361,6 @@ public class AllMusicHud {
         this.save = save;
 
         infoNeedUpdate = true;
-        listNeedUpdate = true;
         lyricNeedUpdate = true;
     }
 
@@ -409,39 +402,6 @@ public class AllMusicHud {
             }
 
             infoNeedUpdate = false;
-        }
-
-        if (listNeedUpdate) {
-            if (!list.isEmpty()) {
-                int offset = 0;
-                String[] temp = list.split("\n");
-
-                int height = AllMusicCore.bridge.getFontHeight() + (save.list.shadow ? 1 : 0);
-                int allHeight = (height + save.list.gap) * temp.length;
-                int allWidth = 0;
-
-                for (String item : temp) {
-                    if (item.isEmpty()) {
-                        continue;
-                    }
-                    allWidth = Math.max(allWidth, AllMusicCore.bridge.getTextWidth(item));
-                }
-
-                listRender.resize(allWidth, allHeight);
-                listRender.use();
-                for (String item : temp) {
-                    if (item.isEmpty()) {
-                        continue;
-                    }
-                    listRender.drawText(item, offset, save.list.color, save.list.shadow);
-                    offset += save.list.gap;
-                }
-                listRender.unUse();
-            } else {
-                listRender.clear();
-            }
-
-            listNeedUpdate = false;
         }
 
         if (lyricNeedUpdate) {
@@ -532,7 +492,7 @@ public class AllMusicHud {
                 lyricKtvRender.clear();
             }
 
-            listNeedUpdate = false;
+            lyricNeedUpdate = false;
         }
 
         if (stateNeedUpdate) {
@@ -556,9 +516,6 @@ public class AllMusicHud {
 
         if (save.info.enable) {
             infoRender.draw(save.info.alpha, save.info.x, save.info.y, save.info.loop ? save.info.maxWidth : -1, save.info.pos);
-        }
-        if (save.list.enable) {
-            listRender.draw(save.list.alpha, save.list.x, save.list.y, save.list.loop ? save.list.maxWidth : -1, save.list.pos);
         }
         if (save.lyric.enable) {
             lyricRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y, save.lyric.maxWidth, save.lyric.pos);
@@ -662,12 +619,6 @@ public class AllMusicHud {
         this.info = info;
 
         infoNeedUpdate = true;
-    }
-
-    public void setList(String list) {
-        this.list = list;
-
-        listNeedUpdate = true;
     }
 
     public void setLyric(String lyric, String tlyric, String ktv) {

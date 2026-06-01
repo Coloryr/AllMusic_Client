@@ -22,7 +22,6 @@ public class MusicPacketCodec {
         buf.writeByte(pack.type.ordinal());
         switch (pack.type) {
             case HUD_DATA:
-            case LIST:
             case INFO:
             case IMG:
             case PLAY:
@@ -87,7 +86,6 @@ public class MusicPacketCodec {
         MusicPack pack;
         switch (type1) {
             case INFO:
-            case LIST:
             case PLAY:
             case IMG:
             case HUD_DATA:

@@ -1,7 +1,6 @@
 package com.coloryr.allmusic.codec;
 
 public class HudPosObj {
-    public HudInfoPosObj list;
     public HudLyricPosObj lyric;
     public HudInfoPosObj info;
     public HudStatePosObj state;
@@ -18,21 +17,6 @@ public class HudPosObj {
         HudInfoPosObj obj = new HudInfoPosObj();
         obj.x = 74;
         obj.y = 2;
-        obj.pos = HudPosType.TOP_LEFT;
-        obj.color = 0xffffff;
-        obj.enable = true;
-        obj.shadow = true;
-        obj.alpha = 1.0f;
-        obj.loop = true;
-        obj.maxWidth = 300;
-        obj.gap = 10;
-        return obj;
-    }
-
-    public static HudInfoPosObj makeList() {
-        HudInfoPosObj obj = new HudInfoPosObj();
-        obj.x = 2;
-        obj.y = 74;
         obj.pos = HudPosType.TOP_LEFT;
         obj.color = 0xffffff;
         obj.enable = true;
@@ -87,7 +71,6 @@ public class HudPosObj {
     public HudPosObj copy() {
         HudPosObj obj1 = new HudPosObj();
         obj1.info = this.info.copy();
-        obj1.list = this.list.copy();
         obj1.lyric = this.lyric.copy();
         obj1.state = this.state.copy();
         obj1.pic = this.pic.copy();
@@ -96,10 +79,6 @@ public class HudPosObj {
 
     public boolean check() {
         boolean save = false;
-        if (list == null) {
-            save = true;
-            list = makeList();
-        }
         if (lyric == null) {
             save = true;
             lyric = makeLyric();
@@ -120,7 +99,6 @@ public class HudPosObj {
     }
 
     public void init() {
-        list = makeList();
         lyric = makeLyric();
         info = makeInfo();
         state = makeState();

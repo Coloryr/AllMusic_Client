@@ -210,10 +210,6 @@ public class AllMusicCore {
                 MusicPack.StringMusicPack pack3 = (MusicPack.StringMusicPack) pack;
                 hud.setInfo(pack3.data);
                 break;
-            case LIST:
-                MusicPack.StringMusicPack pack4 = (MusicPack.StringMusicPack) pack;
-                hud.setList(pack4.data);
-                break;
             case PLAY:
                 MusicPack.StringMusicPack pack5 = (MusicPack.StringMusicPack) pack;
                 stopPlaying();
