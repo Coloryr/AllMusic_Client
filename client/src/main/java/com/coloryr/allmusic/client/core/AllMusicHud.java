@@ -59,6 +59,7 @@ public class AllMusicHud {
     private long lyricTime = -1;
 
     private int pgOffset;
+    private float picScale;
 
     /**
      * 图片渲染
@@ -83,6 +84,7 @@ public class AllMusicHud {
     private static final String BG3 = "textures/hud/bg3.png";
 
     private static final String PG_OFFSET = "textures/hud/offset.txt";
+    private static final String PIC_SCALE = "textures/hud/pic.txt";
 
     private final TextureRender progress1;
     private final TextureRender progress2;
@@ -90,6 +92,8 @@ public class AllMusicHud {
 
     private final TextureRender bg1;
     private final TextureRender bg3;
+
+    private BufferedImage bg2;
 
     /**
      * 是否有图片
@@ -144,13 +148,22 @@ public class AllMusicHud {
 
         String offset = AllMusicCore.bridge.readText(PG_OFFSET);
         pgOffset = Integer.parseInt(offset);
+
+        offset = AllMusicCore.bridge.readText(PIC_SCALE);
+        picScale = Float.parseFloat(offset);
+
+        try {
+            InputStream stream = AllMusicCore.bridge.readFile(BG2);
+            bg2 = resizeImage(ImageIO.read(stream), size, size);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_AREA_AVERAGING);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
-        outputImage.getGraphics()
-                .drawImage(resultingImage, 0, 0, null);
+        outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
         return outputImage;
     }
 
@@ -269,38 +282,17 @@ public class AllMusicHud {
             BufferedImage formatAvatarImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics = formatAvatarImage.createGraphics();
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            int border = (int) (size * 0.11);
+            int border = (int) (size * (1 - picScale));
             Ellipse2D.Double shape = new Ellipse2D.Double(border, border, size - border * 2, size - border * 2);
             graphics.setClip(shape);
             graphics.drawImage(image, border, border, size - border * 2, size - border * 2, null);
             graphics.dispose();
-            graphics = formatAvatarImage.createGraphics();
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            int border1;
-
-            border1 = (int) (size * 0.08);
-            BasicStroke s = new BasicStroke(border1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            graphics.setStroke(s);
-            graphics.setColor(Color.decode("#121212"));
-            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
-
-            border1 = (int) (size * 0.05);
-            float si = (float) (border1 / 6);
-            s = new BasicStroke(si, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            graphics.setStroke(s);
-            graphics.setColor(Color.decode("#181818"));
-            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
-
-            border1 = (int) (size * 0.065);
-            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
-
-            border1 = (int) (size * 0.08);
-            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
-
-            border1 = (int) (size * 0.095);
-            graphics.drawOval(border1, border1, size - border1 * 2, size - border1 * 2);
-
-            graphics.dispose();
+            if (bg2 != null) {
+                graphics = formatAvatarImage.createGraphics();
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                graphics.drawImage(bg2, 0, 0, size, size, null);
+                graphics.dispose();
+            }
 
             outputStream = new ByteArrayOutputStream();
             ImageIO.write(formatAvatarImage, "png", outputStream);

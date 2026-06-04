@@ -1,6 +1,6 @@
 package com.coloryr.allmusic.client.core;
 
-import com.coloryr.allmusic.buffercodec.MusicPacketCodec;
+import com.coloryr.allmusic.codec.MusicPacketCodec;
 import com.coloryr.allmusic.client.core.objs.ConfigObj;
 import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
 import com.coloryr.allmusic.codec.CommandType;
@@ -94,7 +94,7 @@ public class AllMusicCore {
         }
         if (config == null) {
             config = new ConfigObj();
-            config.picSize = 200;
+            config.picSize = 120;
             config.queueSize = 100;
             try {
                 String data = new GsonBuilder().setPrettyPrinting()

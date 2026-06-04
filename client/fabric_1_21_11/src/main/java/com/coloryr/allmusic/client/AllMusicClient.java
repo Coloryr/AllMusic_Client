@@ -13,6 +13,7 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,7 +22,10 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,13 +34,15 @@ import org.joml.Matrix3x2fStack;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     public static final String MODID = "allmusic_client";
 
     public static final Identifier ID = Identifier.fromNamespaceAndPath("allmusic", "channel");
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
-    private static GuiGraphics context;
+    public static GuiGraphics context;
 
     public static void update(GuiGraphics draw) {
         context = draw;
@@ -57,32 +63,6 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
 
     public int getFontHeight() {
         return Minecraft.getInstance().font.lineHeight;
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(item);
-        context.drawString(hud, component, x, y, color, shadow);
-    }
-
-    public void drawPic(Object texture, int size, int x, int y, int ang) {
-        Matrix3x2fStack stack = context.pose();
-        Matrix3x2fStack matrix = stack.pushMatrix();
-
-        int a = size / 2;
-
-        if (ang > 0) {
-            matrix.translation(x + a, y + a);
-            matrix.pushMatrix().rotate((float) Math.toRadians(ang));
-        } else {
-            matrix.translation(x + a, y + a);
-        }
-
-        context.blit(RenderPipelines.GUI_TEXTURED, ID, -a, -a, 0, 0, size, size, size, size, size, size);
-        stack.popMatrix();
-        if (ang > 0) {
-            stack.popMatrix();
-        }
     }
 
     public void sendMessage(String data) {
@@ -124,11 +104,24 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     @Override
     public String readText(String file) {
         try {
-            Resource resource = Minecraft.getInstance().getResourceManager().getResource(Identifier.fromNamespaceAndPath(MODID, file)).orElseThrow();
+            var man = Minecraft.getInstance().getResourceManager();
+            Resource resource = man.getResource(Identifier.fromNamespaceAndPath(MODID, file)).orElseThrow();
             try (InputStream inputStream = resource.open()) {
                 byte[] bytes = inputStream.readAllBytes();
                 return new String(bytes, StandardCharsets.UTF_8);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public InputStream readFile(String file) {
+        try {
+            var man = Minecraft.getInstance().getResourceManager();
+            Resource resource = man.getResource(Identifier.fromNamespaceAndPath(MODID, file)).orElseThrow();
+            return resource.open();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -142,12 +135,5 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         });
 
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
-    }
-
-    public static class Tex extends AbstractTexture {
-        public Tex(GpuTexture tex, GpuTextureView view) {
-            this.texture = tex;
-            this.textureView = view;
-        }
     }
 }

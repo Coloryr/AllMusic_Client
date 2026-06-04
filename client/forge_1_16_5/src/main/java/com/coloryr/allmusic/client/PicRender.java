@@ -68,22 +68,22 @@ public class PicRender extends PictureFrameBuffer {
             matrix.multiply(new Quaternion(0, 0, ang, true));
         }
 
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        int z = 0;
-        int u0 = 0;
+        float x0 = -a;
+        float x1 = a;
+        float y0 = -a;
+        float y1 = a;
+        float z = 0;
+        float u0 = 0;
         float u1 = 1;
         float v0 = 0;
         float v1 = 1;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        bufferBuilder.vertex(matrix, (float) x0, (float) y1, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y1, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, (float) x1, (float) y0, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, (float) x0, (float) y0, (float) z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
+        bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
+        bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
+        bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
+        bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
 

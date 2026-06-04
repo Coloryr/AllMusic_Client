@@ -57,13 +57,8 @@ import java.nio.charset.StandardCharsets;
 @EventBusSubscriber(modid = AllMusicClient.MODID, value = Dist.CLIENT)
 public class AllMusicClient implements AllMusicBridge, IPayloadHandler<MusicCodec> {
     public static final String MODID = "allmusic_client";
-
     public static GuiGraphics context;
-
     public static final Logger LOGGER = LoggerFactory.getLogger("AllMusic Client");
-
-    public static final ResourceLocation channel =
-            ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
 
     @SubscribeEvent
     public static void setup(final FMLClientSetupEvent event) {
@@ -104,7 +99,7 @@ public class AllMusicClient implements AllMusicBridge, IPayloadHandler<MusicCode
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiLayerEvent.Post e) {
         if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
-            gui = e.getGuiGraphics();
+            context = e.getGuiGraphics();
             AllMusicCore.hudUpdate();
         }
     }
@@ -183,6 +178,17 @@ public class AllMusicClient implements AllMusicBridge, IPayloadHandler<MusicCode
                 byte[] bytes = inputStream.readAllBytes();
                 return new String(bytes, StandardCharsets.UTF_8);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public InputStream readFile(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath(MODID, file)).orElseThrow();
+            return resource.open();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

@@ -1,6 +1,9 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.core.AllMusicHud;
+import com.coloryr.allmusic.client.core.Point2f;
 import com.coloryr.allmusic.client.core.render.TextureRender;
+import com.coloryr.allmusic.codec.HudPosType;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -91,6 +94,37 @@ public class TexRender extends TextureRender {
         float z = 0;
         float u0 = 0;
         float u1 = width;
+        float v0 = 0;
+        float v1 = 1;
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(matrix, x0, y1, z).setUv(u0, v1).setColor(1.0f, 1.0f, 1.0f, alpha);
+        bufferBuilder.addVertex(matrix, x1, y1, z).setUv(u1, v1).setColor(1.0f, 1.0f, 1.0f, alpha);
+        bufferBuilder.addVertex(matrix, x1, y0, z).setUv(u1, v0).setColor(1.0f, 1.0f, 1.0f, alpha);
+        bufferBuilder.addVertex(matrix, x0, y0, z).setUv(u0, v0).setColor(1.0f, 1.0f, 1.0f, alpha);
+
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
+    }
+
+    @Override
+    public void drawPic(float x, float y, float width, float height, HudPosType dir, float alpha) {
+        Point2f point = AllMusicHud.getPos(width, height, x, y, dir);
+
+        float w1 = width / 2;
+        float h1 = height / 2;
+
+        Matrix4f matrix = new Matrix4f().translation(point.x + w1, point.y + h1, 0);
+
+        float x0 = -w1;
+        float x1 = w1;
+        float y0 = -h1;
+        float y1 = h1;
+        float z = 0;
+        float u0 = 0;
+        float u1 = 1;
         float v0 = 0;
         float v1 = 1;
 

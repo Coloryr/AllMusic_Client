@@ -2,6 +2,9 @@ package com.coloryr.allmusic.client;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
 import com.coloryr.allmusic.client.core.AllMusicCore;
+import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
+import com.coloryr.allmusic.client.core.render.TextureRender;
 import com.coloryr.allmusic.comm.AllMusicInit;
 import com.coloryr.allmusic.comm.MusicCodec;
 import com.mojang.blaze3d.opengl.GlTexture;
@@ -15,6 +18,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -34,13 +38,16 @@ import org.joml.Matrix3x2fStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
-@EventBusSubscriber(modid = AllMusicInit.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = AllMusicClient.MODID, value = Dist.CLIENT)
 public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBridge {
+    public static final String MODID = "allmusic_client";
+
     public static final Logger LOGGER = LoggerFactory.getLogger("AllMusic Client");
-    public static final Identifier channel = Identifier.fromNamespaceAndPath("allmusic", "channel");
-    private static GuiGraphics gui;
+    public static GuiGraphics context;
 
     @SubscribeEvent
     public static void setup(final FMLClientSetupEvent event) {
@@ -81,7 +88,7 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiLayerEvent.Post e) {
         if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
-            gui = e.getGuiGraphics();
+            context = e.getGuiGraphics();
             AllMusicCore.hudUpdate();
         }
     }
@@ -105,7 +112,7 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
     @Override
     public void handle(MusicCodec pack, IPayloadContext iPayloadContext) {
         try {
-            AllMusicCore.packDo(pack.pack().type, pack.pack().data, pack.pack().data1);
+            AllMusicCore.packDo(pack.pack());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -137,58 +144,45 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
         return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
     }
 
-    public void drawPic(Object tex, int size, int x, int y, int ang) {
-        Matrix3x2fStack stack = gui.pose();
-        Matrix3x2fStack matrix = stack.pushMatrix();
-
-        int a = size / 2;
-
-        if (ang > 0) {
-            matrix.translation(x + a, y + a);
-            matrix.pushMatrix().rotate((float) Math.toRadians(ang));
-        } else {
-            matrix.translation(x + a, y + a);
-        }
-
-        gui.blit(RenderPipelines.GUI_TEXTURED, channel, -a, -a, 0, 0, size, size, size, size, size, size);
-        stack.popMatrix();
-        if (ang > 0) {
-            stack.popMatrix();
-        }
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        var hud = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(item);
-        gui.drawString(hud, component, x, y, color, shadow);
+    @Override
+    public TextFrameBuffer makeTextRender(String name) {
+        return new CoreRenderTarget(name);
     }
 
     @Override
-    public Object genTexture(int size) {
-        var device = RenderSystem.getDevice();
-        var tex = device.createTexture("allmusic:gui_textured", 5, TextureFormat.RGBA8, size, size, 1, 1);
-//        tex.setTextureFilter(FilterMode.NEAREST, false);
-
-        var view = device.createTextureView(tex);
-
-        Tex tex1 = new Tex(tex, view);
-
-        Minecraft.getInstance().getTextureManager().register(channel, tex1);
-
-        return tex;
+    public TextureRender makeTextureRender(String file) {
+        return new TexRender(file);
     }
 
     @Override
-    public void updateTexture(Object tex, int size, ByteBuffer byteBuffer) {
-        if (tex instanceof GlTexture tex1) {
-            AllMusicCore.updateGLTexture(tex1.glId(), size, byteBuffer);
+    public PictureFrameBuffer makePictureRender(int size) {
+        return new PicRender(size);
+    }
+
+    @Override
+    public String readText(String file) {
+        try {
+            var man = Minecraft.getInstance().getResourceManager();
+            Resource resource = man.getResource(Identifier.fromNamespaceAndPath(MODID, file)).orElseThrow();
+            try (InputStream inputStream = resource.open()) {
+                byte[] bytes = inputStream.readAllBytes();
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    public static class Tex extends AbstractTexture {
-        public Tex(GpuTexture tex, GpuTextureView view) {
-            this.texture = tex;
-            this.textureView = view;
+    @Override
+    public InputStream readFile(String file) {
+        try {
+            var man = Minecraft.getInstance().getResourceManager();
+            Resource resource = man.getResource(Identifier.fromNamespaceAndPath(MODID, file)).orElseThrow();
+            return resource.open();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

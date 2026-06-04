@@ -54,9 +54,9 @@ public class TexRender extends TextureRender {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
                 TextureSetup.singleTexture(sourceTexture.getTextureView(), RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
-                matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+                matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 
     @Override
@@ -79,9 +79,9 @@ public class TexRender extends TextureRender {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
                 TextureSetup.singleTexture(sourceTexture.getTextureView(), RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
-                matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+                matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 
     @Override
@@ -104,8 +104,8 @@ public class TexRender extends TextureRender {
 
         int color = 0xFFFFFF00 + (int) (255 * alpha);
 
-        AllMusicClient.context.guiRenderState.submitGuiElement(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
+        AllMusicClient.context.submitGuiElementRenderState(new FloatRenderState(RenderPipelines.GUI_TEXTURED,
                 TextureSetup.singleTexture(sourceTexture.getTextureView(), RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
-                matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.scissorStack.peek()));
+                matrix, x0, y0, x1, y1, u0, u1, v0, v1, color, AllMusicClient.context.peekScissorStack()));
     }
 }

@@ -4,7 +4,6 @@ subprojects {
     dependencies {
         shadowImplementation(project(":client"))
         shadowImplementation(project(":codec"))
-        shadowImplementation(project(":codec:buffercodec"))
     }
 
     tasks {
@@ -21,7 +20,6 @@ tasks {
 }
 
 dependencies {
-    shadowImplementation(project(":codec:buffercodec"))
     shadowImplementation(project(":codec"))
 
     shadowImplementation("org.apache.httpcomponents.client5:httpclient5:${Versions.httpclient5}")

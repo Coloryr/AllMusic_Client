@@ -4,6 +4,8 @@ import com.coloryr.allmusic.client.core.render.PictureFrameBuffer;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.coloryr.allmusic.client.core.render.TextureRender;
 
+import java.io.InputStream;
+
 /**
  * AllMusic 核心桥
  */
@@ -81,4 +83,11 @@ public interface AllMusicBridge {
      * @return 内容
      */
     String readText(String file);
+
+    /**
+     * 读取文件
+     * @param file 文件位置
+     * @return 内容
+     */
+    InputStream readFile(String file);
 }

@@ -1,8 +1,5 @@
-package com.coloryr.allmusic.buffercodec;
+package com.coloryr.allmusic.codec;
 
-import com.coloryr.allmusic.codec.CommandType;
-import com.coloryr.allmusic.codec.MusicPack;
-import com.coloryr.allmusic.codec.KtvLyricObj;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 

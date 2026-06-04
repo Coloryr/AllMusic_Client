@@ -51,12 +51,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-@EventBusSubscriber(modid = AllMusicInit.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = AllMusicClient.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBridge {
-    private static GuiGraphics gui;
-
-    public static final ResourceLocation channel = ResourceLocation.fromNamespaceAndPath("allmusic", "channel");
-
+    public static final String MODID = "allmusic_client";
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
 
     @SubscribeEvent
@@ -106,7 +103,6 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
         @SubscribeEvent
         public static void onRenderOverlay(RenderGuiLayerEvent.Post e) {
             if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
-                gui = e.getGuiGraphics();
                 AllMusicCore.hudUpdate();
             }
         }
@@ -181,6 +177,17 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
                 byte[] bytes = inputStream.readAllBytes();
                 return new String(bytes, StandardCharsets.UTF_8);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public InputStream readFile(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath(AllMusicInit.MODID, file)).orElseThrow();
+            return resource.open();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

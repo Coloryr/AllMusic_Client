@@ -1,7 +1,6 @@
 rootProject.name = "AllMusic_Client"
 
 include(":codec")
-include(":codec:buffercodec")
 
 include(":client")
 include(":client:fabric_1_16_5")

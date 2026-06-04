@@ -170,4 +170,15 @@ public class AllMusicClient implements AllMusicBridge {
             return null;
         }
     }
+
+    @Override
+    public InputStream readFile(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(MODID, file)).orElseThrow();
+            return resource.open();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

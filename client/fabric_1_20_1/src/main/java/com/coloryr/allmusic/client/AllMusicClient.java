@@ -100,6 +100,17 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     }
 
     @Override
+    public InputStream readFile(String file) {
+        try {
+            Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(MODID, file)).orElseThrow();
+            return resource.open();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(ID, (client, handler, buffer, responseSender) -> {
             try {

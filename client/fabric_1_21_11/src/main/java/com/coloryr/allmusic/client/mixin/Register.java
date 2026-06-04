@@ -7,10 +7,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.IOException;
+
 @Mixin(Minecraft.class)
 public class Register {
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;registerTextures(Lnet/minecraft/client/renderer/texture/TextureManager;)V"))
-    public void register(CallbackInfo info) {
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketProcessor;<init>(Ljava/lang/Thread;)V"))
+    public void register(CallbackInfo info) throws IOException {
         AllMusicCore.glInit();
     }
 }

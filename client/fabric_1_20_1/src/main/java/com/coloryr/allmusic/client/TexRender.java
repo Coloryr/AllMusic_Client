@@ -139,6 +139,9 @@ public class TexRender extends TextureRender {
         bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
 
         BufferUploader.drawWithShader(bufferBuilder.end());
+
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     public static class Tex extends SimpleTexture {
