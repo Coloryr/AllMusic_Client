@@ -5,17 +5,22 @@ import com.coloryr.allmusic.client.core.Point2f;
 import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.coloryr.allmusic.codec.HudPosType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.shader.Framebuffer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 public class CoreRenderTarget extends TextFrameBuffer {
-    private final RenderTarget target;
+    private final Framebuffer target;
 
     public CoreRenderTarget() {
-        target = new RenderTarget(800, 200, false, false);
-        target.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        target = new Framebuffer(800, 200, false);
+        target.setFramebufferColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     @Override
@@ -25,8 +30,8 @@ public class CoreRenderTarget extends TextFrameBuffer {
         nowWidth = (width * scaledresolution.getScaledWidth());
         nowHeight = (height * scaledresolution.getScaledHeight());
 
-        if (nowWidth > target.width || nowHeight > target.height) {
-            target.resize(nowWidth, nowHeight, false);
+        if (nowWidth > target.framebufferWidth || nowHeight > target.framebufferHeight) {
+            target.createFramebuffer(nowWidth, nowHeight);
         }
     }
 
@@ -35,11 +40,10 @@ public class CoreRenderTarget extends TextFrameBuffer {
         isDraw = true;
 
         clear();
-        target.clear(false);
-        target.bindWrite(true);
+        target.framebufferClear();
+        target.bindFramebuffer(true);
 
-        GlStateManager.ortho(0.0F, (float) (target.width / scaledresolution.getScaledWidth()),
-                (float) (target.height / scaledresolution.getScaledHeight()), 0.0F, 1000.0F, 21000.0F);
+//        GlStateManager.ortho(0.0F, target.framebufferWidth, target.framebufferHeight, 0.0F, 1000.0F, 3000.0D);
     }
 
     @Override
@@ -48,32 +52,28 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         Minecraft minecraft = Minecraft.getMinecraft();
 
-        GlStateManager.ortho(0.0D, (double)minecraft.displayWidth, (double)minecraft.displayHeight, 0.0D, 1000.0D, 3000.0D);
+//        GlStateManager.ortho(0.0D, minecraft.displayWidth, minecraft.displayHeight, 0.0D, 1000.0D, 3000.0D);
 
-        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
-        main.bindWrite(true);
+        Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
     }
 
     @Override
     public void drawText(String text, int y, int color, boolean shadow) {
         Minecraft minecraft = Minecraft.getMinecraft();
 
-        Font font = Minecraft.getInstance().font;
-        Component component = MiniMessage.parse(text);
+        ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft());
+
+        FontRenderer font = minecraft.fontRenderer;
 
         int width;
 
         if (shadow) {
-            width = font.drawShadow(new PoseStack(), component, 0, 0, color);
+            width = font.drawStringWithShadow(text, 0, 0, color);
         } else {
-            width = font.draw(new PoseStack(), component, 0, 0, color);
+            width = font.drawString(text, 0, 0, color);
         }
 
-        RenderSystem.disableDepthTest();
-        renderBuffers.bufferSource().endBatch();
-        RenderSystem.enableDepthTest();
-
-        TextItem item = new TextItem(width, font.lineHeight + (shadow ? 1 : 0), y, (float) window.getGuiScale());
+        TextItem item = new TextItem(width, font.FONT_HEIGHT + (shadow ? 1 : 0), y, (float) scaledresolution.getScaledWidth());
         texts.add(item);
     }
 
@@ -90,16 +90,15 @@ public class CoreRenderTarget extends TextFrameBuffer {
      * @param scale  贴图缩放
      */
     private void draw(float alpha, float x, float y, float width, float height, float texX, float texY, float scale) {
-        RenderSystem.bindTexture(target.getColorTextureId());
-        RenderSystem.enableTexture();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.depthFunc(GL30.GL_ALWAYS);
+        GlStateManager.bindTexture(target.framebufferTexture);
+        GlStateManager.depthMask(false);
+        GlStateManager.enableBlend();
 
         float w = (width / 2);
         float h = (height / 2);
 
-        Matrix4f matrix = Matrix4f.createTranslateMatrix(x + w, y + h, 0);
+        GL11.glPushMatrix();
+        GL11.glTranslatef(x + w, y + h, 0.0f);
 
         float x0 = -w;
         float x1 = w;
@@ -108,24 +107,27 @@ public class CoreRenderTarget extends TextFrameBuffer {
         float z = 0;
 
         // 计算贴图区域UV
-        float u0 = texX * scale / target.width;
-        float v0 = 1 - (texY * scale / target.height);
-        float u1 = (texX + width) * scale / target.width;
-        float v1 = 1 - ((texY + height) * scale / target.height);
+        float u0 = texX * scale / target.framebufferWidth;
+        float v0 = 1 - (texY * scale / target.framebufferHeight);
+        float u1 = (texX + width) * scale / target.framebufferWidth;
+        float v1 = 1 - ((texY + height) * scale / target.framebufferHeight);
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        bufferBuilder.vertex(matrix, x0, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v1).endVertex();
-        bufferBuilder.vertex(matrix, x1, y1, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v1).endVertex();
-        bufferBuilder.vertex(matrix, x1, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u1, v0).endVertex();
-        bufferBuilder.vertex(matrix, x0, y0, z).color(1.0f, 1.0f, 1.0f, alpha).uv(u0, v0).endVertex();
-        bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
 
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
+        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+        bufferbuilder.pos(x0, y1, z).tex(u0, v1).color(1.0f, 1.0f, 1.0f, alpha).endVertex();
+        bufferbuilder.pos(x1, y1, z).tex(u1, v1).color(1.0f, 1.0f, 1.0f, alpha).endVertex();
+        bufferbuilder.pos(x1, y0, z).tex(u1, v0).color(1.0f, 1.0f, 1.0f, alpha).endVertex();
+        bufferbuilder.pos(x0, y0, z).tex(u0, v0).color(1.0f, 1.0f, 1.0f, alpha).endVertex();
+        tessellator.draw();
 
-        target.unbindRead();
+        GlStateManager.disableBlend();
+        GlStateManager.depthMask(true);
+
+        GL11.glPopMatrix();
+
+        target.unbindFramebufferTexture();
     }
 
     public void drawLoop(float alpha, float x, float y,
@@ -218,7 +220,5 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
             drawByPercent(alpha, point.x, point.y + item.y, 0, item.y, item.textWidth, item.textHeight, maxWidth, state, item.scale);
         }
-
-        target.unbindRead();
     }
 }
