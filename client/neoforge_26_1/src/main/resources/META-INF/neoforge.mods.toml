@@ -31,6 +31,6 @@ side="CLIENT"
 [[dependencies.allmusic_client]]
 modId="minecraft"
 type="required"
-versionRange="[26.1)"
+versionRange="[26.1,)"
 ordering="NONE"
 side="CLIENT"
